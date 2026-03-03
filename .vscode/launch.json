@@ -1,0 +1,47 @@
+{
+        "version": "0.2.0",
+        "configurations": [
+                {
+                        "name": "Run Extension",
+                        "type": "extensionHost",
+                        "request": "launch",
+                        "runtimeExecutable": "${execPath}",
+                        "args": ["--extensionDevelopmentPath=${workspaceFolder}", "--remote-debugging-port=9222"],
+                        "outFiles": ["${workspaceFolder}/out/**/*.js"],
+                        "preLaunchTask": "npm: compile"
+                },
+                {
+                        "name": "Attach Webview (Chrome)",
+                        "type": "chrome",
+                        "request": "attach",
+                        "port": 9222,
+                        "webRoot": "${workspaceFolder}",
+                        "sourceMaps": true
+                },
+                {
+                        "name": "Vite: debug zazaVue (Chrome)",
+                        "type": "chrome",
+                        "request": "launch",
+                        "url": "http://localhost:5173/src/zazaVue.html",
+                        "webRoot": "${workspaceFolder}/examples/zazaVue",
+                        "sourceMaps": true,
+                        "trace": true
+                }
+        ],
+        "compounds": [
+                {
+                        "name": "Run + Attach Webview",
+                        "configurations": ["Run Extension", "Attach Webview (Chrome)"]
+                }
+        ],
+        "tasks": [
+                {
+                        "label": "Start Vite dev server (zazaVue)",
+                        "type": "shell",
+                        "command": "${workspaceFolder}/bin/preview-server.sh",
+                        "isBackground": true,
+                        "problemMatcher": [],
+                        "presentation": { "reveal": "always" }
+                }
+        ]
+}
