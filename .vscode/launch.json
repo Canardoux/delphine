@@ -20,12 +20,35 @@
                 },
                 {
                         "name": "Vite: debug zazaVue (Chrome)",
-                        "type": "chrome",
+                        "type": "pwa-chrome",
                         "request": "launch",
                         "url": "http://localhost:5173/src/zazaVue.html",
-                        "webRoot": "${workspaceFolder}/examples/zazaVue",
+
+                        // ✅ racine du repo Delphine (pas examples/zazaVue)
+                        "webRoot": "${workspaceFolder}",
+
                         "sourceMaps": true,
-                        "trace": true
+                        "trace": "verbose",
+
+                        "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+
+                        "sourceMapPathOverrides": {
+                                // --- Vite @fs as URL
+                                //"http://localhost:5173/@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
+                                //"https://localhost:5173/@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
+
+                                // --- Vite @fs as path inside sourcemaps
+                                //"/@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
+                                //"@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
+
+                                // --- fallback: keep @fs absolute paths as real filesystem paths
+                                "http://localhost:5173/@fs/*": "/*",
+                                "/@fs/*": "/*",
+
+                                // --- vite:// forms (rare selon versions)
+                                "vite:///*": "${workspaceFolder}/*",
+                                "vite:///@fs/*": "/*"
+                        }
                 }
         ],
         "compounds": [

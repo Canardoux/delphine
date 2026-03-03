@@ -605,7 +605,6 @@ export class TComponentRegistry extends TObject {
                         //maybeHost.mountFromRegistry(services);
                 }
 
-                // Actually this does not work for TForm : infinite recursion
                 if (child.allowsChildren()) {
                         el.querySelectorAll(':scope > [data-component]').forEach((el) => {
                                 this.processElem(el, form, child);
@@ -629,6 +628,7 @@ export class TComponentRegistry extends TObject {
                 this.processElem(rootElem, form, root);
 
                 // --- CHILD COMPONENTS ---
+                /*
                 rootElem.querySelectorAll(':scope > [data-component]').forEach((el) => {
                         const child: TComponent | null = this.processElem(el, form, root);
                         //if (el === root) return;
@@ -639,6 +639,7 @@ export class TComponentRegistry extends TObject {
                                 });
                         }
                 });
+                */
         }
 }
 
