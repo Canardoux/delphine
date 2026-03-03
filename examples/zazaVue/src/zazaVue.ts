@@ -14,7 +14,6 @@ import {
   TPanel,
   TCompositeDCC,
   TMetaCompositeDCC,
-  TMetaContainer,
 } from '@vcl'
 //import { TPluginHost } from '@drt/UIPlugin'
 import { createHelloVuePlugin } from './createHelloVuePlugin'
@@ -123,6 +122,14 @@ class MyDCC extends TCompositeDCC {
   constructor(name: string, form: TForm, parent: TComponent) {
     super(name, form, parent)
   }
+  _message: string = 'Salut tout le monde'
+  get message() {
+    return this._message
+  }
+  set message(v: string) {
+    this._message = v
+    console.log('Message prop updated:', v)
+  }
 
   // protected get myprops(): MyDCCProps {
   //   return this.props as MyDCCProps
@@ -130,9 +137,9 @@ class MyDCC extends TCompositeDCC {
 }
 
 export class TMetaMyDCC extends TMetaCompositeDCC {
-  static readonly metaclass: TMetaMyDCC = new TMetaMyDCC(TMetaContainer.metaclass, 'TMyDCC')
+  static readonly metaclass: TMetaMyDCC = new TMetaMyDCC(TMetaCompositeDCC.metaclass, 'TMyDCC')
 
-  protected constructor(superClass: TMetaContainer, name: string) {
+  protected constructor(superClass: TMetaCompositeDCC, name: string) {
     super(superClass, name)
     // et vous changez juste le nom :
   }
@@ -148,6 +155,12 @@ export class TMetaMyDCC extends TMetaCompositeDCC {
     return [
       //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
       //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
+      {
+        name: 'message',
+        kind: 'string',
+        retrieve: (o) => o._message,
+        apply: (o, v) => console.log('Applying message prop:', v),
+      },
     ]
   }
 }
@@ -166,7 +179,7 @@ class MyApplication extends TApplication {
     PluginRegistry.pluginRegistry.register('hello-vue', { factory: createHelloVuePlugin })
 
     // DCC
-    //PluginRegistry.pluginRegistry.register('hello-dcc', { factory: createHelloDcc })
+    this.types.register(TMetaMyDCC.metaclass)
   }
   run() {
     //this.zaza.componentRegistry.buildComponentTree(this.zaza);

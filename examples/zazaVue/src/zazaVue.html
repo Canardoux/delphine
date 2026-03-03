@@ -28,14 +28,23 @@
 
       #myvueplugin {
         color: rgb(255, 255, 0);
+        background-color: rgb(0, 255, 255);
       }
 
       #mypanel {
         color: rgb(0, 255, 255);
         background-color: rgb(255, 255, 0);
-        width: 800px;
-        height: 800px;
+        width: 300px;
+        height: 300px;
       }
+
+            #mydcc {
+        color: rgb(4, 8, 0);
+        background-color: rgb(123, 170, 188);
+        width: 200px;
+        height: 200px;
+      }
+
     </style>
   </head>
   <body
@@ -103,10 +112,19 @@
     </div>
 
     <div
-      data-component="TPluginHost"
+      id="mydcc"
+      data-component="TMyDCC"
       data-plugin="hello-dcc"
       data-name="my-DCC"
       data-props='{"message":"Bonjour"}'
+        >
+      <button
+        data-component="TButton"
+        data-caption="dcc-button1"
+        data-name="dcc-button1"
+        data-onclick="dcc_onclick"
+      >
+
     ></div>
 
     <script type="module" src="/src/zazaVue.js"></script>

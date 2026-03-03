@@ -162,7 +162,7 @@ export class TMetaObject extends TMetaclass {
 }
 
 export class TComponent {
-        getMetaclass(): TMetaComponent {
+        getMetaclass() {
                 return TMetaComponent.metaclass;
         }
 
@@ -275,18 +275,18 @@ export class TComponent {
 }
 
 export class TMetaComponent extends TMetaclass {
-        static readonly metaclass: TMetaComponent = new TMetaComponent(TMetaclass.metaclass, 'TComponent');
+        static readonly metaclass = new TMetaComponent(TMetaclass.metaclass, 'TComponent');
         // The symbolic name used in HTML: data-component="TButton" or "my-button"
         protected constructor(superClass: TMetaclass, name: string) {
                 super(superClass, name);
         }
 
-        getMetaclass(): TMetaComponent {
+        getMetaclass() {
                 return TMetaComponent.metaclass;
         }
 
         // Create the runtime instance and attach it to the DOM element.
-        create(name: string, form: TForm, parent: TComponent) {
+        create(name: string, form: TForm, parent: TComponent): TComponent {
                 return new TComponent(name, form, parent);
         }
 
@@ -334,7 +334,7 @@ export class TComponentTypeRegistry extends TObject {
         }
 
         // If you just need "something meta", return any-meta.
-        get(typeName: string): TMetaComponent | undefined {
+        get(typeName: string) {
                 return this.classes.get(typeName);
         }
 
@@ -672,7 +672,7 @@ export class TMetaDocument extends TMetaObject {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
-        getMetaclass(): TMetaDocument {
+        getMetaclass() {
                 return TMetaDocument.metaclass;
         }
 }
@@ -687,7 +687,7 @@ type ContainerProps = ComponentProps & {
 
 // This clas does not do anything except overrides allowsChildren()
 export class TContainer extends TComponent {
-        getMetaclass() {
+        getMetaclass(): TMetaContainer {
                 return TMetaContainer.metaclass;
         }
 
@@ -709,6 +709,7 @@ export class TContainer extends TComponent {
         allowsChildren(): boolean {
                 return true;
         }
+        //titi=12;
 }
 
 export class TMetaContainer extends TMetaComponent {
@@ -717,7 +718,7 @@ export class TMetaContainer extends TMetaComponent {
         protected constructor(superClass: TMetaComponent, name: string) {
                 super(superClass, name);
         }
-        getMetaclass(): TMetaContainer {
+        getMetaclass() {
                 return TMetaContainer.metaclass;
         }
 
@@ -745,7 +746,7 @@ type PanelProps = ContainerProps & {
 // --------------------------------------
 
 export class TPanel extends TContainer {
-        getMetaclass() {
+        getMetaclass(): TMetaPanel {
                 return TMetaPanel.metaclass;
         }
 
@@ -762,12 +763,13 @@ export class TPanel extends TContainer {
 
                 super.syncDomFromProps();
         }
+        //toto = 12;
 }
 
 export class TMetaPanel extends TMetaContainer {
         static readonly metaclass: TMetaPanel = new TMetaPanel(TMetaContainer.metaclass, 'TPanel');
 
-        protected constructor(superClass: TMetaPanel, name: string) {
+        protected constructor(superClass: TMetaContainer, name: string) {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
@@ -779,7 +781,7 @@ export class TMetaPanel extends TMetaContainer {
                 return new TPanel(name, form, parent);
         }
 
-        defProps(): PropSpec<TPanel>[] {
+        defProps(): PropSpec<any>[] {
                 return [
                         //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
                         //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
@@ -796,12 +798,12 @@ type FormProps = ContainerProps & {
 */
 
 export class TMetaForm extends TMetaContainer {
-        static readonly metaclass: TMetaForm = new TMetaForm(TMetaComponent.metaclass, 'TForm');
-        getMetaClass(): TMetaForm {
+        static readonly metaclass: TMetaForm = new TMetaForm(TMetaContainer.metaclass, 'TForm');
+        getMetaClass() {
                 return TMetaForm.metaclass;
         }
 
-        protected constructor(superClass: TMetaComponent, name: string) {
+        protected constructor(superClass: TMetaContainer, name: string) {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
@@ -810,7 +812,7 @@ export class TMetaForm extends TMetaContainer {
                 return new TForm(name);
         }
 
-        defProps(): PropSpec<TForm>[] {
+        defProps(): PropSpec<any>[] {
                 return [
                         //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
                         //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
@@ -819,7 +821,7 @@ export class TMetaForm extends TMetaContainer {
 }
 
 export class TForm extends TContainer {
-        getMetaclass(): TMetaForm {
+        getMetaclass() {
                 return TMetaForm.metaclass;
         }
         static forms = new Map<string, TForm>();
@@ -996,22 +998,22 @@ export class TButton extends TComponent {
         }
 }
 
-export class TMetaButton extends TMetaComponent {
-        static readonly metaclass: TMetaButton = new TMetaButton(TMetaComponent.metaclass, 'TButton');
+export class TMetaButton<T extends TButton> extends TMetaComponent {
+        static readonly metaclass = new TMetaButton(TMetaComponent.metaclass, 'TButton');
 
         protected constructor(superClass: TMetaComponent, name: string) {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
-        getMetaclass(): TMetaButton {
+        getMetaclass() {
                 return TMetaButton.metaclass;
         }
 
         create(name: string, form: TForm, parent: TComponent) {
-                return new TButton(name, form, parent);
+                return new TButton(name, form, parent) as T;
         }
 
-        defProps(): PropSpec<TButton>[] {
+        defProps(): PropSpec<any>[] {
                 return [
                         {
                                 name: 'caption',
@@ -1259,7 +1261,7 @@ export class TMetaSimpleDCC extends TMetaComponent {
                 return new TSimpleDCC(name, form, parent);
         }
 
-        defProps(): PropSpec<TSimpleDCC>[] {
+        defProps(): PropSpec<any>[] {
                 return [
                         //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
                         //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
@@ -1292,10 +1294,10 @@ export class TCompositeDCC extends TContainer {
                 */
 }
 
-export class TMetaCompositeDCC extends TMetaComponent {
+export class TMetaCompositeDCC extends TMetaContainer {
         static readonly metaclass: TMetaCompositeDCC = new TMetaCompositeDCC(TMetaContainer.metaclass, 'TCompositDCC');
 
-        protected constructor(superClass: TMetaComponent, name: string) {
+        protected constructor(superClass: TMetaContainer, name: string) {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
@@ -1307,7 +1309,7 @@ export class TMetaCompositeDCC extends TMetaComponent {
                 return new TCompositeDCC(name, form, parent);
         }
 
-        defProps(): PropSpec<TCompositeDCC>[] {
+        defProps(): PropSpec<any>[] {
                 return [
                         //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
                         //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
