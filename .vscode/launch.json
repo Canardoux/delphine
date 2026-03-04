@@ -23,31 +23,39 @@
                         "type": "pwa-chrome",
                         "request": "launch",
                         "url": "http://localhost:5173/src/zazaVue.html",
+                        "userDataDir": "${workspaceFolder}/.vscode/chrome-vite-profile",
 
                         // ✅ racine du repo Delphine (pas examples/zazaVue)
                         "webRoot": "${workspaceFolder}",
 
                         "sourceMaps": true,
-                        "trace": "verbose",
+                        "trace": false,
 
                         "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
 
                         "sourceMapPathOverrides": {
-                                // --- Vite @fs as URL
-                                //"http://localhost:5173/@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
-                                //"https://localhost:5173/@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
+                                // --- Vite dev server direct URLs
+                                "http://localhost:5173/src/*": "${workspaceFolder}/examples/zazaVue/src/*",
+                                "/src/*": "${workspaceFolder}/examples/zazaVue/src/*",
+                                "*/src/*": "${workspaceFolder}/examples/zazaVue/src/*",
 
-                                // --- Vite @fs as path inside sourcemaps
-                                //"/@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
-                                //"@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
+                                // --- Vite virtual scheme variants
+                                "vite:///src/*": "${workspaceFolder}/examples/zazaVue/src/*",
+                                "vite://src/*": "${workspaceFolder}/examples/zazaVue/src/*",
+                                "vite:///./src/*": "${workspaceFolder}/examples/zazaVue/src/*",
 
-                                // --- fallback: keep @fs absolute paths as real filesystem paths
+                                // --- Some stacks still emit webpack-style source URLs
+                                "webpack:///src/*": "${workspaceFolder}/examples/zazaVue/src/*",
+                                "webpack:///./src/*": "${workspaceFolder}/examples/zazaVue/src/*",
+
+                                // --- Absolute FS exposure used by Vite (@fs)
                                 "http://localhost:5173/@fs/*": "/*",
                                 "/@fs/*": "/*",
+                                "vite:///@fs/*": "/*",
+                                "*/@fs/*": "/*",
 
-                                // --- vite:// forms (rare selon versions)
-                                "vite:///*": "${workspaceFolder}/*",
-                                "vite:///@fs/*": "/*"
+                                // --- Fallback: if Vite emits vite:///<absolute path> (rare)
+                                "vite:///*": "${workspaceFolder}/*"
                         }
                 }
         ],

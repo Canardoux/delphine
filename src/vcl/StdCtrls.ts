@@ -1,4 +1,6 @@
 import { registerBuiltins } from './registerVcl';
+//import { Toto } from './plugin';
+import type { IPluginHost } from './IPlugin';
 
 /*
    To create a new component type:
@@ -41,8 +43,6 @@ export class THandler {
 
 export type ComponentFactory = (name: string, form: TForm, owner: TComponent) => TComponent;
 
-export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
-
 type PropKind = 'string' | 'number' | 'boolean' | 'color' | 'handler';
 
 export type PropSpec<T, V = unknown> = {
@@ -62,75 +62,6 @@ const RESERVED_DATA_ATTRS = new Set<string>([
         'data-plugin',
         'data-message' // add any meta/framework attrs you don't want treated as props
 ]);
-
-export interface IPluginHost {
-        setPluginSpec(spec: { plugin: string | null; props: any }): void;
-        mountPluginIfReady(services: DelphineServices): void;
-}
-
-export interface DelphineLogger {
-        debug(msg: string, data?: Json): void;
-        info(msg: string, data?: Json): void;
-        warn(msg: string, data?: Json): void;
-        error(msg: string, data?: Json): void;
-}
-
-export interface DelphineEventBus {
-        // Subscribe to an app event.
-        on(eventName: string, handler: (payload: Json) => void): () => void;
-
-        // Publish an app event.
-        emit(eventName: string, payload: Json): void;
-}
-
-export interface DelphineStorage {
-        get(key: string): Promise<Json | undefined>;
-        set(key: string, value: Json): Promise<void>;
-        remove(key: string): Promise<void>;
-}
-export interface DelphineServices {
-        log: {
-                debug(msg: string, data?: any): void;
-                info(msg: string, data?: any): void;
-                warn(msg: string, data?: any): void;
-                error(msg: string, data?: any): void;
-        };
-
-        bus: {
-                on(event: string, handler: (payload: any) => void): () => void;
-                emit(event: string, payload: any): void;
-        };
-
-        storage: {
-                get(key: string): Promise<any> | null;
-                set(key: string, value: any): Promise<void> | null;
-                remove(key: string): Promise<void> | null;
-        };
-
-        // futur
-        // i18n?: ...
-        // nav?: ...
-}
-
-export interface UIPluginInstance<Props extends Json = Json> {
-        readonly id: string;
-
-        // Called exactly once after creation (for a given instance).
-        mount(container: HTMLElement, props: Props, services: DelphineServices): void;
-
-        // Called any time props change (may be frequent).
-        update(props: Props): void;
-
-        // Called exactly once before disposal.
-        unmount(): void;
-
-        // Optional ergonomics.
-        getSizeHints?(): number;
-        focus?(): void;
-
-        // Optional persistence hook (Delphine may store & restore this).
-        serializeState?(): Json;
-}
 
 export abstract class TMetaclass {
         readonly typeName: string = 'TMetaclass';
@@ -169,7 +100,7 @@ export class TComponent {
         readonly name: string;
         readonly parent: TComponent | null = null;
 
-        protected props: ComponentProps = Object.create(null);
+        props: ComponentProps = Object.create(null);
 
         getProp<T = unknown>(name: string): T | undefined {
                 return this.props[name] as T | undefined;
@@ -359,37 +290,12 @@ export class TMetaComponentRegistry extends TMetaclass {
 }
 
 export class TComponentRegistry extends TObject {
+        //_toto: Toto = new Toto();
         getMetaclass(): TMetaComponentRegistry {
                 return TMetaComponentRegistry.metaclass;
         }
 
         private instances = new Map<string, TComponent>();
-
-        logger = {
-                debug(msg: string, data?: Json): void {},
-                info(msg: string, data?: Json): void {},
-                warn(msg: string, data?: Json): void {},
-                error(msg: string, data?: Json): void {}
-        };
-
-        eventBus = {
-                on(event: string, handler: (payload: any) => void): () => void {
-                        return () => void {};
-                },
-                emit(event: string, payload: any): void {}
-        };
-
-        storage = {
-                get(key: string): Promise<any> | null {
-                        return null;
-                },
-                set(key: string, value: any): Promise<void> | null {
-                        return null;
-                },
-                remove(key: string): Promise<void> | null {
-                        return null;
-                }
-        };
 
         constructor() {
                 super();
@@ -401,12 +307,6 @@ export class TComponentRegistry extends TObject {
         get<T extends TComponent = TComponent>(name: string): T | undefined {
                 return this.instances.get(name) as T | undefined;
         }
-
-        services: DelphineServices = {
-                log: this.logger,
-                bus: this.eventBus,
-                storage: this.storage
-        };
 
         clear() {
                 this.instances.clear();
@@ -596,13 +496,23 @@ export class TComponentRegistry extends TObject {
                 // Done in the constructor //parent.children.push(child);
                 const maybeHost = child as unknown as Partial<IPluginHost>;
                 if (maybeHost && typeof maybeHost.setPluginSpec === 'function') {
+                        /*
                         const plugin = el.getAttribute('data-plugin');
                         const raw = el.getAttribute('data-props');
                         const props = raw ? JSON.parse(raw) : {};
 
                         maybeHost.setPluginSpec({ plugin, props });
-                        maybeHost.mountPluginIfReady!(this.services);
+                        maybeHost.mountPluginIfReady!(this._toto.services);
                         //maybeHost.mountFromRegistry(services);
+                        */
+
+                                              const plugin = el.getAttribute('data-plugin');
+                                              const raw = el.getAttribute('data-props');
+                                              const props = raw ? JSON.parse(raw) : {};
+
+                                              maybeHost.setPluginSpec({ plugin, props });
+                                              maybeHost.mountPluginIfReady!();
+ 
                 }
 
                 if (child.allowsChildren()) {
@@ -1086,131 +996,6 @@ export class TApplication {
                 } else {
                         fn();
                 }
-        }
-}
-
-// ============================================= PLUGINHOST ==========================================================
-
-export class TMetaPluginHost extends TMetaComponent {
-        static metaclass = new TMetaPluginHost(TMetaComponent.metaclass, 'TPluginHost');
-        getMetaclass() {
-                return TMetaPluginHost.metaclass;
-        }
-
-        protected constructor(superClass: TMetaclass, name: string) {
-                super(superClass, name);
-        }
-
-        create(name: string, form: TForm, parent: TComponent) {
-                return new TPluginHost(name, form, parent);
-        }
-
-        props(): PropSpec<TPluginHost>[] {
-                return [];
-        }
-}
-
-export class TPluginHost extends TComponent {
-        private instance: UIPluginInstance | null = null;
-
-        pluginName: string | null = null;
-        pluginProps: Json = {};
-        private factory: UIPluginFactory | null = null;
-
-        constructor(name: string, form: TForm, parent: TComponent) {
-                super(name, form, parent);
-        }
-
-        // Called by the metaclass (or by your registry) right after creation
-        setPluginFactory(factory: UIPluginFactory) {
-                this.factory = factory;
-        }
-
-        mountPlugin(props: Json, services: DelphineServices) {
-                const container = this.htmlElement;
-                if (!container) return;
-
-                if (!this.factory) {
-                        services.log.warn('TPluginHost: no plugin factory set', { host: this.name as any });
-                        return;
-                }
-
-                // Dispose old instance if any
-                this.unmount();
-
-                // Create plugin instance then mount
-                this.instance = this.factory({ host: this, form: this.form! });
-                this.instance!.mount(container, props, services);
-        }
-
-        // Called by buildComponentTree()
-        setPluginSpec(spec: { plugin: string | null; props: any }) {
-                this.pluginName = spec.plugin;
-                this.pluginProps = spec.props ?? {};
-        }
-
-        // Called by buildComponentTree()
-        mountPluginIfReady(services: DelphineServices) {
-                const container = this.htmlElement;
-                if (!container || !this.form || !this.pluginName) return;
-
-                const app = TApplication.TheApplication; // ou un accès équivalent
-                const def = PluginRegistry.pluginRegistry.get(this.pluginName);
-
-                if (!def) {
-                        services.log.warn('Unknown plugin', { plugin: this.pluginName as any });
-                        return;
-                }
-
-                this.unmount();
-                this.instance = def.factory({ host: this, form: this.form });
-                this.instance!.mount(container, this.pluginProps, services);
-        }
-
-        update(props: any) {
-                this.pluginProps = props;
-                this.instance?.update(props);
-        }
-
-        unmount() {
-                try {
-                        this.instance?.unmount();
-                } finally {
-                        this.instance = null;
-                }
-        }
-}
-
-export type UIPluginFactory<Props extends Json = Json> = (args: { host: TPluginHost; form: TForm }) => UIPluginInstance<Props>;
-
-export interface SizeHints {
-        minWidth?: number;
-        minHeight?: number;
-        preferredWidth?: number;
-        preferredHeight?: number;
-}
-
-export type UIPluginDef = {
-        factory: UIPluginFactory;
-        // optionnel : un schéma de props, aide au designer
-        // props?: PropSchema;
-};
-
-export class PluginRegistry {
-        static pluginRegistry = new PluginRegistry();
-        private readonly plugins = new Map<string, UIPluginDef>();
-
-        register(name: string, def: UIPluginDef) {
-                if (this.plugins.has(name)) throw new Error(`Plugin already registered: ${name}`);
-                this.plugins.set(name, def);
-        }
-
-        get(name: string): UIPluginDef | undefined {
-                return this.plugins.get(name);
-        }
-
-        has(name: string): boolean {
-                return this.plugins.has(name);
         }
 }
 

@@ -1,0 +1,51 @@
+// drt/vue.ts
+import { createApp, type Component } from 'vue';
+import type { UIPluginInstance } from './plugin'; // votre contrat
+import type { TPluginHost } from '@vcl';
+
+type Options = {
+        props?: (host: TPluginHost) => any;
+};
+
+export function defineVuePlugin(component: Component, opt: Options = {}) {
+        return () => {
+                let app: any = null;
+                let vm: any = null;
+
+                const getProps = (host: TPluginHost) => (opt.props ? opt.props(host) : host.props);
+
+                const plugin: UIPluginInstance = {
+                        mount(host) {
+                                // 1) container DOM du host
+                                const el = host.htmlElement;
+                                if (!el) return;
+
+                                // 2) on nettoie le host (au cas où refresh / remount)
+                                el.innerHTML = '';
+
+                                // 3) mount Vue
+                                app = createApp(component, getProps(host));
+                                vm = app.mount(el);
+                        },
+
+                        update(host) {
+                                // Stratégie simple: remount safe (suffisant pour démarrer)
+                                // Ensuite on optimisera (reactive props) si besoin.
+                                plugin.dispose?.();
+                                plugin.mount(host);
+                        },
+
+                        unmount() {
+                                if (app) {
+                                        app.unmount();
+                                        app = null;
+                                        vm = null;
+                                }
+                        },
+
+                        dispose() {}
+                };
+
+                return plugin;
+        };
+}

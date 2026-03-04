@@ -1,0 +1,17 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+# Par défaut
+indent_style = space
+indent_size = 8
+
+[*.md]
+trim_trailing_whitespace = false
+
+# Si vous voulez autoriser 2 espaces uniquement dans le projet Vite (optionnel)
+[examples/zazaVue/**]
+indent_size = 8

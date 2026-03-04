@@ -4,6 +4,9 @@
                 "module": "commonjs",
                 "lib": ["ES2022", "DOM"],
                 "outDir": "out",
+                "noUnusedParameters": false,
+                "noUnusedLocals": false,
+
                 //"rootDir": "src",
                 "strict": true,
                 "sourceMap": true,

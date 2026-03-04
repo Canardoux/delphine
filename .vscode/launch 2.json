@@ -1,0 +1,77 @@
+{
+        "version": "0.2.0",
+        "configurations": [
+                {
+                        "name": "Run Extension",
+                        "type": "extensionHost",
+                        "request": "launch",
+                        "runtimeExecutable": "${execPath}",
+                        "args": ["--extensionDevelopmentPath=${workspaceFolder}", "--remote-debugging-port=9222"],
+                        "outFiles": ["${workspaceFolder}/out/**/*.js"],
+                        "preLaunchTask": "npm: compile"
+                },
+                {
+                        "name": "Attach Webview (Chrome)",
+                        "type": "chrome",
+                        "request": "attach",
+                        "port": 9222,
+                        "webRoot": "${workspaceFolder}",
+                        "sourceMaps": true
+                },
+                {
+                        "name": "Vite: debug zazaVue (Chrome)",
+                        "type": "pwa-chrome",
+                        "request": "launch",
+                        "url": "http://localhost:5173/src/zazaVue.html",
+
+                        // ✅ racine du repo Delphine (pas examples/zazaVue)
+                        "webRoot": "${workspaceFolder}",
+
+                        "sourceMaps": true,
+                        "trace": true,
+
+                        "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+
+                        "sourceMapPathOverrides": {
+                                // --- Vite @fs as URL
+                                //"http://localhost:5173/@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
+                                //"https://localhost:5173/@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
+
+                                // --- Vite @fs as path inside sourcemaps
+                                //"/@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
+                                //"@fs/Volumes/mac-I/delphine/*": "${workspaceFolder}/*",
+
+                                // --- fallback: keep @fs absolute paths as real filesystem paths
+                                "http://localhost:5173/@fs/*": "/*",
+                                "/@fs/*": "/*",
+
+                                // --- vite:// forms (rare selon versions)
+                                "vite:///*": "${workspaceFolder}/*",
+                                "vite:///@fs/*": "/*",
+
+                                "vite:///src/*": "${workspaceFolder}/examples/zazaVue/src/*",
+
+                                "/src/*": "${workspaceFolder}/examples/zazaVue/src/*",
+                                "*/src/*": "${workspaceFolder}/examples/zazaVue/src/*",
+
+                                "*/@fs/*": "/*"
+                        }
+                }
+        ],
+        "compounds": [
+                {
+                        "name": "Run + Attach Webview",
+                        "configurations": ["Run Extension", "Attach Webview (Chrome)"]
+                }
+        ],
+        "tasks": [
+                {
+                        "label": "Start Vite dev server (zazaVue)",
+                        "type": "shell",
+                        "command": "${workspaceFolder}/bin/preview-server.sh",
+                        "isBackground": true,
+                        "problemMatcher": [],
+                        "presentation": { "reveal": "always" }
+                }
+        ]
+}
