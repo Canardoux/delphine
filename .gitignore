@@ -1,3 +1,4 @@
 media/
 *.sav
 out/
+.vscode/chrome-vite-profile/**
