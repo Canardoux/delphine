@@ -4,7 +4,18 @@ console.log('🔥 I AM ZAZAVUE – ENTRY EXECUTED')
 
 console.log('I AM ZAZAVUE')
 
-import { TForm, TColor, TApplication, TComponent, TButton, PluginRegistry, TPanel, TCompositeDCC, TMetaCompositeDCC } from '@vcl'
+import {
+        TForm,
+        TColor,
+        TApplication,
+        TComponent,
+        TButton,
+        PluginRegistry,
+        TPanel,
+        TCompositeDCC,
+        TMetaCompositeDCC,
+        TPluginHost,
+} from '@vcl'
 //import { TPluginHost } from '@drt/UIPlugin'
 import { createHelloVuePlugin } from './createHelloVuePlugin'
 import type { PropSpec } from '@vcl'
@@ -84,6 +95,10 @@ class ZazaVue extends TForm {
                 }
                 //btn.color = TColor.rgb(0, 0, 255);
                 panel!.backgroundColor = TColor.rgb(54, 127, 173)
+
+                const vue = this.componentRegistry.get<TPluginHost>('myvueplugin')
+                //vue!.props.message = 'Message updated from Delphine!!!'
+                vue!.setPluginProp('message', 'Message updated from Delphine!!!')
         }
 
         zaza_onclick(_ev: Event | null, _sender: TComponent) {

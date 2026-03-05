@@ -136,10 +136,11 @@ export class TComponent {
         //props: ComponentProps;
 
         /** May contain child components */
-        _onclick: THandler = new THandler('');
+        //_onclick: THandler = new THandler('');
         allowsChildren(): boolean {
                 return false;
         }
+
         get color(): TColor {
                 return new TColor(this.getHtmlStyleProp('color'));
         }
@@ -149,10 +150,12 @@ export class TComponent {
         }
 
         get onclick(): THandler {
-                return this._onclick ?? new THandler('');
+                const handler = this.props.onclick as THandler;
+                return handler ?? new THandler('');
         }
+
         set onclick(handler) {
-                this._onclick = handler;
+                this.props.onclick = handler;
         }
 
         syncDomFromProps() {
@@ -230,7 +233,8 @@ export class TMetaComponent extends TMetaclass {
                                 retrieve: (o) => {
                                         return o.onclick;
                                 },
-                                apply: (o, v) => (o.onclick = new THandler(String(v)))
+                                //apply: (o, v) => (o.onclick = new THandler(String(v)))
+                                apply: (o, v) => (o.onclick = v as THandler)
                         }
                         //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
                 ];
@@ -506,13 +510,12 @@ export class TComponentRegistry extends TObject {
                         //maybeHost.mountFromRegistry(services);
                         */
 
-                                              const plugin = el.getAttribute('data-plugin');
-                                              const raw = el.getAttribute('data-props');
-                                              const props = raw ? JSON.parse(raw) : {};
+                        const plugin = el.getAttribute('data-plugin');
+                        const raw = el.getAttribute('data-props');
+                        const props = raw ? JSON.parse(raw) : {};
 
-                                              maybeHost.setPluginSpec({ plugin, props });
-                                              maybeHost.mountPluginIfReady!();
- 
+                        maybeHost.setPluginSpec({ plugin, props });
+                        maybeHost.mountPluginIfReady!();
                 }
 
                 if (child.allowsChildren()) {
@@ -869,8 +872,8 @@ export class TButton extends TComponent {
                 return this.htmlElement! as HTMLButtonElement;
         }
 
-        _caption: string = '';
-        _enabled: boolean = true;
+        //_caption: string = '';
+        //_enabled: boolean = true;
         /*
         protected get bprops(): ButtonProps {
                 return this.props as ButtonProps;
@@ -878,20 +881,24 @@ export class TButton extends TComponent {
                 */
 
         get caption(): string {
-                return this._caption;
+                //return this._caption;
+                return (this.props.caption as string) ?? 'Caption';
         }
         set caption(caption: string) {
-                this._caption = caption;
+                //this._caption = caption;
+                this.props.caption = caption;
                 const el = this.htmlElement;
                 if (!el) return;
                 el.textContent = this.caption;
         }
 
         get enabled(): boolean {
-                return this._enabled ?? true;
+                //return this._enabled ?? true;
+                return (this.props.enabled as boolean) ?? true;
         }
         set enabled(enabled) {
-                this._enabled = enabled;
+                //this._enabled = enabled;
+                this.props.enabled = enabled;
                 this.htmlButton().disabled = !enabled;
         }
 

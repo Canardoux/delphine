@@ -129,11 +129,46 @@ export class TPluginHost extends TComponent {
         private pluginName: string | null = null;
         private pluginProps: any = {};
         private pluginPropsKey: string = '';
-        private factory: UIPluginFactory | null = null;
+        //private factory: UIPluginFactory | null = null;
 
         private mountPoint: HTMLElement | null = null;
         private observer: MutationObserver | null = null;
 
+        private updateScheduled = false;
+
+        /** Replace ALL plugin props (rare). */
+        setPluginProps(next: Record<string, any>) {
+                this.pluginProps = next ?? {};
+                this.scheduleUpdate();
+        }
+
+        /** Patch one prop (common). */
+        setPluginProp(name: string, value: any) {
+                this.pluginProps[name] = value;
+                this.scheduleUpdate();
+        }
+
+        /** Patch many props at once (preferred). */
+        patchPluginProps(patch: Record<string, any>) {
+                Object.assign(this.pluginProps, patch);
+                this.scheduleUpdate();
+        }
+
+        getPluginProp<T = any>(name: string): T | undefined {
+                return this.pluginProps[name] as T | undefined;
+        }
+
+        private scheduleUpdate() {
+                if (this.updateScheduled) return;
+                this.updateScheduled = true;
+
+                queueMicrotask(() => {
+                        this.updateScheduled = false;
+                        this.instance?.update(this.pluginProps);
+                });
+        }
+
+        /*
         mountPlugin(props: Json, services: DelphineServices) {
                 const container = this.htmlElement;
                 if (!container) return;
@@ -150,6 +185,7 @@ export class TPluginHost extends TComponent {
                 this.instance = this.factory({ host: this, form: this.form! });
                 this.instance!.mount(container, props, services);
         }
+                */
 
         // Called by buildComponentTree()
         setPluginSpec(spec: { plugin: string | null; props: any }) {
@@ -157,10 +193,12 @@ export class TPluginHost extends TComponent {
                 this.pluginProps = spec.props ?? {};
         }
 
+        /*
         // Called by the metaclass (or by your registry) right after creation
         setPluginFactory(factory: UIPluginFactory) {
                 this.factory = factory;
         }
+                */
 
         // Called by buildComponentTree() when DOM element is assigned
         mountPluginIfReady() {
@@ -254,8 +292,8 @@ export class TPluginHost extends TComponent {
 
                 // Hard remount
                 this.unmount();
-                this.instance = def.factory({ host: this, form: this.form });
-                this.instance.mount(this.mountPoint, this.pluginProps, services);
+                this.instance = def.factory({ host: this, form: this.form }); // The instance is created Here !---------------
+                this.instance.mount(this.mountPoint, this.pluginProps, services); // Puis est monté ici ----------------------
         }
 
         unmount() {
