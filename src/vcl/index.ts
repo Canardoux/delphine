@@ -1,4 +1,4 @@
 export * from './StdCtrls';
 export * from './plugin';
 export * from './IPlugin';
-//export * from './vuePlugin';
+export * from './VuePlugin';

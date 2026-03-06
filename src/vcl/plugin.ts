@@ -1,6 +1,6 @@
 import { TForm, TComponent, TMetaComponent, TApplication } from './StdCtrls';
 import type { PropSpec } from './StdCtrls';
-import type { DelphineServices } from './IPlugin';
+import type { DelphineServices, UIPluginMessage } from './IPlugin';
 
 // ============================================= PLUGINHOST ==========================================================
 
@@ -142,10 +142,19 @@ export class TPluginHost extends TComponent {
                 this.scheduleUpdate();
         }
 
-        /** Patch one prop (common). */
-        setPluginProp(name: string, value: any) {
-                this.pluginProps[name] = value;
-                this.scheduleUpdate();
+        setPluginProp(key: string, value: any) {
+                // 1) Update cached props object
+                const next = { ...(this.pluginProps ?? {}), [key]: value };
+                this.pluginProps = next;
+
+                // 2) Reflect to DOM so Grapes/HTML stay canonical
+                const el = this.htmlElement;
+                if (el) {
+                        el.setAttribute('data-props', JSON.stringify(next));
+                }
+
+                // 3) Push to plugin instance
+                this.instance?.update(next);
         }
 
         /** Patch many props at once (preferred). */
@@ -200,12 +209,31 @@ export class TPluginHost extends TComponent {
         }
                 */
 
+        private onPluginMessage(msg: UIPluginMessage) {
+                if (msg.type === 'setProp') {
+                        // Option A: update DOM data-props so your existing refreshFromDom pipeline stays consistent
+                        this.setPluginProp(msg.key, msg.value);
+                        return;
+                }
+
+                if (msg.type === 'event') {
+                        // Optionnel: remonter dans le moteur d'events Delphine
+                        //this.form?.dispatchPluginEvent?.(this, msg.name, msg.detail);
+                }
+        }
+
         // Called by buildComponentTree() when DOM element is assigned
         mountPluginIfReady() {
                 const hostEl = this.htmlElement;
                 if (!hostEl || !this.form) return;
 
-                this.services = toto.services; // TODO get real services from args
+                //this.services = toto.services; // TODO get real services from args
+
+                // Inject a notify function *bound to this host*
+                this.services = {
+                        ...toto.services,
+                        notify: (msg) => this.onPluginMessage(msg)
+                };
 
                 // Create a stable mount point INSIDE the host
                 if (!this.mountPoint) {
@@ -311,6 +339,27 @@ export class TPluginHost extends TComponent {
                 this.observer = null;
                 this.mountPoint = null;
                 this.services = null;
+        }
+
+        mountPlugin(services: DelphineServices) {
+                const el = this.htmlElement;
+                if (!el || !this.pluginName) return;
+
+                const def = PluginRegistry.pluginRegistry.get(this.pluginName);
+                if (!def) {
+                        services.log.warn('Unknown plugin', { plugin: this.pluginName });
+                        return;
+                }
+
+                this.unmount();
+
+                this.instance = def.factory({ host: this, form: this.form! });
+
+                this.instance.mount(el, this.pluginProps, services);
+        }
+
+        updatePlugin() {
+                this.instance?.update(this.pluginProps);
         }
 }
 

@@ -1,3 +1,5 @@
+export type UIPluginMessage = { type: 'setProp'; hostName: string; key: string; value: any } | { type: 'event'; hostName: string; name: string; detail?: any };
+
 export interface DelphineServices {
         log: {
                 debug(msg: string, data?: any): void;
@@ -16,6 +18,8 @@ export interface DelphineServices {
                 set(key: string, value: any): Promise<void> | null;
                 remove(key: string): Promise<void> | null;
         };
+
+        notify?: (msg: UIPluginMessage) => void;
 
         // futur
         // i18n?: ...
