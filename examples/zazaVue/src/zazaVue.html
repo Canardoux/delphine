@@ -48,21 +48,21 @@
     </style>
   </head>
   <body
-    data-props='{
+    data-delphine-props='{
     "onclick": "zaza_onclick",
     "name": "ZAZA"
   }'
     id="ir9k"
-    data-component="TForm"
-    data-name="ZAZA"
-    data-oncreate="onMyCreate"
-    data-onshown="onMyShown"
+    data-delphine-component="TForm"
+    data-delphine-name="ZAZA"
+    data-delphine-oncreate="onMyCreate"
+    data-delphine-onshown="onMyShown"
   >
     <button
       id="button1"
-      data-component="TButton"
-      data-name="button1"
-      data-props='{
+      data-delphine-component="TButton"
+      data-delphine-name="button1"
+      data-delphine-props='{
     
     "onclick": "button1_onclick",
     "caption": "Delphine button1 caption",
@@ -75,9 +75,9 @@
 
     <button
       id="buttonx"
-      data-component="TButton"
-      data-caption="Delphine buttonx caption"
-      data-name="buttonx"
+      data-delphine-component="TButton"
+      data-delphine-caption="Delphine buttonx caption"
+      data-delphine-name="buttonx"
     >
       Titi
     </button>
@@ -86,43 +86,43 @@
 
     <div
       id="myvueplugin"
-      data-name="myvueplugin"
-      data-component="TPluginHost"
-      data-plugin="hello-vue"
-      data-message="Bonjour depuis Delphine!!!"
-      data-props='{
+      data-delphine-name="myvueplugin"
+      data-delphine-component="TPluginHost"
+      data-delphine-plugin="hello-vue"
+      data-delphine-message="Bonjour depuis Delphine!!!"
+      data-delphine-props='{
     "message": "Hello depuis Delphinexxx",
     "count": 3,
     "enabled": true
   }'
     ></div>
 
-    <div id="mypanel" data-name="myPanel" data-component="TPanel">
+    <div id="mypanel" data-delphine-name="myPanel" data-delphine-component="TPanel">
       <button
-        data-component="TButton"
-        data-caption="sub-button1"
-        data-name="sub-button1"
-        data-onclick="subButton1_onclick"
+        data-delphine-component="TButton"
+        data-delphine-caption="sub-button1"
+        data-delphine-name="sub-button1"
+        data-delphine-onclick="subButton1_onclick"
       >
         Click Me!
       </button>
-      <button data-component="TButton" data-caption="sub-button2" data-name="sub-button2">
+      <button data-delphine-component="TButton" data-delphine-caption="sub-button2" data-delphine-name="sub-button2">
         Click Me
       </button>
     </div>
 
     <div
       id="mydcc"
-      data-component="TMyDCC"
-      data-plugin="hello-dcc"
-      data-name="my-DCC"
-      data-props='{"message":"Bonjour"}'
+      data-delphine-component="TMyDCC"
+      data-delphine-plugin="hello-dcc"
+      data-delphine-name="my-DCC"
+      data-delphine-props='{"message":"Bonjour"}'
         >
       <button
-        data-component="TButton"
-        data-caption="dcc-button1"
-        data-name="dcc-button1"
-        data-onclick="dcc_onclick"
+        data-delphine-component="TButton"
+        data-delphine-caption="dcc-button1"
+        data-delphine-name="dcc-button1"
+        data-delphine-onclick="dcc_onclick"
       >
 
     ></div>

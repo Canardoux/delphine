@@ -150,7 +150,7 @@ export class TPluginHost extends TComponent {
                 // 2) Reflect to DOM so Grapes/HTML stay canonical
                 const el = this.htmlElement;
                 if (el) {
-                        el.setAttribute('data-props', JSON.stringify(next));
+                        el.setAttribute('data-delphine-props', JSON.stringify(next));
                 }
 
                 // 3) Push to plugin instance
@@ -211,7 +211,7 @@ export class TPluginHost extends TComponent {
 
         private onPluginMessage(msg: UIPluginMessage) {
                 if (msg.type === 'setProp') {
-                        // Option A: update DOM data-props so your existing refreshFromDom pipeline stays consistent
+                        // Option A: update DOM data-delphine-props so your existing refreshFromDom pipeline stays consistent
                         this.setPluginProp(msg.key, msg.value);
                         return;
                 }
@@ -238,7 +238,7 @@ export class TPluginHost extends TComponent {
                 // Create a stable mount point INSIDE the host
                 if (!this.mountPoint) {
                         this.mountPoint = document.createElement('div');
-                        this.mountPoint.setAttribute('data-delphine-mount', '1');
+                        this.mountPoint.setAttribute('data-delphine-delphine-mount', '1');
                         hostEl.replaceChildren(this.mountPoint);
                 }
 
@@ -251,7 +251,7 @@ export class TPluginHost extends TComponent {
                                 for (const m of mutations) {
                                         if (m.type === 'attributes') {
                                                 const a = m.attributeName;
-                                                if (a === 'data-plugin' || a === 'data-props') {
+                                                if (a === 'data-delphine-plugin' || a === 'data-delphine-props') {
                                                         this.refreshFromDom();
                                                         break;
                                                 }
@@ -269,8 +269,8 @@ export class TPluginHost extends TComponent {
                 const hostEl = this.htmlElement;
                 if (!services || !hostEl || !this.form || !this.mountPoint) return;
 
-                const newPlugin = hostEl.getAttribute('data-plugin'); // string | null
-                const newProps = safeParseJson(hostEl.getAttribute('data-props'));
+                const newPlugin = hostEl.getAttribute('data-delphine-plugin'); // string | null
+                const newProps = safeParseJson(hostEl.getAttribute('data-delphine-props'));
                 const newKey = stableStringify(newProps);
 
                 // Nothing to mount => unmount and exit

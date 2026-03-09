@@ -56,11 +56,11 @@ type UnknownRecord = Record<string, unknown>;
 export type ComponentProps = Record<string, unknown>;
 
 const RESERVED_DATA_ATTRS = new Set<string>([
-        'data-component',
-        'data-name',
-        'data-props',
-        'data-plugin',
-        'data-message' // add any meta/framework attrs you don't want treated as props
+        'data-delphine-component',
+        'data-delphine-name',
+        'data-delphine-props',
+        'data-delphine-plugin',
+        'data-delphine-message' // add any meta/framework attrs you don't want treated as props
 ]);
 
 export abstract class TMetaclass {
@@ -210,7 +210,7 @@ export class TComponent {
 
 export class TMetaComponent extends TMetaclass {
         static readonly metaclass = new TMetaComponent(TMetaclass.metaclass, 'TComponent');
-        // The symbolic name used in HTML: data-component="TButton" or "my-button"
+        // The symbolic name used in HTML: data-delphine-component="TButton" or "my-button"
         protected constructor(superClass: TMetaclass, name: string) {
                 super(superClass, name);
         }
@@ -391,7 +391,7 @@ export class TComponentRegistry extends TObject {
                         const spec = this.resolveNearestPropSpec(meta, name);
                         if (!spec) continue; // Not a declared prop -> ignore
                         const v: string = rawValue as string;
-                        // Note: data-xxx gives strings; data-props can give any JSON type.
+                        // Note: data-delphine-xxx gives strings; data-delphine-props can give any JSON type.
                         const value = this.convert(v, spec.kind);
 
                         //out[name] = value; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -402,7 +402,7 @@ export class TComponentRegistry extends TObject {
         }
 
         private extractJsonProps(el: Element): UnknownRecord {
-                const raw = el.getAttribute('data-props');
+                const raw = el.getAttribute('data-delphine-props');
                 if (!raw) return {};
 
                 try {
@@ -413,7 +413,7 @@ export class TComponentRegistry extends TObject {
                         }
                         return {};
                 } catch (e) {
-                        console.error('Invalid JSON in data-props', raw, e);
+                        console.error('Invalid JSON in data-delphine-props', raw, e);
                         return {};
                 }
         }
@@ -421,13 +421,13 @@ export class TComponentRegistry extends TObject {
         private extractDataAttributes(el: Element): UnknownRecord {
                 const out: UnknownRecord = {};
 
-                // Iterate all attributes, keep only data-xxx (except reserved)
+                // Iterate all attributes, keep only data-delphine-xxx (except reserved)
                 for (const attr of Array.from(el.attributes)) {
                         const attrName = attr.name;
-                        if (!attrName.startsWith('data-')) continue;
+                        if (!attrName.startsWith('data-delphine-')) continue;
                         if (RESERVED_DATA_ATTRS.has(attrName)) continue;
 
-                        const propName = attrName.slice('data-'.length);
+                        const propName = attrName.slice('data-delphine-'.length);
                         // Skip empty names
                         if (!propName) continue;
 
@@ -445,31 +445,31 @@ export class TComponentRegistry extends TObject {
 
         /**
          * Parse HTML attributes + JSON bulk into a plain object of typed props.
-         * - Reads JSON from data-props
-         * - Reads data-xxx attributes (excluding reserved ones)
+         * - Reads JSON from data-delphine-props
+         * - Reads data-delphine-xxx attributes (excluding reserved ones)
          * - For each candidate prop name, resolves the nearest PropSpec by walking metaclass inheritance.
          * - Applies conversion based on spec.kind
-         * - data-xxx overrides data-props
+         * - data-delphine-xxx overrides data-delphine-props
          */
         parsePropsFromElement(comp: TComponent) {
                 const el: Element | null = comp.elem;
 
                 if (!el) return;
 
-                // 1) Extract JSON bulk props from data-props
+                // 1) Extract JSON bulk props from data-delphine-props
                 const jsonProps = this.extractJsonProps(el);
 
-                // 2) Extract data-xxx attributes (excluding reserved)
+                // 2) Extract data-delphine-xxx attributes (excluding reserved)
                 const dataAttrs = this.extractDataAttributes(el);
 
-                // 3) Apply JSON first, then data-xxx overrides
+                // 3) Apply JSON first, then data-delphine-xxx overrides
                 this.applyPropsFromSource(comp, jsonProps, comp.getMetaclass());
                 this.applyPropsFromSource(comp, dataAttrs, comp.getMetaclass());
         }
 
         private processElem(el: Element, form: TForm, parent: TComponent): TComponent | null {
-                const name = el.getAttribute('data-name');
-                const type = el.getAttribute('data-component');
+                const name = el.getAttribute('data-delphine-name');
+                const type = el.getAttribute('data-delphine-component');
 
                 const cls = TApplication.TheApplication.types.get(type!);
 
@@ -501,8 +501,8 @@ export class TComponentRegistry extends TObject {
                 const maybeHost = child as unknown as Partial<IPluginHost>;
                 if (maybeHost && typeof maybeHost.setPluginSpec === 'function') {
                         /*
-                        const plugin = el.getAttribute('data-plugin');
-                        const raw = el.getAttribute('data-props');
+                        const plugin = el.getAttribute('data-delphine-plugin');
+                        const raw = el.getAttribute('data-delphine-props');
                         const props = raw ? JSON.parse(raw) : {};
 
                         maybeHost.setPluginSpec({ plugin, props });
@@ -510,8 +510,8 @@ export class TComponentRegistry extends TObject {
                         //maybeHost.mountFromRegistry(services);
                         */
 
-                        const plugin = el.getAttribute('data-plugin');
-                        const raw = el.getAttribute('data-props');
+                        const plugin = el.getAttribute('data-delphine-plugin');
+                        const raw = el.getAttribute('data-delphine-props');
                         const props = raw ? JSON.parse(raw) : {};
 
                         maybeHost.setPluginSpec({ plugin, props });
@@ -519,7 +519,7 @@ export class TComponentRegistry extends TObject {
                 }
 
                 if (child.allowsChildren()) {
-                        el.querySelectorAll(':scope > [data-component]').forEach((el) => {
+                        el.querySelectorAll(':scope > [data-delphine-component]').forEach((el) => {
                                 this.processElem(el, form, child);
                                 //if (el === root) return;
                         });
@@ -532,7 +532,7 @@ export class TComponentRegistry extends TObject {
         buildComponentTree(form: TForm, root: TComponent) {
                 this.clear();
                 // --- FORM ---
-                // provisoirement if (root.getAttribute('data-component') === 'TForm') {
+                // provisoirement if (root.getAttribute('data-delphine-component') === 'TForm') {
                 //const el = root.elem!;
 
                 //this.registerInstance(root.name, form);
@@ -542,11 +542,11 @@ export class TComponentRegistry extends TObject {
 
                 // --- CHILD COMPONENTS ---
                 /*
-                rootElem.querySelectorAll(':scope > [data-component]').forEach((el) => {
+                rootElem.querySelectorAll(':scope > [data-delphine-component]').forEach((el) => {
                         const child: TComponent | null = this.processElem(el, form, root);
                         //if (el === root) return;
                         if (child && child.allowsChildren()) {
-                                el.querySelectorAll(':scope > [data-component]').forEach((el) => {
+                                el.querySelectorAll(':scope > [data-delphine-component]').forEach((el) => {
                                         this.processElem(el, form, child);
                                         //if (el === root) return;
                                 });
@@ -755,11 +755,11 @@ export class TForm extends TContainer {
 
         findFormFromEventTarget(target: Element): TForm | null {
                 // 1) Find the nearest element that looks like a form container
-                const formElem = target.closest('[data-component="TForm"][data-name]') as Element | null;
+                const formElem = target.closest('[data-delphine-component="TForm"][data-delphine-name]') as Element | null;
                 if (!formElem) return null;
 
                 // 2) Resolve the TForm instance
-                const formName = formElem.getAttribute('data-name');
+                const formName = formElem.getAttribute('data-delphine-name');
                 if (!formName) return null;
 
                 return TForm.forms.get(formName) ?? null;
@@ -799,9 +799,9 @@ export class TForm extends TContainer {
 
                 const propName = `on${ev.type}`;
 
-                let el: Element | null = targetElem.closest('[data-component]');
+                let el: Element | null = targetElem.closest('[data-delphine-component]');
                 if (!el) return;
-                const name = el.getAttribute('data-name');
+                const name = el.getAttribute('data-delphine-name');
                 let comp = name ? this.componentRegistry.get(name) : null;
                 while (comp) {
                         const handler = comp.getProp<THandler>(propName); // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -811,7 +811,7 @@ export class TForm extends TContainer {
                                 handler.fire(this, propName, ev, comp);
                                 return;
                         }
-                        //el = next ?? el.parentElement?.closest('[data-component]') ?? null;
+                        //el = next ?? el.parentElement?.closest('[data-delphine-component]') ?? null;
                         comp = comp.parent;
                 }
 
@@ -835,7 +835,7 @@ export class TForm extends TContainer {
         }
 
         protected onCreate() {
-                const onShownName = this.elem!.getAttribute('data-oncreate');
+                const onShownName = this.elem!.getAttribute('data-delphine-oncreate');
                 if (onShownName) {
                         queueMicrotask(() => {
                                 const fn = (this as any)[onShownName];
@@ -845,7 +845,7 @@ export class TForm extends TContainer {
         }
 
         protected onShown() {
-                const onShownName = this.elem!.getAttribute('data-onshown');
+                const onShownName = this.elem!.getAttribute('data-delphine-onshown');
                 if (onShownName) {
                         queueMicrotask(() => {
                                 const fn = (this as any)[onShownName];

@@ -1,6 +1,15 @@
 // boot.ts (compiled to boot.js)
 // English comments as requested.
 //import * as vscode from 'vscode';
+import type { DelphineVsCodeApi, DelphineWindow } from './delphineWebviewTypes';
+
+declare function acquireVsCodeApi(): DelphineVsCodeApi;
+
+const w = window as DelphineWindow;
+
+if (!w.__delphineVsCodeApi) {
+        w.__delphineVsCodeApi = acquireVsCodeApi();
+}
 export {};
 type VsCodeApi = {
         postMessage: (msg: any) => void;
@@ -9,13 +18,6 @@ type VsCodeApi = {
 };
 
 console.log('[boot] starting, grapesjs=', (window as any).grapesjs);
-
-declare global {
-        interface Window {
-                __delphineBootInstalled?: boolean;
-                __delphineVsCodeApi?: VsCodeApi | null;
-        }
-}
 
 function tryAcquireVsCodeApi(): VsCodeApi | null {
         try {
@@ -106,7 +108,8 @@ function main() {
 
         const tick = () => {
                 if (!window.__delphineVsCodeApi) {
-                        window.__delphineVsCodeApi = tryAcquireVsCodeApi();
+                        const api = tryAcquireVsCodeApi();
+                        window.__delphineVsCodeApi = api ?? undefined;
                 }
 
                 // Install listeners even if the VSCode API is not available

@@ -1,13 +1,13 @@
 {
-        "name": "delphine-preview",
-        "displayName": "Delphine Preview",
+        "name": "delphine",
+        "displayName": "Delphine",
         "description": "Custom editor + preview webview for Delphine forms",
         "version": "0.0.1",
-        "publisher": "your-publisher",
-        "license": "MIT",
+        "publisher": "canardoux",
+        "license": "GPL-3.0-only",
         "repository": {
                 "type": "git",
-                "url": "https://github.com/Microsoft/vscode-extension-samples"
+                "url": "https://github.com/Canardoux/delphine"
         },
         "engines": {
                 "vscode": "^1.90.0"
@@ -25,12 +25,17 @@
                 "commands": [
                         {
                                 "command": "delphine.preview",
-                                "title": "Preview",
+                                "title": "Delphine-Preview",
                                 "category": "Delphine"
                         },
                         {
                                 "command": "delphine.openEditor",
-                                "title": "Open Delphine Editor",
+                                "title": "Delphine-Editor",
+                                "category": "Delphine"
+                        },
+                        {
+                                "command": "delphine.openSource",
+                                "title": "Open-Source",
                                 "category": "Delphine"
                         }
                 ],
@@ -54,9 +59,24 @@
                                         "group": "navigation"
                                 },
                                 {
-                                        "when": "resourceLangId == html",
+                                        "when": "resourceLangId == html || activeWebviewPanelId == 'delphinePreview'",
                                         "command": "delphine.openEditor",
                                         "group": "navigation"
+                                },
+                                {
+                                        "when": "activeCustomEditorId == 'delphine.customEditor' || activeWebviewPanelId == 'delphinePreview'",
+                                        "command": "delphine.openSource",
+                                        "group": "navigation"
+                                }
+                        ],
+                        "webview/context": [
+                                {
+                                        "when": "webviewId == 'delphinePreview'",
+                                        "command": "delphine.openEditor"
+                                },
+                                {
+                                        "when": "webviewId == 'delphinePreview'",
+                                        "command": "delphine.openSource"
                                 }
                         ]
                 }

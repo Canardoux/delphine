@@ -2,102 +2,9 @@ import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { splitHtmlForGrapes } from '../SplitHtml';
 
 type Disposer = { dispose(): void };
-
-// ***************************  The following code is a duplicate from the Custom Editor *******************************
-// **************************** We should use a shared code. TODO ******************************************************
-import { parse } from 'parse5';
-import * as prettier from 'prettier';
-import type {
-        Document as DefaultTreeDocument,
-        Element as DefaultTreeElement,
-        Node as DefaultTreeNode,
-        //ParentNode as DefaultTreeParentNode,
-        TextNode as DefaultTreeTextNode
-} from 'parse5/dist/tree-adapters/default';
-
-/**
- * Result of the HTML split for GrapesJS
- */
-export interface GrapesInput {
-        cssText: string;
-        bodyInnerHtml: string;
-        bodyAttrs: string;
-}
-
-/**
- * Result of the HTML split for GrapesJS
- */
-export interface GrapesInput {
-        cssText: string;
-        bodyInnerHtml: string;
-        bodyAttrs: string;
-}
-
-// --- Small helpers ---
-function isElement(n: DefaultTreeNode, tag: string): n is DefaultTreeElement {
-        return (n as any).nodeName === tag;
-}
-
-function childNodes(n: DefaultTreeNode): DefaultTreeNode[] {
-        return ((n as any).childNodes ?? []) as DefaultTreeNode[];
-}
-
-function findFirst(node: DefaultTreeNode, pred: (n: DefaultTreeNode) => boolean): DefaultTreeNode | null {
-        if (pred(node)) return node;
-        for (const ch of childNodes(node)) {
-                const found = findFirst(ch, pred);
-                if (found) return found;
-        }
-        return null;
-}
-
-function findAll(node: DefaultTreeNode, pred: (n: DefaultTreeNode) => boolean, acc: DefaultTreeNode[] = []): DefaultTreeNode[] {
-        if (pred(node)) acc.push(node);
-        for (const ch of childNodes(node)) {
-                findAll(ch, pred, acc);
-        }
-        return acc;
-}
-
-function extractStyleText(styleEl: DefaultTreeElement): string {
-        // In parse5 default tree, <style> content is usually a single TextNode with `.value`
-        const texts = childNodes(styleEl).filter((n) => (n as any).nodeName === '#text') as DefaultTreeTextNode[];
-        return texts.map((t) => t.value ?? '').join('');
-}
-
-function extractBodyParts(fullHtml: string): { bodyAttrs: string; bodyInnerHtml: string } {
-        const m = fullHtml.match(/<body([^>]*)>([\s\S]*?)<\/body>/i);
-        if (!m) return { bodyAttrs: '', bodyInnerHtml: fullHtml };
-
-        const bodyAttrs = (m[1] ?? '').trim();
-        const bodyInnerHtml = (m[2] ?? '').trim();
-        return { bodyAttrs, bodyInnerHtml };
-}
-
-// --- Main ---
-export function splitHtmlForGrapes(fullHtml: string): GrapesInput {
-        const doc = parse(fullHtml) as DefaultTreeDocument;
-
-        const { bodyAttrs, bodyInnerHtml } = extractBodyParts(fullHtml);
-
-        const headNode = findFirst(doc as any, (n) => isElement(n, 'head')) as DefaultTreeElement | null;
-        const styleNodes = headNode ? (findAll(headNode, (n) => isElement(n, 'style')) as DefaultTreeElement[]) : [];
-
-        const cssText = styleNodes
-                .map((el) => extractStyleText(el).trim())
-                .filter(Boolean)
-                .join('\n\n');
-
-        return {
-                bodyInnerHtml,
-                bodyAttrs,
-                cssText: cssText.trim()
-        };
-}
-
-// ********************************************************************************************************
 
 /**
  * A simple WebviewPanel used for "preview".
@@ -127,56 +34,52 @@ export class PreviewPanel {
         // English comments: example integration
         private compiledWatcher?: { dispose(): void };
 
+        private static current?: PreviewPanel;
+
         private constructor(context: vscode.ExtensionContext, panel: vscode.WebviewPanel) {
                 this.context = context;
                 this.panel = panel;
 
-                /*
-                // If the webview becomes visible again, ask it to re-focus itself.
-                this.panel.onDidChangeViewState(
-                        (e) => {
-                                if (!e.webviewPanel.visible) return;
-                                // Reveal once, not in bursts.
-                                try {
-                                        e.webviewPanel.reveal(e.webviewPanel.viewColumn, false);
-                                } catch {
-                                        // ignored
-                                }
-                                void e.webviewPanel.webview.postMessage({ type: 'focusNow' });
-                        },
-                        null,
-                        context.subscriptions
-                );
-                */
+                this.panel.onDidDispose(() => {
+                        this.disposed = true;
+
+                        if (PreviewPanel.current === this) {
+                                PreviewPanel.current = undefined;
+                        }
+                });
+
+                this.panel.onDidChangeViewState((e) => {
+                        if (e.webviewPanel.active) {
+                                PreviewPanel.current = this;
+                        }
+                });
         }
 
-        // createOrShow() is a factory
-        public static async createOrShow(context: vscode.ExtensionContext, docUri: vscode.Uri): Promise<PreviewPanel> {
-                // Dispose previous preview (fresh panel per run).
-                //PreviewPanel.current?.dispose();
+        public static getActiveDocUri(): vscode.Uri | undefined {
+                return PreviewPanel.current?.docUri ?? undefined;
+        }
 
+        public static async createOrShow(context: vscode.ExtensionContext, docUri: vscode.Uri): Promise<PreviewPanel> {
                 const panel = vscode.window.createWebviewPanel(PreviewPanel.viewType, 'Delphine Preview', vscode.ViewColumn.Beside, {
                         enableScripts: true,
                         retainContextWhenHidden: false,
-                        // Restrict file access to the extension's media folder.
                         localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')]
                 });
 
-                // The object constructor
-                const instance = await new PreviewPanel(context, panel);
+                const instance = new PreviewPanel(context, panel);
+                PreviewPanel.current = instance;
 
-                //PreviewPanel.current = instance;
                 instance.docUri = docUri;
 
-                const editor = vscode.window.activeTextEditor;
-                if (editor) instance.document = editor?.document;
+                try {
+                        instance.document = await vscode.workspace.openTextDocument(docUri);
+                } catch {
+                        instance.document = null;
+                }
+
                 instance.init(context, panel);
                 return instance;
-
-                // Optional: a short watchdog to log OK/KO.
-                //instance.startWatchdog(3000);
         }
-
         private docChangeTimer: NodeJS.Timeout | undefined;
 
         private init(context: vscode.ExtensionContext, panel: vscode.WebviewPanel) {
