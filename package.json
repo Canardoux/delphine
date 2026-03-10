@@ -37,6 +37,18 @@
                                 "command": "delphine.openSource",
                                 "title": "Open-Source",
                                 "category": "Delphine"
+                        },
+                        {
+                                "command": "delphine.newProject",
+                                "title": "New Project",
+                                "category": "Delphine",
+                                "icon": "$(new-folder)"
+                        },
+                        {
+                                "command": "delphine.newForm",
+                                "title": "New Form",
+                                "category": "Delphine",
+                                "icon": "$(new-file)"
                         }
                 ],
                 "customEditors": [
@@ -77,6 +89,46 @@
                                 {
                                         "when": "webviewId == 'delphinePreview'",
                                         "command": "delphine.openSource"
+                                }
+                        ],
+                        "view/title": [
+                                {
+                                        "command": "delphine.newProject",
+                                        "when": "view == delphine.projects",
+                                        "group": "navigation"
+                                },
+                                {
+                                        "command": "delphine.newForm",
+                                        "when": "view == delphine.forms",
+                                        "group": "navigation"
+                                }
+                        ],
+                        "view/item/context": [
+                                {
+                                        "command": "delphine.newForm",
+                                        "when": "view == delphine.forms",
+                                        "group": "inline"
+                                }
+                        ]
+                },
+                "viewsContainers": {
+                        "activitybar": [
+                                {
+                                        "id": "delphine",
+                                        "title": "Delphine",
+                                        "icon": "images/del1.svg"
+                                }
+                        ]
+                },
+                "views": {
+                        "delphine": [
+                                {
+                                        "id": "delphine.projects",
+                                        "name": "Projects"
+                                },
+                                {
+                                        "id": "delphine.forms",
+                                        "name": "Forms"
                                 }
                         ]
                 }

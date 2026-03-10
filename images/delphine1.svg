@@ -1,0 +1,21 @@
+<svg width="24" height="24"
+     viewBox="0 0 24 24"
+     xmlns="http://www.w3.org/2000/svg"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+
+  <!-- Dolphin body -->
+  <path d="M3 14
+           C6 10, 10 7, 15 8
+           C18 9, 20 11, 21 13
+           C19 13, 17 14, 16 16
+           C13 17, 9 16, 6 15
+           C5 15, 4 15, 3 14Z"/>
+
+  <!-- Eye -->
+  <circle cx="15" cy="10" r="0.8" fill="currentColor"/>
+
+</svg>
