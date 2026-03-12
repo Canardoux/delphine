@@ -1,871 +1,33 @@
-import { registerBuiltins } from './registerVcl';
-//import { Toto } from './plugin';
-import type { IPluginHost } from './IPlugin';
+// StdCtrls.ts
 
 /*
-   To create a new component type:
+ * Copyright 2026 Canardoux.
+ *
+ * This file is part of the Delphine project.
+ *
+ * Delphine is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3 (GPL3), as published by
+ * the Free Software Foundation.
+ *
+ * Delphine is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
-   To create a new component attribut
+import { TControl, TMetaControl } from './Base';
+import { TMetaContainer, TContainer } from './Container';
+import type { PropSpec } from './Component';
+import type { IForm } from './IForm';
+import type { IControl } from './IControl';
+//import { TForm } from './Form';
 
-*/
-
-export class TColor {
-        s: string;
-
-        constructor(s: string) {
-                this.s = s;
-        }
-        /* factory */ static rgb(r: number, g: number, b: number): TColor {
-                return new TColor(`rgb(${r}, ${g}, ${b})`);
-        }
-        /* factory */ static rgba(r: number, g: number, b: number, a: number): TColor {
-                return new TColor(`rgba(${r}, ${g}, ${b}, ${a})`);
-        }
-}
-
-export class THandler {
-        s: string;
-
-        constructor(s: string) {
-                this.s = s;
-        }
-        fire(form: TForm, handlerName: string, ev: Event, sender: any) {
-                const maybeMethod = (form as any)[this.s];
-                if (typeof maybeMethod !== 'function') {
-                        console.log('NOT A METHOD', handlerName);
-                        return false;
-                }
-
-                // If sender is missing, fallback to the form itself (safe)
-                (maybeMethod as (event: Event, sender: any) => any).call(form, ev, sender ?? this);
-        }
-}
-
-export type ComponentFactory = (name: string, form: TForm, owner: TComponent) => TComponent;
-
-type PropKind = 'string' | 'number' | 'boolean' | 'color' | 'handler';
-
-export type PropSpec<T, V = unknown> = {
-        name: string;
-        kind: PropKind;
-        retrieve: (obj: T) => V;
-        apply: (obj: T, value: V) => void;
-};
-
-type UnknownRecord = Record<string, unknown>;
-export type ComponentProps = Record<string, unknown>;
-
-const RESERVED_DATA_ATTRS = new Set<string>([
-        'data-delphine-component',
-        'data-delphine-name',
-        'data-delphine-props',
-        'data-delphine-plugin',
-        'data-delphine-message' // add any meta/framework attrs you don't want treated as props
-]);
-
-export abstract class TMetaclass {
-        readonly typeName: string = 'TMetaclass';
-        static metaclass: TMetaclass;
-        readonly superClass: TMetaclass | null = null;
-
-        abstract getMetaclass(): TMetaclass;
-        protected constructor(superClass: TMetaclass | null, typeName = 'TMetaclass') {
-                this.superClass = superClass;
-                this.typeName = typeName;
-        }
-}
-
-export class TObject {
-        getMetaClass(): TMetaObject {
-                return TMetaObject.metaClass;
-        }
-}
-
-export class TMetaObject extends TMetaclass {
-        static readonly metaClass: TMetaObject = new TMetaObject(TMetaclass.metaclass, 'TObject');
-
-        getMetaclass(): TMetaObject {
-                return TMetaObject.metaClass;
-        }
-        constructor(superClass: TMetaclass, name: string) {
-                super(superClass, name);
-        }
-}
-
-export class TComponent {
+export class TButton extends TControl {
         getMetaclass() {
-                return TMetaComponent.metaclass;
-        }
-
-        readonly name: string;
-        readonly parent: TComponent | null = null;
-
-        props: ComponentProps = Object.create(null);
-
-        getProp<T = unknown>(name: string): T | undefined {
-                return this.props[name] as T | undefined;
-        }
-
-        setProp(name: string, value: unknown): void {
-                this.props[name] = value;
-        }
-
-        // optional
-        hasProp(name: string): boolean {
-                return Object.prototype.hasOwnProperty.call(this.props, name);
-        }
-        //protected props: ComponentProps = Object.create(null);
-        form: TForm | null = null;
-        children: TComponent[] = [];
-
-        elem: Element | null = null;
-        get htmlElement(): HTMLElement | null {
-                return this.elem as HTMLElement | null;
-        }
-        constructor(name: string, form: TForm | null, parent: TComponent | null) {
-                this.name = name;
-                this.parent = parent;
-                parent?.children.push(this); // Could be done in buildComponentTree()
-                this.form = form;
-
-                // IMPORTANT: Initialize props at runtime (declare would not do it).
-                //this.props = {};
-        }
-
-        // NOTE: This is runtime data, so it must be initialized (no "declare").
-        //props: ComponentProps;
-
-        /** May contain child components */
-        //_onclick: THandler = new THandler('');
-        allowsChildren(): boolean {
-                return false;
-        }
-
-        get color(): TColor {
-                return new TColor(this.getHtmlStyleProp('color'));
-        }
-
-        set color(color) {
-                this.setHtmlStyleProp('color', color.s);
-        }
-
-        get onclick(): THandler {
-                const handler = this.props.onclick as THandler;
-                return handler ?? new THandler('');
-        }
-
-        set onclick(handler) {
-                this.props.onclick = handler;
-        }
-
-        syncDomFromProps() {
-                const el = this.htmlElement;
-                if (!el) return;
-        }
-
-        get backgroundColor(): TColor {
-                return new TColor(this.getHtmlStyleProp('background-color'));
-        }
-        set backgroundColor(v: TColor) {
-                this.setHtmlStyleProp('background-color', v.s);
-        }
-
-        get width(): string {
-                return this.getHtmlProp('width') ?? '';
-        }
-        set width(v: string) {
-                this.setHtmlProp('width', v);
-        }
-
-        get height(): string {
-                return this.getHtmlProp('height') ?? '';
-        }
-        set height(v: string) {
-                this.setHtmlProp('height', v);
-        }
-
-        get offsetWidth(): number {
-                return this.htmlElement!.offsetWidth;
-        }
-        get offsetHeight(): number {
-                return this.htmlElement!.offsetHeight;
-        }
-
-        setHtmlStyleProp(name: string, value: string) {
-                this.htmlElement!.style.setProperty(name, value);
-        }
-
-        getHtmlStyleProp(name: string) {
-                return this.htmlElement!.style.getPropertyValue(name);
-        }
-
-        setHtmlProp(name: string, value: string) {
-                this.htmlElement!.setAttribute(name, value);
-        }
-
-        getHtmlProp(name: string) {
-                return this!.htmlElement!.getAttribute(name);
-        }
-}
-
-export class TMetaComponent extends TMetaclass {
-        static readonly metaclass = new TMetaComponent(TMetaclass.metaclass, 'TComponent');
-        // The symbolic name used in HTML: data-delphine-component="TButton" or "my-button"
-        protected constructor(superClass: TMetaclass, name: string) {
-                super(superClass, name);
-        }
-
-        getMetaclass() {
-                return TMetaComponent.metaclass;
-        }
-
-        // Create the runtime instance and attach it to the DOM element.
-        create(name: string, form: TForm, parent: TComponent): TComponent {
-                return new TComponent(name, form, parent);
-        }
-
-        defProps(): PropSpec<any>[] {
-                return [
-                        //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
-                        {
-                                name: 'onclick',
-                                kind: 'handler',
-                                retrieve: (o) => {
-                                        return o.onclick;
-                                },
-                                //apply: (o, v) => (o.onclick = new THandler(String(v)))
-                                apply: (o, v) => (o.onclick = v as THandler)
-                        }
-                        //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
-                ];
-        }
-
-        domEvents?(): string[]; // default [];
-}
-
-export class TMetaComponentTypeRegistry extends TMetaObject {
-        static readonly metaclass: TMetaComponentTypeRegistry = new TMetaComponentTypeRegistry(TMetaObject.metaClass, 'TComponentTypeRegistry');
-        protected constructor(superClass: TMetaObject, name: string) {
-                super(superClass, name);
-                // et vous changez juste le nom :
-        }
-        getMetaclass(): TMetaComponentTypeRegistry {
-                return TMetaComponentTypeRegistry.metaclass;
-        }
-}
-
-export class TComponentTypeRegistry extends TObject {
-        // We store heterogeneous metas, so we keep them as TMetaComponent<any>.
-        getMetaclass(): TMetaComponentTypeRegistry {
-                return TMetaComponentTypeRegistry.metaClass;
-        }
-        private readonly classes = new Map<string, TMetaComponent>();
-
-        register(meta: TMetaComponent) {
-                if (this.classes.has(meta.typeName)) {
-                        throw new Error(`Component type already registered: ${meta.typeName}`);
-                }
-                this.classes.set(meta.typeName, meta);
-        }
-
-        // If you just need "something meta", return any-meta.
-        get(typeName: string) {
-                return this.classes.get(typeName);
-        }
-
-        has(typeName: string): boolean {
-                return this.classes.has(typeName);
-        }
-
-        list(): string[] {
-                return [...this.classes.keys()].sort();
-        }
-}
-
-export class TMetaComponentRegistry extends TMetaclass {
-        static readonly metaclass: TMetaComponentRegistry = new TMetaComponentRegistry(TMetaclass.metaclass, 'TComponentTypeRegistry');
-
-        protected constructor(superClass: TMetaclass, name: string) {
-                super(superClass, name);
-        }
-        getMetaclass(): TMetaComponentRegistry {
-                return TMetaComponentRegistry.metaclass;
-        }
-}
-
-export class TComponentRegistry extends TObject {
-        //_toto: Toto = new Toto();
-        getMetaclass(): TMetaComponentRegistry {
-                return TMetaComponentRegistry.metaclass;
-        }
-
-        private instances = new Map<string, TComponent>();
-
-        constructor() {
-                super();
-        }
-
-        registerInstance(name: string, c: TComponent) {
-                this.instances.set(name, c);
-        }
-        get<T extends TComponent = TComponent>(name: string): T | undefined {
-                return this.instances.get(name) as T | undefined;
-        }
-
-        clear() {
-                this.instances.clear();
-        }
-
-        resolveRoot(): HTMLElement {
-                // Prefer body as the canonical root.
-                if (document.body?.dataset?.component) return document.body;
-
-                // Backward compatibility: old wrapper div.
-                const legacy = document.getElementById('delphine-root');
-                if (legacy) return legacy;
-
-                // Last resort.
-                return document.body ?? document.documentElement;
-        }
-
-        private convert(raw: string, kind: PropKind) {
-                if (typeof raw === 'string') {
-                        switch (kind) {
-                                case 'string':
-                                        return raw;
-                                case 'number':
-                                        return Number(raw);
-                                case 'boolean':
-                                        return raw === 'true' || raw === '1' || raw === '';
-                                case 'color':
-                                        return new TColor(raw); // ou parse en TColor si vous avez
-                                case 'handler':
-                                        return new THandler(raw);
-                        }
-                }
-                return raw;
-        }
-
-        // -------------------- Properties --------------------
-
-        /**
-         * Find the nearest PropSpec for a prop name by walking meta inheritance:
-         * meta -> meta.superClass -> ...
-         * Uses caching for speed.
-         */
-        private resolveNearestPropSpec(meta: TMetaComponent, propName: string): PropSpec<any> | null {
-                /*
-                let perMeta = this._propSpecCache.get(meta);
-                if (!perMeta) {
-                        perMeta = new Map<string, PropSpec<any> | null>();
-                        this._propSpecCache.set(meta, perMeta);
-                }
-
-                if (perMeta.has(propName)) {
-                        return perMeta.get(propName)!;
-                }
-                        */
-
-                // Walk up metaclass inheritance: child first (nearest wins)
-                let mc: TMetaComponent | null = meta;
-
-                while (mc) {
-                        if (typeof mc.defProps === 'function') {
-                                const defs = mc.defProps();
-                                for (const spec of defs) {
-                                        if (spec.name === propName) {
-                                                //perMeta.set(propName, spec);
-                                                return spec;
-                                        }
-                                }
-                        }
-                        mc = (mc.superClass as TMetaComponent) ?? null;
-                }
-
-                //perMeta.set(propName, null);
-                return null;
-        }
-
-        private applyPropsFromSource(comp: TComponent, src: UnknownRecord, meta: TMetaComponent) {
-                for (const [name, rawValue] of Object.entries(src)) {
-                        const spec = this.resolveNearestPropSpec(meta, name);
-                        if (!spec) continue; // Not a declared prop -> ignore
-                        const v: string = rawValue as string;
-                        // Note: data-delphine-xxx gives strings; data-delphine-props can give any JSON type.
-                        const value = this.convert(v, spec.kind);
-
-                        //out[name] = value; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        //comp.setHtmlProp(name, value); // for convenience, setHtmlProp can be used by the component itself to react to prop changes.
-                        comp.setProp(name, value);
-                        spec.apply(comp, value);
-                }
-        }
-
-        private extractJsonProps(el: Element): UnknownRecord {
-                const raw = el.getAttribute('data-delphine-props');
-                if (!raw) return {};
-
-                try {
-                        const parsed = JSON.parse(raw);
-                        // Only accept plain objects
-                        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-                                return parsed as UnknownRecord;
-                        }
-                        return {};
-                } catch (e) {
-                        console.error('Invalid JSON in data-delphine-props', raw, e);
-                        return {};
-                }
-        }
-
-        private extractDataAttributes(el: Element): UnknownRecord {
-                const out: UnknownRecord = {};
-
-                // Iterate all attributes, keep only data-delphine-xxx (except reserved)
-                for (const attr of Array.from(el.attributes)) {
-                        const attrName = attr.name;
-                        if (!attrName.startsWith('data-delphine-')) continue;
-                        if (RESERVED_DATA_ATTRS.has(attrName)) continue;
-
-                        const propName = attrName.slice('data-delphine-'.length);
-                        // Skip empty names
-                        if (!propName) continue;
-
-                        out[propName] = attr.value;
-                }
-
-                return out;
-        }
-        // ==================================================================================
-
-        // English comments as requested.
-
-        // Cache: per metaclass -> (propName -> nearest PropSpec or null if not found)
-        //private readonly _propSpecCache = new WeakMap<TMetaComponent, Map<string, PropSpec<any> | null>>();
-
-        /**
-         * Parse HTML attributes + JSON bulk into a plain object of typed props.
-         * - Reads JSON from data-delphine-props
-         * - Reads data-delphine-xxx attributes (excluding reserved ones)
-         * - For each candidate prop name, resolves the nearest PropSpec by walking metaclass inheritance.
-         * - Applies conversion based on spec.kind
-         * - data-delphine-xxx overrides data-delphine-props
-         */
-        parsePropsFromElement(comp: TComponent) {
-                const el: Element | null = comp.elem;
-
-                if (!el) return;
-
-                // 1) Extract JSON bulk props from data-delphine-props
-                const jsonProps = this.extractJsonProps(el);
-
-                // 2) Extract data-delphine-xxx attributes (excluding reserved)
-                const dataAttrs = this.extractDataAttributes(el);
-
-                // 3) Apply JSON first, then data-delphine-xxx overrides
-                this.applyPropsFromSource(comp, jsonProps, comp.getMetaclass());
-                this.applyPropsFromSource(comp, dataAttrs, comp.getMetaclass());
-        }
-
-        private processElem(el: Element, form: TForm, parent: TComponent): TComponent | null {
-                const name = el.getAttribute('data-delphine-name');
-                const type = el.getAttribute('data-delphine-component');
-
-                const cls = TApplication.TheApplication.types.get(type!);
-
-                if (!cls) return null;
-
-                let child = parent;
-                if (cls != TMetaForm.metaclass) {
-                        // The TForm are already created by the user.
-                        child = cls.create(name!, form, parent);
-                }
-
-                this.registerInstance(name!, child);
-                // name: string, form: TForm, parent: TComponent, elem: HTMLElement
-                if (!child) return null;
-
-                //child.parent = component;
-
-                child.elem = el;
-                //child.form = form;
-                //child.name = name!;
-                //child.props = {};
-
-                // We collect
-                this.parsePropsFromElement(child);
-                child.syncDomFromProps();
-                (child as any).onAttachedToDom?.();
-
-                // Done in the constructor //parent.children.push(child);
-                const maybeHost = child as unknown as Partial<IPluginHost>;
-                if (maybeHost && typeof maybeHost.setPluginSpec === 'function') {
-                        /*
-                        const plugin = el.getAttribute('data-delphine-plugin');
-                        const raw = el.getAttribute('data-delphine-props');
-                        const props = raw ? JSON.parse(raw) : {};
-
-                        maybeHost.setPluginSpec({ plugin, props });
-                        maybeHost.mountPluginIfReady!(this._toto.services);
-                        //maybeHost.mountFromRegistry(services);
-                        */
-
-                        const plugin = el.getAttribute('data-delphine-plugin');
-                        const raw = el.getAttribute('data-delphine-props');
-                        const props = raw ? JSON.parse(raw) : {};
-
-                        maybeHost.setPluginSpec({ plugin, props });
-                        maybeHost.mountPluginIfReady!();
-                }
-
-                if (child.allowsChildren()) {
-                        el.querySelectorAll(':scope > [data-delphine-component]').forEach((el) => {
-                                this.processElem(el, form, child);
-                                //if (el === root) return;
-                        });
-                }
-                return child;
-                //if (el === root) return; // No need to go higher in the hierachy
-        }
-
-        // This function is called juste once, when the form is created
-        buildComponentTree(form: TForm, root: TComponent) {
-                this.clear();
-                // --- FORM ---
-                // provisoirement if (root.getAttribute('data-delphine-component') === 'TForm') {
-                //const el = root.elem!;
-
-                //this.registerInstance(root.name, form);
-                //}
-                const rootElem = root.elem!;
-                this.processElem(rootElem, form, root);
-
-                // --- CHILD COMPONENTS ---
-                /*
-                rootElem.querySelectorAll(':scope > [data-delphine-component]').forEach((el) => {
-                        const child: TComponent | null = this.processElem(el, form, root);
-                        //if (el === root) return;
-                        if (child && child.allowsChildren()) {
-                                el.querySelectorAll(':scope > [data-delphine-component]').forEach((el) => {
-                                        this.processElem(el, form, child);
-                                        //if (el === root) return;
-                                });
-                        }
-                });
-                */
-        }
-}
-
-/*
-export type ComponentProps = {
-        onclick?: THandler;
-        oncreate?: THandler;
-        //color?: TColor; // ou TColor, etc.
-        name?: string;
-        component?: string;
-};
-*/
-
-//type RawProp = Record<string, string>;
-
-export class TDocument extends TObject {
-        static document: TDocument = new TDocument(document);
-        static body = document.body;
-        htmlDoc: Document;
-        constructor(htmlDoc: Document) {
-                super();
-                this.htmlDoc = htmlDoc;
-        }
-}
-
-export class TMetaDocument extends TMetaObject {
-        static readonly metaclass: TMetaDocument = new TMetaDocument(TMetaObject.metaclass, 'TDocument');
-
-        protected constructor(superClass: TMetaObject, name: string) {
-                super(superClass, name);
-                // et vous changez juste le nom :
-        }
-        getMetaclass() {
-                return TMetaDocument.metaclass;
-        }
-}
-
-/*
-type ContainerProps = ComponentProps & {
-        //caption?: string;
-        //enabled?: boolean;
-        //color?: TColor; // ou TColor, etc.
-};
-*/
-
-// This clas does not do anything except overrides allowsChildren()
-export class TContainer extends TComponent {
-        getMetaclass(): TMetaContainer {
-                return TMetaContainer.metaclass;
-        }
-
-        //private get cprops(): ContainerProps {
-        //return this.props as ContainerProps;
-        //}
-
-        constructor(name: string, form: TForm | null, parent: TComponent | null) {
-                super(name, form, parent);
-        }
-
-        syncDomFromProps() {
-                const el = this.htmlElement;
-                if (!el) return;
-
-                super.syncDomFromProps();
-        }
-
-        allowsChildren(): boolean {
-                return true;
-        }
-        //titi=12;
-}
-
-export class TMetaContainer extends TMetaComponent {
-        static readonly metaclass: TMetaContainer = new TMetaContainer(TMetaComponent.metaclass, 'TContainer');
-
-        protected constructor(superClass: TMetaComponent, name: string) {
-                super(superClass, name);
-        }
-        getMetaclass() {
-                return TMetaContainer.metaclass;
-        }
-
-        create(name: string, form: TForm, parent: TComponent): TContainer {
-                return new TContainer(name, form, parent);
-        }
-
-        defProps(): PropSpec<any>[] {
-                return [
-                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
-                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
-                ];
-        }
-}
-
-/*
-type PanelProps = ContainerProps & {
-        //caption?: string;
-        //enabled?: boolean;
-        //color?: TColor; // ou TColor, etc.
-};
-*/
-
-// This class does not do anything useful
-// --------------------------------------
-
-export class TPanel extends TContainer {
-        getMetaclass(): TMetaPanel {
-                return TMetaPanel.metaclass;
-        }
-
-        //protected get pprops(): PanelProps {
-        //return this.props as PanelProps;
-        //}
-
-        constructor(name: string, form: TForm | null, parent: TComponent | null) {
-                super(name, form, parent);
-        }
-        syncDomFromProps() {
-                const el = this.htmlElement;
-                if (!el) return;
-
-                super.syncDomFromProps();
-        }
-        //toto = 12;
-}
-
-export class TMetaPanel extends TMetaContainer {
-        static readonly metaclass: TMetaPanel = new TMetaPanel(TMetaContainer.metaclass, 'TPanel');
-
-        protected constructor(superClass: TMetaContainer, name: string) {
-                super(superClass, name);
-                // et vous changez juste le nom :
-        }
-        getMetaclass(): TMetaPanel {
-                return TMetaPanel.metaclass;
-        }
-
-        create(name: string, form: TForm, parent: TComponent): TPanel {
-                return new TPanel(name, form, parent);
-        }
-
-        defProps(): PropSpec<any>[] {
-                return [
-                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
-                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
-                ];
-        }
-}
-
-/*
-type FormProps = ContainerProps & {
-        //caption?: string;
-        //enabled?: boolean;
-        //color?: TColor; // ou TColor, etc.
-};
-*/
-
-export class TMetaForm extends TMetaContainer {
-        static readonly metaclass: TMetaForm = new TMetaForm(TMetaContainer.metaclass, 'TForm');
-        getMetaClass() {
-                return TMetaForm.metaclass;
-        }
-
-        protected constructor(superClass: TMetaContainer, name: string) {
-                super(superClass, name);
-                // et vous changez juste le nom :
-        }
-
-        create(name: string, form: TForm, parent: TComponent) {
-                return new TForm(name);
-        }
-
-        defProps(): PropSpec<any>[] {
-                return [
-                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
-                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
-                ];
-        }
-}
-
-export class TForm extends TContainer {
-        getMetaclass() {
-                return TMetaForm.metaclass;
-        }
-        static forms = new Map<string, TForm>();
-        private _mounted = false;
-        // Each Form has its own componentRegistry
-        componentRegistry: TComponentRegistry = new TComponentRegistry();
-        constructor(name: string) {
-                super(name, null, null);
-                this.form = this;
-                TForm.forms.set(name, this);
-        }
-
-        get application(): TApplication {
-                return this.form?.application ?? TApplication.TheApplication;
-        }
-
-        // English comments as requested.
-
-        findFormFromEventTarget(target: Element): TForm | null {
-                // 1) Find the nearest element that looks like a form container
-                const formElem = target.closest('[data-delphine-component="TForm"][data-delphine-name]') as Element | null;
-                if (!formElem) return null;
-
-                // 2) Resolve the TForm instance
-                const formName = formElem.getAttribute('data-delphine-name');
-                if (!formName) return null;
-
-                return TForm.forms.get(formName) ?? null;
-        }
-
-        private _ac: AbortController | null = null;
-
-        installEventRouter() {
-                this._ac?.abort();
-                this._ac = new AbortController();
-                const { signal } = this._ac;
-
-                const root = this.elem as Element | null;
-                if (!root) return;
-
-                // same handler for everybody
-                const handler = (ev: Event) => this.dispatchDomEvent(ev);
-
-                for (const type of ['click', 'input', 'change', 'keydown']) {
-                        root.addEventListener(type, handler, { capture: true, signal });
-                }
-
-                for (const type in this.getMetaclass().domEvents) {
-                        root.addEventListener(type, handler, { capture: true, signal });
-                }
-        }
-
-        disposeEventRouter() {
-                this._ac?.abort();
-                this._ac = null;
-        }
-
-        // We received an DOM Event. Dispatch it
-        private dispatchDomEvent(ev: Event) {
-                const targetElem = ev.target as Element | null;
-                if (!targetElem) return;
-
-                const propName = `on${ev.type}`;
-
-                let el: Element | null = targetElem.closest('[data-delphine-component]');
-                if (!el) return;
-                const name = el.getAttribute('data-delphine-name');
-                let comp = name ? this.componentRegistry.get(name) : null;
-                while (comp) {
-                        const handler = comp.getProp<THandler>(propName); // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-                        //const handler = comp.getProperty(propName); //comp?.props[propName as keyof typeof comp.props] as THandler | null;
-                        if (handler && handler.s && handler.s != '') {
-                                handler.fire(this, propName, ev, comp);
-                                return;
-                        }
-                        //el = next ?? el.parentElement?.closest('[data-delphine-component]') ?? null;
-                        comp = comp.parent;
-                }
-
-                // No handler here: try going "up" using your component tree if possible
-        }
-
-        show() {
-                // Must be done before buildComponentTree() because `buildComponentTree()` does not do `resolveRoot()` itself.
-                if (!this.elem) {
-                        this.elem = this.componentRegistry.resolveRoot(); // ou this.resolveRoot()
-                }
-                if (!this._mounted) {
-                        this.componentRegistry.buildComponentTree(this, this);
-                        this.onCreate(); // Maybe could be done after installEventRouter()
-                        this.installEventRouter();
-                        this._mounted = true;
-                }
-                this.onShown();
-
-                // TODO
-        }
-
-        protected onCreate() {
-                const onShownName = this.elem!.getAttribute('data-delphine-oncreate');
-                if (onShownName) {
-                        queueMicrotask(() => {
-                                const fn = (this as any)[onShownName];
-                                if (typeof fn === 'function') fn.call(this, null, this);
-                        });
-                }
-        }
-
-        protected onShown() {
-                const onShownName = this.elem!.getAttribute('data-delphine-onshown');
-                if (onShownName) {
-                        queueMicrotask(() => {
-                                const fn = (this as any)[onShownName];
-                                if (typeof fn === 'function') fn.call(this, null, this);
-                        });
-                }
-        }
-}
-
-/*
-type ButtonProps = ComponentProps & {
-        caption?: string;
-        enabled?: boolean;
-        //color?: TColor; // ou TColor, etc.
-};
-*/
-
-export class TButton extends TComponent {
-        getMetaclass() {
-                return TMetaButton.metaclass;
+                return TMetaControl.metaclass;
         }
 
         htmlButton(): HTMLButtonElement {
@@ -902,7 +64,7 @@ export class TButton extends TComponent {
                 this.htmlButton().disabled = !enabled;
         }
 
-        constructor(name: string, form: TForm, parent: TComponent) {
+        constructor(name: string, form: IForm, parent: TControl) {
                 super(name, form, parent);
         }
         syncDomFromProps() {
@@ -915,10 +77,10 @@ export class TButton extends TComponent {
         }
 }
 
-export class TMetaButton<T extends TButton> extends TMetaComponent {
-        static readonly metaclass = new TMetaButton(TMetaComponent.metaclass, 'TButton');
+export class TMetaButton<T extends TButton> extends TMetaControl {
+        static readonly metaclass = new TMetaButton(TMetaControl.metaclass, 'TButton');
 
-        protected constructor(superClass: TMetaComponent, name: string) {
+        protected constructor(superClass: TMetaControl, name: string) {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
@@ -926,7 +88,7 @@ export class TMetaButton<T extends TButton> extends TMetaComponent {
                 return TMetaButton.metaclass;
         }
 
-        create(name: string, form: TForm, parent: TComponent) {
+        create(name: string, form: IForm, parent: TControl) {
                 return new TButton(name, form, parent) as T;
         }
 
@@ -952,82 +114,59 @@ export class TMetaButton<T extends TButton> extends TMetaComponent {
         }
 }
 
-export class TMetaApplication extends TMetaclass {
-        static readonly metaclass: TMetaApplication = new TMetaApplication(TMetaclass.metaclass, 'TApplication');
+// This class does not do anything useful
+// --------------------------------------
 
-        protected constructor(superClass: TMetaclass, name: string) {
+export class TPanel extends TContainer {
+        getMetaclass(): TMetaPanel {
+                return TMetaPanel.metaclass;
+        }
+
+        //protected get pprops(): PanelProps {
+        //return this.props as PanelProps;
+        //}
+
+        constructor(name: string, form: IForm | null, parent: TControl | null) {
+                super(name, form, parent);
+        }
+        syncDomFromProps() {
+                const el = this.htmlElement;
+                if (!el) return;
+
+                super.syncDomFromProps();
+        }
+        //toto = 12;
+}
+
+export class TMetaPanel extends TMetaContainer {
+        static readonly metaclass = new TMetaPanel(TMetaContainer.metaclass, 'TPanel');
+
+        protected constructor(superClass: TMetaContainer, name: string) {
                 super(superClass, name);
+                // et vous changez juste le nom :
         }
-        getMetaclass(): TMetaApplication {
-                return TMetaApplication.metaclass;
-        }
-}
-
-export class TApplication {
-        getMetaclass(): TMetaApplication {
-                return TMetaApplication.metaclass;
-        }
-        static TheApplication: TApplication;
-        //static pluginRegistry = new PluginRegistry();
-        //plugins: IPluginRegistry;
-        private forms: TForm[] = [];
-        readonly types = new TComponentTypeRegistry();
-        mainForm: TForm | null = null;
-
-        constructor() {
-                TApplication.TheApplication = this;
-                registerBuiltins(this.types);
+        getMetaclass(): TMetaPanel {
+                return TMetaPanel.metaclass;
         }
 
-        createForm<T extends TForm>(ctor: new (...args: any[]) => T, name: string): T {
-                const f = new ctor(name);
-                this.forms.push(f);
-                if (!this.mainForm) this.mainForm = f;
-                return f;
+        create(name: string, form: IForm, parent: TControl): TPanel {
+                return new TPanel(name, form, parent);
         }
 
-        run() {
-                this.runWhenDomReady(() => {
-                        if (this.mainForm) this.mainForm.show();
-                        else this.autoStart();
-                });
-        }
-
-        protected autoStart() {
-                // fallback: choisir une form enregistrée, ou créer une form implicite
-        }
-
-        runWhenDomReady(fn: () => void) {
-                if (document.readyState === 'loading') {
-                        window.addEventListener('DOMContentLoaded', fn, { once: true });
-                } else {
-                        fn();
-                }
+        defProps(): PropSpec<any>[] {
+                return [
+                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
+                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
+                ];
         }
 }
 
-// ==================================================================================================================================================================
-
-// ======================================================================== DCC =====================================================================================
-
-// DCC = Delphine Custom Component
-
-/*
-type SimpleDCCProps = ComponentProps & {
-        //caption?: string;
-        //enabled?: boolean;
-        //color?: TColor; // ou TColor, etc.
-};
-*/
-
-// Note: this class does not do anything. Perhaps that DCC can herit directly from TComponent
-
-export class TSimpleDCC extends TComponent {
+export class TSimpleDCC extends TControl {
         getMetaclass() {
                 return TMetaSimpleDCC.metaclass;
         }
 
-        constructor(name: string, form: TForm, parent: TComponent) {
+        constructor(name: string, form: IForm, parent: TControl) {
                 super(name, form, parent);
         }
 
@@ -1038,10 +177,10 @@ export class TSimpleDCC extends TComponent {
                 */
 }
 
-export class TMetaSimpleDCC extends TMetaComponent {
-        static readonly metaclass: TMetaSimpleDCC = new TMetaSimpleDCC(TMetaComponent.metaclass, 'TSimpleDCC');
+export class TMetaSimpleDCC extends TMetaControl {
+        static readonly metaclass: TMetaSimpleDCC = new TMetaSimpleDCC(TMetaControl.metaclass, 'TSimpleDCC');
 
-        protected constructor(superClass: TMetaComponent, name: string) {
+        protected constructor(superClass: TMetaControl, name: string) {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
@@ -1049,7 +188,7 @@ export class TMetaSimpleDCC extends TMetaComponent {
                 return TMetaSimpleDCC.metaclass;
         }
 
-        create(name: string, form: TForm, parent: TComponent) {
+        create(name: string, form: IForm, parent: TControl) {
                 return new TSimpleDCC(name, form, parent);
         }
 
@@ -1076,7 +215,7 @@ export class TCompositeDCC extends TContainer {
                 return TMetaCompositeDCC.metaclass;
         }
 
-        constructor(name: string, form: TForm, parent: TComponent) {
+        constructor(name: string, form: IForm, parent: TControl) {
                 super(name, form, parent);
         }
         /*
@@ -1097,7 +236,7 @@ export class TMetaCompositeDCC extends TMetaContainer {
                 return TMetaCompositeDCC.metaclass;
         }
 
-        create(name: string, form: TForm, parent: TComponent) {
+        create(name: string, form: IForm, parent: TControl) {
                 return new TCompositeDCC(name, form, parent);
         }
 
@@ -1108,5 +247,3 @@ export class TMetaCompositeDCC extends TMetaContainer {
                 ];
         }
 }
-
-// ===================================================================================================================================================================

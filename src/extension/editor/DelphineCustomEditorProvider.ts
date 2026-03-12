@@ -205,6 +205,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 const bootUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'bootEditor.js'));
                 const bridgeUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'bootBridge.js'));
 
+                /*
                 const csp = [
                         `default-src 'none'`,
                         `img-src ${webview.cspSource} https: data:`,
@@ -212,6 +213,15 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                         `font-src ${webview.cspSource} https: data:`,
                         `connect-src ${webview.cspSource} https:`,
                         `script-src 'nonce-${nonce}' ${webview.cspSource}`
+                ].join('; ');
+                */
+                const csp = [
+                        `default-src 'none'`,
+                        `img-src ${webview.cspSource} https: data:`,
+                        `style-src ${webview.cspSource} 'unsafe-inline' https://cdnjs.cloudflare.com`,
+                        `font-src ${webview.cspSource} https: data:`,
+                        `connect-src ${webview.cspSource} https:`,
+                        `script-src ${webview.cspSource} https: 'unsafe-inline'`
                 ].join('; ');
 
                 return `<!doctype html>
@@ -232,9 +242,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
 
   <script nonce="${nonce}" src="${bridgeUri}"></script>
   <script nonce="${nonce}" src="${grapesJsUri}"></script>
-  <script nonce="${nonce}" type="module">
-    await import('${bootUri}');
-  </script>
+
 </body>
 </html>`;
         }

@@ -4,20 +4,14 @@ declare function acquireVsCodeApi(): {
         setState?(state: unknown): void;
 };
 
-/*
-type DelphineVsCodeApi = {
-        postMessage(message: unknown): void;
-        getState?(): unknown;
-        setState?(state: unknown): void;
-};
-*/
+declare function acquireVsCodeApi(): DelphineVsCodeApi;
 
 type DelphineWindow = Window &
         typeof globalThis & {
                 __delphineVsCodeApi?: DelphineVsCodeApi;
                 __delphineBootBridgeLoaded?: boolean;
+                __delphineBootEditorInjected?: boolean;
         };
-declare function acquireVsCodeApi(): DelphineVsCodeApi;
 
 (() => {
         const w = window as DelphineWindow;
@@ -25,60 +19,100 @@ declare function acquireVsCodeApi(): DelphineVsCodeApi;
 
         console.log(`[bridge ${bridgeInstanceId}] script evaluated`);
         console.log(`[bridge ${bridgeInstanceId}] href=${window.location.href}`);
-        console.log(`[bridge ${bridgeInstanceId}] hasVsCodeApi=${typeof acquireVsCodeApi === 'function'}`);
 
-        const hasVsCodeApi = typeof acquireVsCodeApi === 'function';
         const isFakeFrame = window.location.href.includes('/fake.html');
-
-        if (!hasVsCodeApi || isFakeFrame) {
-                console.log(`[bridge ${bridgeInstanceId}] not in host frame, skipping`);
+        if (isFakeFrame) {
+                console.log(`[bridge ${bridgeInstanceId}] fake frame, skipping`);
                 return;
         }
 
-        if (w.__delphineBootBridgeLoaded) {
-                console.log(`[bridge ${bridgeInstanceId}] bootBridge already loaded, skipping`);
-                return;
-        }
+        let attempts = 0;
+        const maxAttempts = 20;
+        const retryDelayMs = 50;
 
-        w.__delphineBootBridgeLoaded = true;
+        const tryInstall = (): void => {
+                attempts += 1;
 
-        if (!w.__delphineVsCodeApi) {
-                w.__delphineVsCodeApi = acquireVsCodeApi();
-        }
+                const hasVsCodeApi = typeof acquireVsCodeApi === 'function';
+                console.log(`[bridge ${bridgeInstanceId}] tryInstall #${attempts}, hasVsCodeApi=${hasVsCodeApi}`);
 
-        const vscode = w.__delphineVsCodeApi;
-        if (!vscode) {
-                console.log(`[bridge ${bridgeInstanceId}] VS Code API unavailable`);
-                return;
-        }
-
-        console.log(`[bridge ${bridgeInstanceId}] installed in top-level webview`);
-        console.log(`[bridge ${bridgeInstanceId}] adding message listener`);
-
-        window.addEventListener('message', (event: MessageEvent) => {
-                const msg = event.data;
-                console.log(`[bridge ${bridgeInstanceId}] message received in parent`, msg);
-
-                if (!msg) {
+                if (!hasVsCodeApi) {
+                        if (attempts < maxAttempts) {
+                                window.setTimeout(tryInstall, retryDelayMs);
+                        } else {
+                                console.log(`[bridge ${bridgeInstanceId}] VS Code API unavailable after retries`);
+                        }
                         return;
                 }
 
-                if (msg.__delphineFromChild === true) {
-                        const payload = msg.payload;
+                if (w.__delphineBootBridgeLoaded) {
+                        console.log(`[bridge ${bridgeInstanceId}] bootBridge already loaded, skipping`);
+                        return;
+                }
 
-                        if (payload?.type === 'bridge:hello') {
-                                console.log(`[bridge ${bridgeInstanceId}] child says hello`);
-                                window.postMessage({ __delphineBridgeReady: true }, '*');
+                w.__delphineBootBridgeLoaded = true;
+
+                if (!w.__delphineVsCodeApi) {
+                        w.__delphineVsCodeApi = acquireVsCodeApi();
+                }
+
+                const vscode = w.__delphineVsCodeApi;
+                if (!vscode) {
+                        console.log(`[bridge ${bridgeInstanceId}] VS Code API unavailable`);
+                        return;
+                }
+
+                console.log(`[bridge ${bridgeInstanceId}] installed in top-level webview`);
+
+                if (!w.__delphineBootEditorInjected) {
+                        w.__delphineBootEditorInjected = true;
+
+                        const currentScript = document.currentScript as HTMLScriptElement | null;
+                        const bridgeSrc = currentScript?.src;
+
+                        if (bridgeSrc) {
+                                const bootEditorSrc = new URL('./bootEditor.js', bridgeSrc).toString();
+
+                                console.log(`[bridge ${bridgeInstanceId}] injecting bootEditor ${bootEditorSrc}`);
+
+                                const script = document.createElement('script');
+                                script.type = 'module';
+                                script.src = bootEditorSrc;
+                                document.body.appendChild(script);
+                        } else {
+                                console.log(`[bridge ${bridgeInstanceId}] unable to resolve bootEditor src`);
+                        }
+                }
+
+                console.log(`[bridge ${bridgeInstanceId}] adding message listener`);
+
+                window.addEventListener('message', (event: MessageEvent) => {
+                        const msg = event.data;
+                        console.log(`[bridge ${bridgeInstanceId}] message received in parent`, msg);
+
+                        if (!msg) {
                                 return;
                         }
 
-                        console.log(`[bridge ${bridgeInstanceId}] child -> VSCode ${payload?.type ?? '<no-type>'}`);
-                        vscode.postMessage(payload);
-                        return;
-                }
-                if (typeof msg?.type === 'string') {
-                        console.log(`[bridge ${bridgeInstanceId}] host received VSCode message ${msg.type} (no relay needed)`);
-                        return;
-                }
-        });
+                        if (msg.__delphineFromChild === true) {
+                                const payload = msg.payload;
+
+                                if (payload?.type === 'bridge:hello') {
+                                        console.log(`[bridge ${bridgeInstanceId}] child says hello`);
+                                        window.postMessage({ __delphineBridgeReady: true }, '*');
+                                        return;
+                                }
+
+                                console.log(`[bridge ${bridgeInstanceId}] child -> VSCode ${payload?.type ?? '<no-type>'}`);
+                                vscode.postMessage(payload);
+                                return;
+                        }
+
+                        if (typeof msg?.type === 'string') {
+                                console.log(`[bridge ${bridgeInstanceId}] host received VSCode message ${msg.type} (no relay needed)`);
+                        }
+                });
+        };
+
+        tryInstall();
 })();

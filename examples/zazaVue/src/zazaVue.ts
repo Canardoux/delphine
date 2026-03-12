@@ -4,18 +4,7 @@ console.log('🔥 I AM ZAZAVUE – ENTRY EXECUTED')
 
 console.log('I AM ZAZAVUE')
 
-import {
-        TForm,
-        TColor,
-        TApplication,
-        TComponent,
-        TButton,
-        PluginRegistry,
-        TPanel,
-        TCompositeDCC,
-        TMetaCompositeDCC,
-        TPluginHost,
-} from '@vcl'
+import { TForm, TColor, TApplication, TControl, TButton, PluginRegistry, TPanel, TCompositeDCC, TMetaCompositeDCC, TPluginHost } from '@vcl'
 //import { TPluginHost } from '@drt/UIPlugin'
 import { createHelloVuePlugin } from './createHelloVuePlugin'
 import type { PropSpec } from '@vcl'
@@ -64,17 +53,17 @@ class ZazaVue extends TForm {
         };
         */
 
-        protected onMyCreate(_ev: Event | null, _sender: TComponent) {
+        protected onMyCreate(_ev: Event | null, _sender: TControl) {
                 //const btn = this.componentRegistry.get('button1')
                 //if (btn) btn.color = TColor.rgb(0, 0, 255)
         }
 
-        protected onMyShown(_ev: Event | null, _sender: TComponent) {
+        protected onMyShown(_ev: Event | null, _sender: TControl) {
                 //const btn = this.componentRegistry.get('buttonx')
                 //if (btn) btn.color = TColor.rgb(0, 255, 255)
         }
 
-        button1_onclick(_ev: Event | null, _sender: TComponent) {
+        button1_onclick(_ev: Event | null, _sender: TControl) {
                 const btn = this.componentRegistry.get<TButton>('button1')
                 if (!btn) {
                         console.warn('button1 not found in registry')
@@ -87,7 +76,7 @@ class ZazaVue extends TForm {
                 console.log('Button1 clicked!!!!')
         }
 
-        subButton1_onclick(_ev: Event | null, _sender: TComponent) {
+        subButton1_onclick(_ev: Event | null, _sender: TControl) {
                 const panel = this.componentRegistry.get<TPanel>('myPanel')
                 if (!panel) {
                         console.warn('myPanel not found in registry')
@@ -101,7 +90,7 @@ class ZazaVue extends TForm {
                 vue!.setPluginProp('message', 'Message updated from Delphine!!!')
         }
 
-        zaza_onclick(_ev: Event | null, _sender: TComponent) {
+        zaza_onclick(_ev: Event | null, _sender: TControl) {
                 const btn = this.componentRegistry.get<TButton>('buttonx')
                 btn!.color = TColor.rgb(0, 255, 0)
                 console.log('zazaVue clicked!!!!')
@@ -124,7 +113,7 @@ class MyDCC extends TCompositeDCC {
                 return TMetaMyDCC.metaclass
         }
 
-        constructor(name: string, form: TForm, parent: TComponent) {
+        constructor(name: string, form: TForm, parent: TControl) {
                 super(name, form, parent)
         }
         _message: string = 'Salut tout le monde'
@@ -152,7 +141,7 @@ export class TMetaMyDCC extends TMetaCompositeDCC {
                 return TMetaMyDCC.metaclass
         }
 
-        create(name: string, form: TForm, parent: TComponent) {
+        create(name: string, form: TForm, parent: TControl) {
                 return new MyDCC(name, form, parent)
         }
 

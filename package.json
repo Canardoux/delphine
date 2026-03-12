@@ -24,21 +24,6 @@
         "contributes": {
                 "commands": [
                         {
-                                "command": "delphine.preview",
-                                "title": "Delphine-Preview",
-                                "category": "Delphine"
-                        },
-                        {
-                                "command": "delphine.openEditor",
-                                "title": "Delphine-Editor",
-                                "category": "Delphine"
-                        },
-                        {
-                                "command": "delphine.openSource",
-                                "title": "Open-Source",
-                                "category": "Delphine"
-                        },
-                        {
                                 "command": "delphine.newProject",
                                 "title": "New Project",
                                 "category": "Delphine",
@@ -49,6 +34,31 @@
                                 "title": "New Form",
                                 "category": "Delphine",
                                 "icon": "$(new-file)"
+                        },
+                        {
+                                "command": "delphine.openHtmlSource",
+                                "title": "Open HTML Source",
+                                "category": "Delphine"
+                        },
+                        {
+                                "command": "delphine.openTypeScript",
+                                "title": "Open TypeScript",
+                                "category": "Delphine"
+                        },
+                        {
+                                "command": "delphine.openEditor",
+                                "title": "Open Editor",
+                                "category": "Delphine"
+                        },
+                        {
+                                "command": "delphine.preview",
+                                "title": "Preview",
+                                "category": "Delphine"
+                        },
+                        {
+                                "command": "delphine.runForm",
+                                "title": "Run Form",
+                                "category": "Delphine"
                         }
                 ],
                 "customEditors": [
@@ -105,9 +115,29 @@
                         ],
                         "view/item/context": [
                                 {
-                                        "command": "delphine.newForm",
-                                        "when": "view == delphine.forms",
-                                        "group": "inline"
+                                        "command": "delphine.openHtmlSource",
+                                        "when": "view == delphine.forms && viewItem == delphineForm",
+                                        "group": "inline@1"
+                                },
+                                {
+                                        "command": "delphine.openTypeScript",
+                                        "when": "view == delphine.forms && viewItem == delphineForm",
+                                        "group": "inline@2"
+                                },
+                                {
+                                        "command": "delphine.openEditor",
+                                        "when": "view == delphine.forms && viewItem == delphineForm",
+                                        "group": "navigation@1"
+                                },
+                                {
+                                        "command": "delphine.preview",
+                                        "when": "view == delphine.forms && viewItem == delphineForm",
+                                        "group": "navigation@2"
+                                },
+                                {
+                                        "command": "delphine.runForm",
+                                        "when": "view == delphine.forms && viewItem == delphineForm",
+                                        "group": "navigation@3"
                                 }
                         ]
                 },
@@ -161,6 +191,7 @@
         },
         "dependencies": {
                 "grapesjs": "^0.22.14",
+                "madge": "^8.0.0",
                 "parse5": "^8.0.0",
                 "prettier": "^3.8.1",
                 "toto": "^0.0.2",

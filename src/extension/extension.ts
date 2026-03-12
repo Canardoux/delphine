@@ -7,7 +7,54 @@ import { newDelphineProject } from './delphine/NewDelphineProject';
 import { newForm } from './delphine/NewForm';
 import { PreviewPanel } from './preview/PreviewPanel';
 import { DelphineCustomEditorProvider } from './editor/DelphineCustomEditorProvider';
+import { spawn } from 'child_process';
 
+let viteProcess: any;
+
+async function runForm(uri?: vscode.Uri) {
+        const htmlUri = resolveHtmlUri(uri);
+
+        if (!htmlUri) {
+                vscode.window.showErrorMessage('No form selected');
+                return;
+        }
+
+        const formName = path.basename(htmlUri.fsPath, '.html');
+
+        const workspace = vscode.workspace.workspaceFolders?.[0];
+
+        if (!workspace) {
+                vscode.window.showErrorMessage('No workspace');
+                return;
+        }
+
+        // start vite if not running
+        if (!viteProcess) {
+                const cwd = workspace.uri.fsPath;
+
+                viteProcess = spawn('npm', ['run', 'dev'], {
+                        cwd,
+                        shell: true
+                });
+
+                viteProcess.stdout.on('data', (data: Buffer) => {
+                        console.log(data.toString());
+                });
+
+                viteProcess.stderr.on('data', (data: Buffer) => {
+                        console.error(data.toString());
+                });
+
+                // small delay so vite can start
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+        }
+
+        const url = `http://localhost:5174/?form=${formName}`;
+
+        vscode.env.openExternal(vscode.Uri.parse(url));
+}
+
+/*
 function resolveTargetUri(uri?: unknown): vscode.Uri | undefined {
         if (uri instanceof vscode.Uri && uri.scheme === 'file') {
                 return uri;
@@ -19,45 +66,101 @@ function resolveTargetUri(uri?: unknown): vscode.Uri | undefined {
         }
 
         return PreviewPanel.getActiveDocUri();
+} */
+
+function resolveHtmlUri(uri?: unknown): vscode.Uri | undefined {
+        if (uri instanceof vscode.Uri && uri.fsPath.endsWith('.html')) {
+                return uri;
+        }
+
+        const active = vscode.window.activeTextEditor?.document.uri;
+        if (active && active.fsPath.endsWith('.html')) {
+                return active;
+        }
+
+        const previewUri = PreviewPanel.getActiveDocUri();
+        if (previewUri && previewUri.fsPath.endsWith('.html')) {
+                return previewUri;
+        }
+
+        return undefined;
+}
+
+function htmlToTsUri(htmlUri: vscode.Uri): vscode.Uri {
+        const dir = path.dirname(htmlUri.fsPath);
+        const base = path.basename(htmlUri.fsPath, '.html');
+        return vscode.Uri.file(path.join(dir, `${base}.ts`));
 }
 
 export function activate(context: vscode.ExtensionContext): void {
         const formsProvider = new FormsProvider();
+        const projectsProvider = new ProjectsProvider();
 
         // Register the Forms TreeView
-        context.subscriptions.push(vscode.window.registerTreeDataProvider('delphine.forms', formsProvider));
+        //context.subscriptions.push(vscode.window.registerTreeDataProvider('delphine.forms', formsProvider));
 
         // -------------------------------------------------
         // Commands
         // ------------------------------------------------
-
         context.subscriptions.push(
-                vscode.commands.registerCommand('delphine.preview', async (uri?: unknown) => {
-                        const targetUri = resolveTargetUri(uri);
-                        if (!targetUri) {
-                                void vscode.window.showInformationMessage('No target document');
+                vscode.commands.registerCommand('delphine.openTypeScript', async (uri?: vscode.Uri) => {
+                        const htmlUri = resolveHtmlUri(uri);
+                        if (!htmlUri) {
+                                void vscode.window.showInformationMessage('No HTML form selected');
                                 return;
                         }
 
-                        await PreviewPanel.createOrShow(context, targetUri);
+                        const tsUri = htmlToTsUri(htmlUri);
+                        await vscode.window.showTextDocument(tsUri);
                 })
         );
 
         context.subscriptions.push(
-                vscode.commands.registerCommand('delphine.openEditor', async (uri?: unknown) => {
-                        const targetUri = resolveTargetUri(uri);
+                vscode.commands.registerCommand('delphine.openHtmlSource', async (uri?: vscode.Uri) => {
+                        const targetUri = resolveHtmlUri(uri);
                         if (!targetUri) {
-                                void vscode.window.showInformationMessage('No target document');
+                                void vscode.window.showInformationMessage('No HTML form selected');
                                 return;
                         }
 
-                        await vscode.commands.executeCommand('vscode.openWith', targetUri, 'delphine.customEditor');
+                        await vscode.window.showTextDocument(targetUri);
                 })
         );
 
+        context.subscriptions.push(
+                vscode.commands.registerCommand('delphine.preview', async (uri?: vscode.Uri) => {
+                        const htmlUri = resolveHtmlUri(uri);
+                        if (!htmlUri) {
+                                void vscode.window.showInformationMessage('No HTML form selected');
+                                return;
+                        }
+
+                        await PreviewPanel.createOrShow(context, htmlUri);
+                })
+        );
+        /*vscode.commands.registerCommand('delphine.preview', async () => {
+                const editor = vscode.window.activeTextEditor;
+                if (!editor) {
+                        void vscode.window.showInformationMessage('No active editor');
+                        return;
+                }
+                await PreviewPanel.createOrShow(context, editor.document.uri);
+        });*/
+
+        context.subscriptions.push(
+                vscode.commands.registerCommand('delphine.openEditor', async (uri?: vscode.Uri) => {
+                        const htmlUri = resolveHtmlUri(uri);
+                        if (!htmlUri) {
+                                void vscode.window.showInformationMessage('No HTML form selected');
+                                return;
+                        }
+
+                        await vscode.commands.executeCommand('vscode.openWith', htmlUri, 'delphine.customEditor');
+                })
+        );
         context.subscriptions.push(
                 vscode.commands.registerCommand('delphine.openSource', async (uri?: unknown) => {
-                        const targetUri = resolveTargetUri(uri);
+                        const targetUri = resolveHtmlUri(uri);
                         if (!targetUri) {
                                 void vscode.window.showInformationMessage('No target document');
                                 return;
@@ -73,33 +176,27 @@ export function activate(context: vscode.ExtensionContext): void {
         // ------------------------------------------------
         // New Delphine Project
         // ------------------------------------------------
-
         context.subscriptions.push(
                 vscode.commands.registerCommand('delphine.newProject', async () => {
                         const name = await vscode.window.showInputBox({
                                 prompt: 'Project name'
                         });
-
                         if (!name) return;
 
                         const folder = await vscode.window.showOpenDialog({
                                 canSelectFolders: true,
                                 openLabel: 'Select project location'
                         });
-
                         if (!folder) return;
 
                         const projectPath = path.join(folder[0].fsPath, name);
-
                         fs.mkdirSync(projectPath, { recursive: true });
 
                         const src = path.join(projectPath, 'src');
                         const forms = path.join(src, 'forms');
                         const mainForm = path.join(forms, 'MainForm');
-
                         fs.mkdirSync(mainForm, { recursive: true });
 
-                        // Create delphine.json
                         fs.writeFileSync(
                                 path.join(projectPath, 'delphine.json'),
                                 JSON.stringify(
@@ -113,7 +210,6 @@ export function activate(context: vscode.ExtensionContext): void {
                                 )
                         );
 
-                        // Create initial form
                         fs.writeFileSync(
                                 path.join(mainForm, 'MainForm.html'),
                                 `<div data-delphine-form="MainForm">
@@ -135,26 +231,22 @@ export function activate(context: vscode.ExtensionContext): void {
                         fs.writeFileSync(path.join(mainForm, 'MainForm.css'), '');
                         fs.writeFileSync(path.join(mainForm, 'MainForm.json'), '{}');
 
-                        // Open the project in VSCode
-                        vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(projectPath));
+                        await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(projectPath));
                 })
         );
-
         // ------------------------------------------------
         // New Form
         // ------------------------------------------------
-
         context.subscriptions.push(
                 vscode.commands.registerCommand('delphine.newForm', async () => {
                         const name = await vscode.window.showInputBox({
                                 prompt: 'Form name'
                         });
-
                         if (!name) return;
 
                         const workspace = vscode.workspace.workspaceFolders?.[0];
                         if (!workspace) {
-                                vscode.window.showInformationMessage('No workspace open');
+                                void vscode.window.showInformationMessage('No workspace open');
                                 return;
                         }
 
@@ -181,25 +273,28 @@ export function activate(context: vscode.ExtensionContext): void {
                         fs.writeFileSync(path.join(formDir, `${name}.css`), '');
                         fs.writeFileSync(path.join(formDir, `${name}.json`), '{}');
 
-                        // Refresh the Forms view
                         formsProvider.refresh();
 
-                        // Open the HTML file
-                        const uri = vscode.Uri.file(path.join(formDir, `${name}.html`));
-
-                        vscode.commands.executeCommand('vscode.open', uri);
+                        await vscode.window.showTextDocument(vscode.Uri.file(path.join(formDir, `${name}.html`)));
                 })
         );
 
-        const projectsProvider = new ProjectsProvider();
+        context.subscriptions.push(
+                vscode.commands.registerCommand('delphine.runForm', async (uri?: vscode.Uri) => {
+                        await runForm(uri);
+                })
+        );
 
-        context.subscriptions.push(vscode.window.registerTreeDataProvider('delphine.projects', projectsProvider));
         context.subscriptions.push(DelphineCustomEditorProvider.register(context));
-        context.subscriptions.push(vscode.commands.registerCommand('delphine.newProject', newDelphineProject));
 
-        context.subscriptions.push(vscode.commands.registerCommand('delphine.newForm', newForm));
+        //context.subscriptions.push(vscode.window.registerTreeDataProvider('delphine.projects', projectsProvider));
+        //context.subscriptions.push(vscode.commands.registerCommand('delphine.newProject', newDelphineProject));
 
-        context.subscriptions.push(vscode.window.registerTreeDataProvider('delphine.forms', formsProvider));
+        //context.subscriptions.push(vscode.commands.registerCommand('delphine.newForm', newForm));
+
+        //context.subscriptions.push(vscode.window.registerTreeDataProvider('delphine.forms', formsProvider));
+
+        context.subscriptions.push(vscode.window.registerTreeDataProvider('delphine.projects', projectsProvider), vscode.window.registerTreeDataProvider('delphine.forms', formsProvider));
 }
 
 export function deactivate(): void {}
