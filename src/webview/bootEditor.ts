@@ -1,3 +1,27 @@
+import * as vscode from 'vscode';
+//import { ResolvedForm } from '../extension/loadForm';
+
+/*
+export async function updateFormSourceFiles(form: ResolvedForm, html: string, css: string): Promise<void> {
+        const htmlDoc = await vscode.workspace.openTextDocument(form.htmlUri);
+        const cssDoc = await vscode.workspace.openTextDocument(form.cssUri);
+
+        const edit = new vscode.WorkspaceEdit();
+
+        const fullHtmlRange = new vscode.Range(htmlDoc.positionAt(0), htmlDoc.positionAt(htmlDoc.getText().length));
+
+        const fullCssRange = new vscode.Range(cssDoc.positionAt(0), cssDoc.positionAt(cssDoc.getText().length));
+
+        edit.replace(form.htmlUri, fullHtmlRange, html);
+        edit.replace(form.cssUri, fullCssRange, css);
+
+        await vscode.workspace.applyEdit(edit);
+
+        await htmlDoc.save();
+        await cssDoc.save();
+}
+        */
+
 declare function acquireVsCodeApi(): {
         postMessage(message: unknown): void;
         getState(): unknown;
@@ -159,12 +183,22 @@ function grapesJSEditor(grapes: any): void {
                 });
         }
 
-        messageHandler = (payload: DelphineInboundMessage) => {
+        messageHandler = async (payload: DelphineInboundMessage) => {
                 switch (payload.type) {
                         case 'doc:update': {
+                                /*
                                 const msg = payload as DocUpdateMessage;
                                 loadDocument(msg.html ?? '', msg.css ?? '');
                                 break;
+                                */
+                                const msg = payload as DocUpdateMessage;
+                                loadDocument(msg.html!, msg.css!);
+                                //const form = resolveForm(this.htmlUri);
+                                //if (!form) {
+                                //throw new Error('Unable to resolve current Delphine Form');
+                                //}
+
+                                //await updateFormSourceFiles(form, msg.html!, msg.css!);
                         }
 
                         default:

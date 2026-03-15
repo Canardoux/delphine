@@ -77,15 +77,21 @@ export class TComponentRegistry extends TObject {
         }
 
         resolveRoot(): HTMLElement {
-                // Prefer body as the canonical root.
-                if (document.body?.dataset?.component) return document.body;
+                const app = document.getElementById('app');
+                if (!app) {
+                        throw new Error('Delphine preview: #app not found');
+                }
 
-                // Backward compatibility: old wrapper div.
-                const legacy = document.getElementById('delphine-root');
-                if (legacy) return legacy;
+                for (const child of Array.from(app.children)) {
+                        if (child instanceof HTMLElement && child.hasAttribute('data-delphine-component')) {
+                                for (const child of Array.from(app.children)) {
+                                        console.log('child:', child.tagName, child.getAttribute('data-delphine-component'));
+                                }
+                                return child;
+                        }
+                }
 
-                // Last resort.
-                return document.body ?? document.documentElement;
+                throw new Error('Delphine preview: no Delphine root found inside #app');
         }
 
         private convert(raw: string, kind: PropKind) {
@@ -232,14 +238,14 @@ export class TComponentRegistry extends TObject {
                 const type = el.getAttribute('data-delphine-component');
 
                 //const cls = getApplication()?.types.get(type!);
-                const cls = type != null ? getApplication()?.getClass(type) : null;
+                const cls = type != null ? form?.getClass(type) : null;
                 if (!cls) return null;
 
                 let child = parent;
                 if (!cls.isAForm()) {
-                        const comp = cls as TMetaControl;
+                        const metaComp = cls as TMetaControl;
                         // The TForm are already created by the user.
-                        child = comp.create(name!, form, parent);
+                        child = metaComp.create(name!, form, parent);
                 }
 
                 this.registerInstance(name!, child);

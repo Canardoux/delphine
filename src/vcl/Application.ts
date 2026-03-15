@@ -46,15 +46,15 @@ export class TApplication implements TApplication {
         //static pluginRegistry = new PluginRegistry();
         //plugins: IPluginRegistry;
         private forms: TForm[] = [];
-        readonly types = new TComponentTypeRegistry();
+        //readonly types = new TComponentTypeRegistry();
         mainForm: TForm | null = null;
-        getClass(type: string): TMetaControl | undefined {
-                return this.types.get(type!) as TMetaControl | undefined;
-        }
+        //getClass(type: string): TMetaControl | undefined {
+        //return this.types.get(type!) as TMetaControl | undefined;
+        //}
 
         constructor() {
                 setApplication(this);
-                registerBuiltins(this.types);
+                //registerBuiltins(this.types);
         }
 
         createForm<T extends TForm>(ctor: new (...args: any[]) => T, name: string): T {

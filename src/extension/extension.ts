@@ -7,9 +7,96 @@ import { newDelphineProject } from './delphine/NewDelphineProject';
 import { newForm } from './delphine/NewForm';
 import { PreviewPanel } from './preview/PreviewPanel';
 import { DelphineCustomEditorProvider } from './editor/DelphineCustomEditorProvider';
-import { spawn } from 'child_process';
+import { spawn, ChildProcess } from 'child_process';
+import { RuntimePreviewPanel } from './panels/RuntimePreviewPanel';
 
-let viteProcess: any;
+let viteProcess: ChildProcess | undefined;
+
+function htmlToFormName(uri: vscode.Uri): string {
+        return path.basename(uri.fsPath, '.html');
+}
+
+function resolveHtmlUri(uri?: unknown): vscode.Uri | undefined {
+        if (uri instanceof vscode.Uri && uri.fsPath.endsWith('.html')) {
+                return uri;
+        }
+
+        const active = vscode.window.activeTextEditor?.document.uri;
+        if (active && active.fsPath.endsWith('.html')) {
+                return active;
+        }
+
+        return undefined;
+}
+
+function buildPreviewUrl(formName: string): string {
+        return `http://localhost:5173/src/preview.html?form=${encodeURIComponent(formName)}`;
+}
+
+function createRuntimePreviewPanel(context: vscode.ExtensionContext, url: string): void {
+        const panel = vscode.window.createWebviewPanel('delphineRuntimePreview', 'Delphine Runtime Preview', vscode.ViewColumn.Beside, {
+                enableScripts: true
+        });
+
+        panel.webview.html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<meta http-equiv="Content-Security-Policy"
+content="default-src 'none';
+         frame-src http://localhost:5173 http://127.0.0.1:5173;
+         style-src 'unsafe-inline';">
+
+<style>
+html, body {
+        margin:0;
+        padding:0;
+        width:100%;
+        height:100%;
+        overflow:hidden;
+}
+
+iframe {
+        border:0;
+        width:100%;
+        height:100%;
+}
+</style>
+</head>
+
+<body>
+<iframe src="${url}"></iframe>
+</body>
+</html>`;
+}
+
+async function ensureViteRunning(): Promise<void> {
+        if (viteProcess && !viteProcess.killed) {
+                return;
+        }
+
+        const workspace = vscode.workspace.workspaceFolders?.[0];
+        if (!workspace) {
+                throw new Error('No workspace open');
+        }
+
+        viteProcess = spawn('npm', ['run', 'dev'], {
+                cwd: workspace.uri.fsPath,
+                shell: true,
+                stdio: 'pipe'
+        });
+
+        viteProcess.stdout?.on('data', (data: Buffer) => {
+                console.log('[Delphine/Vite]', data.toString());
+        });
+
+        viteProcess.stderr?.on('data', (data: Buffer) => {
+                console.error('[Delphine/Vite]', data.toString());
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+}
 
 async function runForm(uri?: vscode.Uri) {
         const htmlUri = resolveHtmlUri(uri);
@@ -37,11 +124,11 @@ async function runForm(uri?: vscode.Uri) {
                         shell: true
                 });
 
-                viteProcess.stdout.on('data', (data: Buffer) => {
+                viteProcess.stdout?.on('data', (data: Buffer) => {
                         console.log(data.toString());
                 });
 
-                viteProcess.stderr.on('data', (data: Buffer) => {
+                viteProcess.stderr?.on('data', (data: Buffer) => {
                         console.error(data.toString());
                 });
 
@@ -68,6 +155,7 @@ function resolveTargetUri(uri?: unknown): vscode.Uri | undefined {
         return PreviewPanel.getActiveDocUri();
 } */
 
+/*
 function resolveHtmlUri(uri?: unknown): vscode.Uri | undefined {
         if (uri instanceof vscode.Uri && uri.fsPath.endsWith('.html')) {
                 return uri;
@@ -85,6 +173,7 @@ function resolveHtmlUri(uri?: unknown): vscode.Uri | undefined {
 
         return undefined;
 }
+        */
 
 function htmlToTsUri(htmlUri: vscode.Uri): vscode.Uri {
         const dir = path.dirname(htmlUri.fsPath);
@@ -135,10 +224,12 @@ export function activate(context: vscode.ExtensionContext): void {
                                 return;
                         }
 
-                        await PreviewPanel.createOrShow(context, htmlUri);
+                        const formName = htmlToFormName(htmlUri);
+                        const url = buildPreviewUrl(formName);
+
+                        createRuntimePreviewPanel(context, url);
                 })
-        );
-        /*vscode.commands.registerCommand('delphine.preview', async () => {
+        ); /*vscode.commands.registerCommand('delphine.preview', async () => {
                 const editor = vscode.window.activeTextEditor;
                 if (!editor) {
                         void vscode.window.showInformationMessage('No active editor');
@@ -239,6 +330,22 @@ export function activate(context: vscode.ExtensionContext): void {
         // ------------------------------------------------
         context.subscriptions.push(
                 vscode.commands.registerCommand('delphine.newForm', async () => {
+                        newForm(formsProvider);
+                })
+        );
+        /*
+                vscode.commands.registerCommand(
+                        
+                        'delphine.newForm', async () => {
+                        newForm();
+                        formsProvider.refresh();
+
+                        //await vscode.window.showTextDocument(vscode.Uri.file(path.join(formDir, `${name}.html`)));
+                })
+        );
+*/
+        /*
+                vscode.commands.registerCommand('delphine.newForm', async () => {
                         const name = await vscode.window.showInputBox({
                                 prompt: 'Form name'
                         });
@@ -251,7 +358,7 @@ export function activate(context: vscode.ExtensionContext): void {
                         }
 
                         const formsDir = path.join(workspace.uri.fsPath, 'src', 'forms');
-                        const formDir = path.join(formsDir, name);
+                        const formDir = path.join(formsDir, name + '.form');
 
                         fs.mkdirSync(formDir, { recursive: true });
 
@@ -278,10 +385,67 @@ export function activate(context: vscode.ExtensionContext): void {
                         await vscode.window.showTextDocument(vscode.Uri.file(path.join(formDir, `${name}.html`)));
                 })
         );
+        */
 
         context.subscriptions.push(
                 vscode.commands.registerCommand('delphine.runForm', async (uri?: vscode.Uri) => {
                         await runForm(uri);
+                })
+        );
+
+        /*
+        context.subscriptions.push(
+                vscode.commands.registerCommand('delphine.previewInBrowser', async (uri?: vscode.Uri) => {
+                        const htmlUri = resolveHtmlUri(uri);
+                        if (!htmlUri) {
+                                void vscode.window.showInformationMessage('No HTML form selected');
+                                return;
+                        }
+
+                        const tsUri = htmlToTsUri(htmlUri);
+
+                        await ensureViteRunning();
+
+                        const workspace = vscode.workspace.workspaceFolders?.[0];
+                        if (!workspace) {
+                                void vscode.window.showInformationMessage('No workspace open');
+                                return;
+                        }
+
+                        const relativeTsPath = '/' + path.relative(workspace.uri.fsPath, tsUri.fsPath).replace(/\\/g, '/');
+                        const url = `http://localhost:5174/preview.html?form=${encodeURIComponent(relativeTsPath)}`;
+
+                        await vscode.env.openExternal(vscode.Uri.parse(url));
+                })
+        );
+        */
+
+        context.subscriptions.push(
+                vscode.commands.registerCommand('delphine.previewBrowser', async (uri?: vscode.Uri) => {
+                        const htmlUri = resolveHtmlUri(uri);
+                        if (!htmlUri) {
+                                void vscode.window.showInformationMessage('No HTML form selected');
+                                return;
+                        }
+
+                        const formName = htmlToFormName(htmlUri);
+                        const url = buildPreviewUrl(formName);
+
+                        await vscode.env.openExternal(vscode.Uri.parse(url));
+                })
+        );
+        context.subscriptions.push(
+                vscode.commands.registerCommand('delphine.previewRuntime', async (uri?: vscode.Uri) => {
+                        const htmlUri = resolveHtmlUri(uri);
+                        if (!htmlUri) {
+                                void vscode.window.showInformationMessage('No HTML form selected');
+                                return;
+                        }
+
+                        const formName = htmlToFormName(htmlUri);
+                        const url = buildPreviewUrl(formName);
+
+                        createRuntimePreviewPanel(context, url);
                 })
         );
 

@@ -21,10 +21,13 @@
 import { THandler } from './Base';
 import { TComponent } from './Component';
 import { TMetaContainer, TContainer } from './Container';
-import type { PropSpec } from './Component';
+import type { PropSpec, TMetaComponent } from './Component';
 import { TComponentRegistry } from './ComponentRegistry';
+import { TComponentTypeRegistry } from './ComponentTypeRegistry';
 import type { IForm } from './IForm';
 import type { IApplication } from './IApplication';
+import type { IMetaControl, IControl } from './IControl';
+import { registerBuiltins } from './RegisterVcl';
 
 export class TMetaForm extends TMetaContainer {
         static readonly metaclass: TMetaForm = new TMetaForm(TMetaContainer.metaclass, 'TForm');
@@ -61,10 +64,19 @@ export class TForm extends TContainer implements IForm {
         private _mounted = false;
         // Each Form has its own componentRegistry
         componentRegistry: TComponentRegistry = new TComponentRegistry();
+        typeRegistry: TComponentTypeRegistry | null = null;
         constructor(name: string) {
                 super(name, null, null);
                 this.form = this;
                 TForm.forms.set(name, this);
+        }
+
+        getClass(type: string): IControl | undefined {
+                if (!this.typeRegistry) {
+                        this.typeRegistry = new TComponentTypeRegistry();
+                        registerBuiltins(this.typeRegistry);
+                }
+                return this.typeRegistry?.get(type);
         }
 
         //get application(): IApplication {
@@ -139,6 +151,7 @@ export class TForm extends TContainer implements IForm {
         }
 
         show() {
+                debugger;
                 // Must be done before buildComponentTree() because `buildComponentTree()` does not do `resolveRoot()` itself.
                 if (!this.elem) {
                         this.elem = this.componentRegistry.resolveRoot(); // ou this.resolveRoot()

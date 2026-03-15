@@ -2,7 +2,8 @@ import * as vscode from 'vscode';
 import * as crypto from 'crypto';
 import { parse } from 'parse5';
 import * as prettier from 'prettier';
-import { splitHtmlForGrapes } from '../SplitHtml';
+//import { splitHtmlForGrapes } from '../SplitHtml';
+import { loadFormHtml, loadFormCss } from '../loadForm';
 
 import type {
         Document as DefaultTreeDocument,
@@ -91,6 +92,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                                         //const prettyHtml = await formatHtml(msg.html ?? "");
                                         //const prettyCss  = await formatCss(msg.css ?? "");
                                         // Actually zaza.js is hard coded here. Should be modified TODO
+                                        /*
                                         const prettyDoc = await formatHtml(
                                                 `<!DOCTYPE html> 
 <html lang="en-US"> <head> <meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cat Scratch Editor</title><style>` +
@@ -99,8 +101,10 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                                                         msg.html +
                                                         `</html>`
                                         );
+                                        */
 
-                                        await this.updateTextDocument(document, prettyDoc);
+                                        await this.updateTextDocument(document, msg.html ?? ''); // !!!! Pas coule !!!!
+                                        //!!!!!!!!! Il faut mettre a jour aussi le CSS
                                         return;
 
                                 case 'bootEditor:ready':
@@ -128,9 +132,11 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 console.log(webviewPanel.webview.html);
                 console.log('-------------------------------------------------------------------');
 
-                const updateWebview = () => {
+                const updateWebview = async () => {
                         console.log(`[Delphine/ext] post doc:update panel=${panelId}`);
-                        const { bodyInnerHtml, cssText } = splitHtmlForGrapes(document.getText());
+                        //const { bodyInnerHtml, cssText } = splitHtmlForGrapes(document.getText());
+                        const bodyInnerHtml = await loadFormHtml(document.uri);
+                        const cssText = await loadFormCss(document.uri);
 
                         console.log(`[VSCode] doc:update -> bootEditor`);
                         void webviewPanel.webview.postMessage({
@@ -170,6 +176,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 // ******************************************************************* Functions *********************************************
 
                 // Keep it small and deterministic
+                /*
                 async function formatHtml(html: string): Promise<string> {
                         try {
                                 // Comments in English (as you prefer)
@@ -195,6 +202,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                                 return html;
                         }
                 }
+                        */
         }
 
         private buildHtml(webview: vscode.Webview, document: vscode.TextDocument): string {

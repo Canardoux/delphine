@@ -25,3 +25,4 @@ export * from './Base';
 export * from './Application';
 export * from './Form';
 export * from './Component';
+export * from './RegisterVcl';

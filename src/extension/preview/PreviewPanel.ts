@@ -2,7 +2,8 @@ import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { splitHtmlForGrapes } from '../SplitHtml';
+//import { splitHtmlForGrapes } from '../SplitHtml';
+import { loadFormHtml, loadFormCss } from '../loadForm';
 
 type Disposer = { dispose(): void };
 
@@ -139,7 +140,9 @@ export class PreviewPanel {
                 }
 
                 //const doc = this.document;
-                const { bodyInnerHtml, bodyAttrs, cssText } = splitHtmlForGrapes(this.document!.getText());
+                //const { bodyInnerHtml, bodyAttrs, cssText } = splitHtmlForGrapes(this.document!.getText());
+                const bodyInnerHtml = loadFormHtml(this.document!.uri);
+                const cssText = loadFormCss(this.document!.uri);
                 console.log('---------------------------bodyInnerHtml---------------------------');
                 console.log(bodyInnerHtml);
                 console.log('--------------------------------------------------------------');
@@ -172,7 +175,7 @@ export class PreviewPanel {
                         </style>
 
                         </head>
-                        <body ${bodyAttrs}>
+                        <body>
                         ${bodyInnerHtml}
                         <script nonce="${nonce}" type="module" src="${bootUri}"></script>
                         <script nonce="${nonce}" type="module" src="${this.compiledUri!}"></script>

@@ -1,5 +1,5 @@
-// IApplication.ts
-// ---------------
+// IComponent.ts
+// -------------
 
 /*
  * Copyright 2026 Canardoux.
@@ -19,22 +19,13 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { TMetaclass } from './Oops';
-import type { IControl, IMetaControl } from './IControl';
+import { TObject, TMetaclass, TMetaObject } from './Oops';
 
-export interface IApplication {
-        run(): void;
-        //getClass(type: string): IMetaControl | undefined;
+export interface IComponent {
+        isAForm(): boolean;
 }
 
-//export const TheApplication: IApplication | null = null;
-
-let _application: IApplication | null = null;
-
-export function getApplication(): IApplication | null {
-        return _application;
-}
-
-export function setApplication(app: IApplication): void {
-        _application = app;
+export interface IMetaComponent {
+        create(name: string, form: any, parent: any): any;
+        isAForm(): boolean;
 }
