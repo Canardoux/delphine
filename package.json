@@ -56,8 +56,8 @@
                                 "category": "Delphine"
                         },
                         {
-                                "command": "delphine.runForm",
-                                "title": "Run Form",
+                                "command": "delphine.previewBrowser",
+                                "title": "previewBrowser",
                                 "category": "Delphine"
                         }
                 ],
@@ -135,7 +135,7 @@
                                         "group": "navigation@2"
                                 },
                                 {
-                                        "command": "delphine.runForm",
+                                        "command": "delphine.previewBrowser",
                                         "when": "view == delphine.forms && viewItem == delphineForm",
                                         "group": "navigation@3"
                                 }
