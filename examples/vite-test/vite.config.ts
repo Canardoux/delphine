@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import path from 'node:path';
+import path from 'path';
 
 export default defineConfig({
         resolve: {
@@ -9,7 +9,7 @@ export default defineConfig({
         },
         server: {
                 fs: {
-                        allow: [path.resolve(__dirname, '../../')]
+                        allow: [path.resolve(__dirname, '..', '..')]
                 }
         }
 });

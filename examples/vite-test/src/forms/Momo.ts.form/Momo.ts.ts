@@ -1,3 +1,0 @@
-export class Momo.ts {
-
-}

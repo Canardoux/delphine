@@ -33,45 +33,97 @@ function normalizeFormName(name: string): string {
         return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-export async function newForm(formsProvider: FormsProvider) {
-        const rawName = await vscode.window.showInputBox({
-                prompt: 'Form name'
-        });
+function resolveAppDir(uri?: vscode.Uri): string | undefined {
+        if (!uri) {
+                return undefined;
+        }
 
-        if (!rawName) return;
+        const fsPath = uri.fsPath;
 
-        const name = normalizeFormName(rawName);
+        let current = fs.statSync(fsPath).isDirectory() ? fsPath : path.dirname(fsPath);
 
-        const workspace = vscode.workspace.workspaceFolders?.[0];
-        if (!workspace) {
-                void vscode.window.showInformationMessage('No workspace open');
+        while (true) {
+                const appJson = path.join(current, 'app.json');
+
+                if (fs.existsSync(appJson)) {
+                        return current;
+                }
+
+                const parent = path.dirname(current);
+                if (parent === current) {
+                        return undefined;
+                }
+
+                current = parent;
+        }
+}
+
+export async function newForm(uri?: vscode.Uri): Promise<void> {
+        const targetUri = uri ?? vscode.window.activeTextEditor?.document.uri;
+
+        const appDir = resolveAppDir(targetUri);
+
+        if (!appDir) {
+                vscode.window.showErrorMessage('No App found for this location');
                 return;
         }
 
-        const formsDir = path.join(workspace.uri.fsPath, 'src', 'forms');
-        const formDir = path.join(formsDir, name + '.form');
+        const formName = await vscode.window.showInputBox({
+                prompt: 'Form name',
+                placeHolder: 'Customer',
+                ignoreFocusOut: true,
+                validateInput: (value) => {
+                        const trimmed = value.trim();
+
+                        if (!trimmed) {
+                                return 'Form name is required';
+                        }
+
+                        if (!/^[A-Za-z0-9_]+$/.test(trimmed)) {
+                                return 'Use only letters, digits, underscore';
+                        }
+
+                        return null;
+                }
+        });
+
+        if (!formName) {
+                return;
+        }
+
+        const formsDir = path.join(appDir, 'forms');
+        const formDir = path.join(formsDir, `${formName}.form`);
+
+        if (fs.existsSync(formDir)) {
+                vscode.window.showErrorMessage(`Form already exists: ${formName}`);
+                return;
+        }
 
         fs.mkdirSync(formDir, { recursive: true });
 
+        // HTML
         fs.writeFileSync(
-                path.join(formDir, `${name}.html`),
-                `<div data-delphine-form="${name}">
+                path.join(formDir, `${formName}.html`),
+                `<div>
+    ${formName} works
 </div>
 `
         );
 
+        // TS
         fs.writeFileSync(
-                path.join(formDir, `${name}.ts`),
-                `export class ${name} {
+                path.join(formDir, `${formName}.ts`),
+                `import { TForm } from '@vcl/Form';
 
+export class ${formName} extends TForm {
 }
 `
         );
 
-        fs.writeFileSync(path.join(formDir, `${name}.css`), '');
-        fs.writeFileSync(path.join(formDir, `${name}.json`), '{}');
+        // CSS
+        fs.writeFileSync(path.join(formDir, `${formName}.css`), '');
 
-        formsProvider.refresh();
+        vscode.commands.executeCommand('workbench.files.action.refreshFilesExplorer');
 
-        await vscode.window.showTextDocument(vscode.Uri.file(path.join(formDir, `${name}.html`)));
+        vscode.window.showInformationMessage(`Form '${formName}' created`);
 }

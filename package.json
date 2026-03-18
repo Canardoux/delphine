@@ -48,17 +48,26 @@
                         {
                                 "command": "delphine.openEditor",
                                 "title": "Open Editor",
-                                "category": "Delphine"
+                                "category": "Delphine",
+                                "icon": "$(edit)"
                         },
                         {
                                 "command": "delphine.preview",
                                 "title": "Preview",
-                                "category": "Delphine"
+                                "category": "Delphine",
+                                "icon": "$(preview)"
                         },
                         {
                                 "command": "delphine.previewBrowser",
-                                "title": "previewBrowser",
-                                "category": "Delphine"
+                                "title": "Preview in Browser",
+                                "category": "Delphine",
+                                "icon": "$(globe)"
+                        },
+                        {
+                                "command": "delphine.newApp",
+                                "title": "New App",
+                                "category": "Delphine",
+                                "icon": "$(rocket)"
                         }
                 ],
                 "customEditors": [
@@ -76,19 +85,19 @@
                 "menus": {
                         "editor/title": [
                                 {
-                                        "when": "resourceLangId == html",
-                                        "command": "delphine.preview",
-                                        "group": "navigation"
-                                },
-                                {
-                                        "when": "resourceLangId == html || activeWebviewPanelId == 'delphinePreview'",
+                                        "when": "resourceLangId == html || resourceLangId == typescript || resourceLangId == css",
                                         "command": "delphine.openEditor",
-                                        "group": "navigation"
+                                        "group": "navigation@1"
                                 },
                                 {
-                                        "when": "activeCustomEditorId == 'delphine.customEditor' || activeWebviewPanelId == 'delphinePreview'",
-                                        "command": "delphine.openSource",
-                                        "group": "navigation"
+                                        "when": "resourceLangId == html || resourceLangId == typescript || resourceLangId == css",
+                                        "command": "delphine.preview",
+                                        "group": "navigation@2"
+                                },
+                                {
+                                        "when": "resourceLangId == html || resourceLangId == typescript || resourceLangId == css",
+                                        "command": "delphine.previewBrowser",
+                                        "group": "navigation@3"
                                 }
                         ],
                         "webview/context": [
@@ -103,40 +112,55 @@
                         ],
                         "view/title": [
                                 {
-                                        "command": "delphine.newProject",
-                                        "when": "view == delphine.projects",
-                                        "group": "navigation"
+                                        "command": "delphine.newApp",
+                                        "when": "view == delphine.projects && viewItem == delphineProject",
+                                        "group": "navigation@1"
                                 },
                                 {
                                         "command": "delphine.newForm",
-                                        "when": "view == delphine.forms",
-                                        "group": "navigation"
-                                }
-                        ],
-                        "view/item/context": [
-                                {
-                                        "command": "delphine.openHtmlSource",
-                                        "when": "view == delphine.forms && viewItem == delphineForm",
-                                        "group": "inline@1"
-                                },
-                                {
-                                        "command": "delphine.openTypeScript",
-                                        "when": "view == delphine.forms && viewItem == delphineForm",
-                                        "group": "inline@2"
-                                },
-                                {
-                                        "command": "delphine.openEditor",
-                                        "when": "view == delphine.forms && viewItem == delphineForm",
+                                        "when": "view == delphine.projects && viewItem == delphineApp",
                                         "group": "navigation@1"
                                 },
                                 {
                                         "command": "delphine.preview",
-                                        "when": "view == delphine.forms && viewItem == delphineForm",
+                                        "when": "view == delphine.projects && viewItem == delphineForm",
+                                        "group": "navigation@1"
+                                }
+                        ],
+                        "view/item/context": [
+                                {
+                                        "command": "delphine.newProject",
+                                        "when": "view == delphine.projects && viewItem == delphineProject",
+                                        "group": "navigation@0"
+                                },
+                                {
+                                        "command": "delphine.newApp",
+                                        "when": "view == delphine.projects && viewItem == delphineProject",
+                                        "group": "navigation@1"
+                                },
+                                {
+                                        "command": "delphine.newForm",
+                                        "when": "view == delphine.projects && viewItem == delphineApp",
+                                        "group": "navigation@1"
+                                },
+                                {
+                                        "command": "delphine.runApp",
+                                        "when": "view == delphine.projects && viewItem == delphineApp",
+                                        "group": "navigation@2"
+                                },
+                                {
+                                        "command": "delphine.openEditor",
+                                        "when": "view == delphine.projects && (viewItem == delphineForm || viewItem == delphineFormFile)",
+                                        "group": "navigation@1"
+                                },
+                                {
+                                        "command": "delphine.preview",
+                                        "when": "view == delphine.projects && (viewItem == delphineForm || viewItem == delphineFormFile)",
                                         "group": "navigation@2"
                                 },
                                 {
                                         "command": "delphine.previewBrowser",
-                                        "when": "view == delphine.forms && viewItem == delphineForm",
+                                        "when": "view == delphine.projects && (viewItem == delphineForm || viewItem == delphineFormFile)",
                                         "group": "navigation@3"
                                 }
                         ]

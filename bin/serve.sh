@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd examples/zazaVue
+cd examples/test
 npm run dev
 
