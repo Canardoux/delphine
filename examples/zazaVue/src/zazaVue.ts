@@ -145,34 +145,3 @@ export class TMetaMyDCC extends TMetaCompositeDCC {
                 return new MyDCC(name, form, parent)
         }
 }
-
-// ----------------------------------------------------- Application -----------------------------------------------------------------
-
-class MyApplication extends TApplication {
-        zazaVue: ZazaVue
-
-        constructor() {
-                super()
-                this.zazaVue = new ZazaVue('zazaVue')
-                this.mainForm = this.zazaVue
-
-                // VueJS
-                PluginRegistry.pluginRegistry.register('hello-vue', { factory: createHelloVuePlugin })
-                //PluginRegistry.pluginRegistry.register('hello-vue2', { factory: createHelloVuePlugin2 })
-
-                // DCC
-                //this.types.register(TMetaMyDCC.metaclass)
-        }
-        run() {
-                //this.zaza.componentRegistry.buildComponentTree(this.zaza);
-                //this.zaza.addEventListener('click');
-
-                // au lancement
-                this.runWhenDomReady(() => {
-                        this.zazaVue.show()
-                })
-        }
-} // class MyApplication
-
-const myApplication: MyApplication = new MyApplication()
-myApplication.run()

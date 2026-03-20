@@ -21,9 +21,13 @@
 
 import { TMetaclass } from './Oops';
 import type { IControl, IMetaControl } from './IControl';
+import type { IForm } from './IForm';
 
 export interface IApplication {
         run(): void;
+        initialize(): Promise<void>;
+        showForm(form: IForm): void;
+
         //getClass(type: string): IMetaControl | undefined;
 }
 

@@ -28,6 +28,7 @@ import type { IForm } from './IForm';
 import type { IApplication } from './IApplication';
 import type { IMetaControl, IControl } from './IControl';
 import { registerBuiltins } from './RegisterVcl';
+import { getApplication } from './IApplication';
 
 export class TMetaForm extends TMetaContainer {
         static readonly metaclass: TMetaForm = new TMetaForm(TMetaContainer.metaclass, 'TForm');
@@ -150,21 +151,94 @@ export class TForm extends TContainer implements IForm {
                 // No handler here: try going "up" using your component tree if possible
         }
 
-        show() {
-                debugger;
-                // Must be done before buildComponentTree() because `buildComponentTree()` does not do `resolveRoot()` itself.
-                if (!this.elem) {
-                        this.elem = this.componentRegistry.resolveRoot(); // ou this.resolveRoot()
-                }
-                if (!this._mounted) {
-                        this.componentRegistry.buildComponentTree(this, this);
-                        this.onCreate(); // Maybe could be done after installEventRouter()
-                        this.installEventRouter();
-                        this._mounted = true;
-                }
-                this.onShown();
+        // Form.ts
+        // -------
 
-                // TODO
+        //elem: Element | null = null;
+        protected _created = false;
+
+        /**
+         * Create the Form DOM under <body>, hidden by default,
+         * then build the component tree from the injected HTML.
+         */
+        create(htmlSource: string): void {
+                if (this._created) {
+                        return;
+                }
+
+                // 1. Create a hidden host container under <body>
+                const host = document.createElement('div');
+                host.hidden = true;
+                host.setAttribute('data-delphine-form-host', this.name);
+                document.body.appendChild(host);
+
+                // 2. Inject the user HTML inside that host
+                host.innerHTML = htmlSource;
+
+                // 3. Resolve the actual root element of the Form
+                //    In your current architecture, resolveRoot() knows how to find:
+                //    - <body> if it is itself the root
+                //    - or the first child carrying TForm metadata
+                this.elem = this.componentRegistry.resolveRoot(host);
+
+                if (!this.elem) {
+                        throw new Error(`Unable to resolve root element for form '${this.name}'`);
+                }
+
+                // 4. Build Delphine component tree
+                this.componentRegistry.buildComponentTree(this, this);
+
+                // 5. Install event routing
+                this.installEventRouter();
+
+                // 6. Mark as created, still hidden
+                this._mounted = true;
+                this._created = true;
+
+                console.log('created form root =', this.elem);
+                console.log('created form host =', this.elem?.parentElement);
+
+                // 7. Lifecycle hook
+                this.onCreate();
+        }
+
+        hide(): void {
+                if (!this.elem) {
+                        return;
+                }
+
+                const host = this.elem.parentElement;
+                if (host) {
+                        host.hidden = true;
+                }
+        }
+
+        show(): void {
+                debugger;
+                if (!this.elem || !this._created) {
+                        throw new Error(`Form ${this.name} not created`);
+                }
+
+                getApplication()!.showForm(this);
+
+                const focusTarget = this.elem.querySelector<HTMLElement>('[autofocus], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])');
+                focusTarget?.focus();
+        }
+
+        destroy(): void {
+                if (!this.elem) {
+                        return;
+                }
+
+                const host = this.elem.parentElement;
+                if (host && host.hasAttribute('data-delphine-form-host')) {
+                        host.remove();
+                } else {
+                        this.elem.remove();
+                }
+
+                this.elem = null;
+                this._created = false;
         }
 
         protected onCreate() {
@@ -177,7 +251,7 @@ export class TForm extends TContainer implements IForm {
                 }
         }
 
-        protected onShown() {
+        onShown() {
                 const onShownName = this.elem!.getAttribute('data-delphine-onshown');
                 if (onShownName) {
                         queueMicrotask(() => {

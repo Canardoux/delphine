@@ -17,21 +17,21 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { createApp, reactive } from 'vue';
-import type { UIPluginFactory, UIPluginInstance } from './Plugin';
+import { createApp, reactive, type App as VueApp, type Component } from 'vue';
+import type { UIPluginFactory } from './Plugin';
 
-export function defineVuePlugin(Component: any): UIPluginFactory {
+export function defineVuePlugin(component: Component): UIPluginFactory {
         return ({ host }) => {
-                let app: any = null;
-                const state = reactive({});
+                let app: VueApp | null = null;
+                const state = reactive<Record<string, unknown>>({});
 
                 return {
-                        id: Component.name ?? 'vue-plugin',
+                        id: (component as any).name ?? 'vue-plugin',
 
                         mount(container, props, services) {
                                 Object.assign(state, props);
 
-                                app = createApp(Component, {
+                                app = createApp(component, {
                                         state,
                                         services,
                                         hostName: host.name

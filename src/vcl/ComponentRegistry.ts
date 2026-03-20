@@ -76,22 +76,20 @@ export class TComponentRegistry extends TObject {
                 this.instances.clear();
         }
 
-        resolveRoot(): HTMLElement {
-                const app = document.getElementById('app');
-                if (!app) {
-                        throw new Error('Delphine preview: #app not found');
-                }
-
-                for (const child of Array.from(app.children)) {
+        resolveRoot(container: HTMLElement): HTMLElement {
+                // Look for first element marked as a Delphine component root
+                for (const child of Array.from(container.children)) {
                         if (child instanceof HTMLElement && child.hasAttribute('data-delphine-component')) {
-                                for (const child of Array.from(app.children)) {
-                                        console.log('child:', child.tagName, child.getAttribute('data-delphine-component'));
+                                // Debug (optional)
+                                for (const c of Array.from(container.children)) {
+                                        console.log('child:', c.tagName, c.getAttribute('data-delphine-component'));
                                 }
+
                                 return child;
                         }
                 }
 
-                throw new Error('Delphine preview: no Delphine root found inside #app');
+                throw new Error('Delphine: no root component found in container');
         }
 
         private convert(raw: string, kind: PropKind) {

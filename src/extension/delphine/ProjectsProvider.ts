@@ -63,6 +63,16 @@ class FormFileItem extends vscode.TreeItem {
         }
 }
 
+class CurrentProjectItem extends vscode.TreeItem {
+        constructor(public readonly projectUri: vscode.Uri) {
+                super('Current Project', vscode.TreeItemCollapsibleState.Expanded);
+                this.contextValue = 'delphineCurrentProject';
+                this.iconPath = new vscode.ThemeIcon('folder-opened');
+                this.description = path.basename(projectUri.fsPath);
+                this.tooltip = projectUri.fsPath;
+        }
+}
+
 type ProjectTreeItem = ProjectItem | AppItem | FormItem | FormFileItem;
 
 export class ProjectsProvider implements vscode.TreeDataProvider<ProjectTreeItem> {
@@ -78,6 +88,9 @@ export class ProjectsProvider implements vscode.TreeDataProvider<ProjectTreeItem
         }
 
         getChildren(element?: ProjectTreeItem): Thenable<ProjectTreeItem[]> {
+                if (element instanceof CurrentProjectItem) {
+                        return Promise.resolve(this.getApps(element));
+                }
                 if (!element) {
                         return Promise.resolve(this.getProjects());
                 }
@@ -102,7 +115,7 @@ export class ProjectsProvider implements vscode.TreeDataProvider<ProjectTreeItem
                         return [];
                 }
 
-                return [new ProjectItem(workspace.uri)];
+                return [new CurrentProjectItem(workspace.uri)];
         }
 
         private getApps(project: ProjectItem): ProjectTreeItem[] {

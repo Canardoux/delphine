@@ -68,6 +68,12 @@
                                 "title": "New App",
                                 "category": "Delphine",
                                 "icon": "$(rocket)"
+                        },
+                        {
+                                "command": "delphine.runApp",
+                                "title": "Run App",
+                                "category": "Delphine",
+                                "icon": "$(play)"
                         }
                 ],
                 "customEditors": [
@@ -118,7 +124,7 @@
                                 },
                                 {
                                         "command": "delphine.newForm",
-                                        "when": "view == delphine.projects && viewItem == delphineApp",
+                                        "when": "view == delphine.projects && viewItem == delphineCurrentProject",
                                         "group": "navigation@1"
                                 },
                                 {
@@ -130,12 +136,12 @@
                         "view/item/context": [
                                 {
                                         "command": "delphine.newProject",
-                                        "when": "view == delphine.projects && viewItem == delphineProject",
+                                        "when": "view == delphine.projects && viewItem == delphineCurrentProject",
                                         "group": "navigation@0"
                                 },
                                 {
                                         "command": "delphine.newApp",
-                                        "when": "view == delphine.projects && viewItem == delphineProject",
+                                        "when": "view == delphine.projects && viewItem == delphineCurrentProject",
                                         "group": "navigation@1"
                                 },
                                 {
@@ -162,6 +168,11 @@
                                         "command": "delphine.previewBrowser",
                                         "when": "view == delphine.projects && (viewItem == delphineForm || viewItem == delphineFormFile)",
                                         "group": "navigation@3"
+                                },
+                                {
+                                        "command": "delphine.runApp",
+                                        "when": "view == delphine.projects && (viewItem == delphineApp || viewItem == delphineForm || viewItem == delphineFormFile)",
+                                        "group": "navigation@1"
                                 }
                         ]
                 },

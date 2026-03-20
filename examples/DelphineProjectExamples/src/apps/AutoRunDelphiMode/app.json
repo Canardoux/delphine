@@ -1,0 +1,4 @@
+{
+        "mainForm": "MainForm",
+        "forms": ["MainForm", "Riri"]
+}

@@ -1,6 +1,56 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { spawn } from 'child_process';
+
+export async function runNpmInstall(projectPath: string): Promise<void> {
+        console.log('[Delphine] starting npm install for new project:', projectPath);
+        await vscode.window.withProgress(
+                {
+                        location: vscode.ProgressLocation.Notification,
+                        title: 'Installing project dependencies',
+                        cancellable: false
+                },
+                () =>
+                        new Promise<void>((resolve, reject) => {
+                                const child = spawn('npm', ['install'], {
+                                        cwd: projectPath,
+                                        shell: true,
+                                        stdio: ['ignore', 'pipe', 'pipe']
+                                });
+
+                                let output = '';
+
+                                const onData = (chunk: Buffer): void => {
+                                        const text = chunk.toString();
+                                        output += text;
+                                        console.log('[Delphine/npm]', text);
+                                };
+
+                                child.stdout?.on('data', onData);
+                                child.stderr?.on('data', onData);
+
+                                child.on('error', (err) => {
+                                        reject(err);
+                                });
+
+                                child.on('exit', (code) => {
+                                        if (code === 0) {
+                                                resolve();
+                                                return;
+                                        }
+
+                                        if (output.includes('npm: command not found') || output.includes('npm command not found') || output.includes('npm n’est pas reconnu') || output.includes('not recognized as an internal or external command')) {
+                                                reject(new Error('npm was not found. Please install Node.js and npm, then run npm install in the project folder.'));
+                                                return;
+                                        }
+
+                                        reject(new Error(`npm install failed (code ${code})`));
+                                });
+                        })
+        );
+        console.log('[Delphine] npm install completed for:', projectPath);
+}
 
 /**
  * Copy a directory recursively while skipping unwanted files.
@@ -47,11 +97,18 @@ function patchNewProjectFiles(projectPath: string, projectName: string): void {
         }
 }
 
+function ucfirst(name: string): string {
+        if (!name) {
+                return name;
+        }
+
+        return name[0].toUpperCase() + name.slice(1);
+}
 /**
  * Create a new Delphine project from the on-disk template.
  */
 export async function newDelphineProject(context: vscode.ExtensionContext): Promise<void> {
-        const projectName = await vscode.window.showInputBox({
+        const rawName = await vscode.window.showInputBox({
                 prompt: 'Project name',
                 placeHolder: 'MyProject',
                 ignoreFocusOut: true,
@@ -70,9 +127,11 @@ export async function newDelphineProject(context: vscode.ExtensionContext): Prom
                 }
         });
 
-        if (!projectName) {
+        if (!rawName) {
                 return;
         }
+
+        const projectName = ucfirst(rawName.trim());
 
         const selectedFolder = await vscode.window.showOpenDialog({
                 canSelectFiles: false,
@@ -101,7 +160,25 @@ export async function newDelphineProject(context: vscode.ExtensionContext): Prom
         }
 
         try {
-                copyDirectoryRecursive(templatePath, projectPath);
+                try {
+                        copyDirectoryRecursive(templatePath, projectPath);
+                        patchNewProjectFiles(projectPath, projectName);
+
+                        await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(projectPath));
+
+                        void runNpmInstall(projectPath).then(
+                                () => {
+                                        void vscode.window.showInformationMessage('Project created and dependencies installed.');
+                                },
+                                (error) => {
+                                        console.error('[Delphine] npm install failed:', error);
+                                        void vscode.window.showErrorMessage(String(error));
+                                }
+                        );
+                } catch (error) {
+                        console.error('[Delphine] newProject failed:', error);
+                        void vscode.window.showErrorMessage(`Unable to create project: ${String(error)}`);
+                }
                 patchNewProjectFiles(projectPath, projectName);
 
                 await vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(projectPath));

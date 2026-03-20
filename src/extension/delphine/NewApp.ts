@@ -2,6 +2,14 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+function ucfirst(name: string): string {
+        if (!name) {
+                return name;
+        }
+
+        return name[0].toUpperCase() + name.slice(1);
+}
+
 /**
  * Create a new App inside the current workspace.
  */
@@ -13,7 +21,7 @@ export async function newApp(): Promise<void> {
                 return;
         }
 
-        const appName = await vscode.window.showInputBox({
+        const rawName = await vscode.window.showInputBox({
                 prompt: 'App name',
                 placeHolder: 'MyApp',
                 ignoreFocusOut: true,
@@ -32,9 +40,11 @@ export async function newApp(): Promise<void> {
                 }
         });
 
-        if (!appName) {
+        if (!rawName) {
                 return;
         }
+
+        const appName = ucfirst(rawName?.trim());
 
         const appsDir = path.join(workspace.uri.fsPath, 'src', 'apps');
         const appDir = path.join(appsDir, appName);
@@ -92,10 +102,7 @@ export class MainForm extends TForm {
         // --------------------------------------------------
         // MainForm.css
         // --------------------------------------------------
-        fs.writeFileSync(
-                path.join(mainFormDir, 'MainForm.css'),
-                ''
-        );
+        fs.writeFileSync(path.join(mainFormDir, 'MainForm.css'), '');
 
         // --------------------------------------------------
         // Refresh explorer

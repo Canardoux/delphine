@@ -1,8 +1,11 @@
 import { ChildProcess, spawn } from 'child_process';
-import { resolveForm, resolveProjectRootFromPath } from './projectModel';
+import { resolveForm, resolveProjectRootFromPath, resolveApp } from './projectModel';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
+
+//import { ensureViteServer } from './ViteServerManager'; // si même fichier, inutile
+//import { resolveApp, resolveProjectRootFromPath } from './projectModel';
 
 type ViteServerInfo = {
         projectPath: string;
@@ -12,6 +15,40 @@ type ViteServerInfo = {
 
 const viteServers = new Map<string, ViteServerInfo>();
 const viteServerStarts = new Map<string, Promise<ViteServerInfo>>();
+
+function buildAppUrl(port: number, appName: string): string {
+        return `http://127.0.0.1:${port}/app.html?app=${encodeURIComponent(appName)}`;
+}
+
+export async function runApp(input?: unknown): Promise<void> {
+        const app = resolveApp(input);
+
+        if (!app) {
+                void vscode.window.showErrorMessage('No App selected');
+                return;
+        }
+
+        const projectPath = resolveProjectRootFromPath(app.appDir.fsPath);
+        if (!projectPath) {
+                void vscode.window.showErrorMessage('Unable to find Vite project root');
+                return;
+        }
+
+        try {
+                const vite = await ensureViteServer(projectPath);
+                const url = buildAppUrl(vite.port, app.name);
+
+                console.log('[Delphine] runApp project =', projectPath);
+                console.log('[Delphine] runApp app =', app.name);
+                console.log('[Delphine] runApp port =', vite.port);
+                console.log('[Delphine] runApp url =', url);
+
+                await vscode.env.openExternal(vscode.Uri.parse(url));
+        } catch (e) {
+                console.error(e);
+                void vscode.window.showErrorMessage(String(e));
+        }
+}
 
 export async function ensureViteServer(projectPath: string): Promise<ViteServerInfo> {
         const existing = viteServers.get(projectPath);
@@ -44,6 +81,7 @@ export async function ensureViteServer(projectPath: string): Promise<ViteServerI
 }
 
 async function startViteServer(projectPath: string): Promise<ViteServerInfo> {
+        let fullOutput = '';
         return new Promise((resolve, reject) => {
                 const child = spawn('npm', ['run', 'dev', '--', '--host', '127.0.0.1'], {
                         cwd: projectPath,
@@ -55,6 +93,7 @@ async function startViteServer(projectPath: string): Promise<ViteServerInfo> {
 
                 const onData = (chunk: Buffer): void => {
                         const text = chunk.toString();
+                        fullOutput += text;
                         console.log('[Delphine/Vite]', text);
 
                         const match = text.match(/Local:\s+http:\/\/localhost:(\d+)\//) ?? text.match(/Local:\s+http:\/\/127\.0\.0\.1:(\d+)\//);
@@ -85,6 +124,11 @@ async function startViteServer(projectPath: string): Promise<ViteServerInfo> {
                 child.on('exit', (code) => {
                         viteServers.delete(projectPath);
                         if (!resolved) {
+                                if (fullOutput.includes('vite: command not found')) {
+                                        reject(new Error('Vite is not installed for this project. Run npm install in the project folder.'));
+                                        return;
+                                }
+
                                 reject(new Error(`Vite exited before startup (code ${code})`));
                         }
                 });
@@ -222,23 +266,4 @@ function resolveAppUri(input?: unknown): vscode.Uri | undefined {
         }
 
         return undefined;
-}
-
-export async function runAppFromTree(input?: unknown): Promise<void> {
-        const appUri = resolveAppUri(input);
-        if (!appUri) {
-                void vscode.window.showErrorMessage('No App selected');
-                return;
-        }
-
-        const projectPath = resolveProjectRootFromPath(appUri.fsPath);
-        if (!projectPath) {
-                void vscode.window.showErrorMessage('Unable to find Vite project root');
-                return;
-        }
-
-        const vite = await ensureViteServer(projectPath);
-        const url = `http://127.0.0.1:${vite.port}/app.html`;
-
-        await vscode.env.openExternal(vscode.Uri.parse(url));
 }

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FormsProvider } from './FormsProvider';
+import { resolveApp } from '../projectModel';
 /*
 export async function newForm() {
         const name = await vscode.window.showInputBox({
@@ -33,6 +34,14 @@ function normalizeFormName(name: string): string {
         return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
+function ucfirst(name: string): string {
+        if (!name) {
+                return name;
+        }
+
+        return name[0].toUpperCase() + name.slice(1);
+}
+
 function resolveAppDir(uri?: vscode.Uri): string | undefined {
         if (!uri) {
                 return undefined;
@@ -58,17 +67,19 @@ function resolveAppDir(uri?: vscode.Uri): string | undefined {
         }
 }
 
-export async function newForm(uri?: vscode.Uri): Promise<void> {
-        const targetUri = uri ?? vscode.window.activeTextEditor?.document.uri;
+export async function newForm(input?: unknown): Promise<void> {
+        //const targetUri = uri ?? vscode.window.activeTextEditor?.document.uri;
 
-        const appDir = resolveAppDir(targetUri);
+        //const appDir = resolveAppDir(targetUri);
+        const app = resolveApp(input);
+        if (!app) return;
 
-        if (!appDir) {
-                vscode.window.showErrorMessage('No App found for this location');
-                return;
-        }
+        //if (!appDir) {
+        //vscode.window.showErrorMessage('No App found for this location');
+        //return;
+        //}
 
-        const formName = await vscode.window.showInputBox({
+        const rawName = await vscode.window.showInputBox({
                 prompt: 'Form name',
                 placeHolder: 'Customer',
                 ignoreFocusOut: true,
@@ -87,12 +98,14 @@ export async function newForm(uri?: vscode.Uri): Promise<void> {
                 }
         });
 
-        if (!formName) {
+        if (!rawName) {
                 return;
         }
 
-        const formsDir = path.join(appDir, 'forms');
-        const formDir = path.join(formsDir, `${formName}.form`);
+        const formName = ucfirst(rawName.trim());
+
+        //const formsDir = path.join(appDir, 'forms');
+        const formDir = path.join(app.formsDir.fsPath, `${formName}.form`);
 
         if (fs.existsSync(formDir)) {
                 vscode.window.showErrorMessage(`Form already exists: ${formName}`);

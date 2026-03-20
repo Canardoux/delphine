@@ -1,4 +1,4 @@
-import { getPreviewUrlForForm, disposeAllViteServers, runAppFromTree } from './ViteServerManager';
+import { getPreviewUrlForForm, disposeAllViteServers, runApp } from './ViteServerManager';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -182,6 +182,7 @@ export function activate(context: vscode.ExtensionContext): void {
         context.subscriptions.push(
                 vscode.commands.registerCommand('delphine.newProject', async () => {
                         await newDelphineProject(context);
+                        projectsProvider.refresh();
                 })
         );
 
@@ -189,8 +190,9 @@ export function activate(context: vscode.ExtensionContext): void {
         // New Form
         // ------------------------------------------------
         context.subscriptions.push(
-                vscode.commands.registerCommand('delphine.newForm', async (uri?: vscode.Uri) => {
-                        await newForm(uri);
+                vscode.commands.registerCommand('delphine.newForm', async (input?: unknown) => {
+                        await newForm(input);
+                        projectsProvider.refresh();
                 })
         );
 
@@ -226,13 +228,14 @@ export function activate(context: vscode.ExtensionContext): void {
 
         context.subscriptions.push(
                 vscode.commands.registerCommand('delphine.newApp', async () => {
+                        projectsProvider.refresh();
                         await newApp();
                 })
         );
 
         context.subscriptions.push(
                 vscode.commands.registerCommand('delphine.runApp', async (input?: unknown) => {
-                        await runAppFromTree(input);
+                        await runApp(input);
                 })
         );
 }
