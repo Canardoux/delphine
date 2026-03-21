@@ -22,7 +22,9 @@
 import { TMetaclass, TObject, TMetaObject } from './Oops';
 //import { TComponentRegistry } from './ComponentRegistry';
 import type { IForm } from './IForm';
-import type { IControl, IMetaControl } from './IControl';
+//import type { IControl, IMetaControl } from './IControl';
+//import { TControl } from './Base';
+import type { IComponent, IMetaComponent } from './IComponent';
 
 export type PropSpec<T, V = unknown> = {
         name: string;
@@ -34,7 +36,7 @@ export type PropSpec<T, V = unknown> = {
 export type ComponentProps = Record<string, unknown>;
 export type PropKind = 'string' | 'number' | 'boolean' | 'color' | 'handler';
 
-export class TComponent extends TObject implements IControl {
+export class TComponent extends TObject implements IComponent {
         getMetaclass() {
                 return TMetaComponent.metaclass;
         }
@@ -69,6 +71,10 @@ export class TMetaComponent extends TMetaObject {
         protected constructor(superClass: TMetaObject, name: string) {
                 super(superClass, name);
                 //super(name, form, parent);
+        }
+
+        create(name: string, form: IForm, parent: TComponent): TComponent {
+                return new TComponent(name, form, parent);
         }
 
         getMetaclass() {

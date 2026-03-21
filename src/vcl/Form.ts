@@ -65,20 +65,24 @@ export class TForm extends TContainer implements IForm {
         private _mounted = false;
         // Each Form has its own componentRegistry
         componentRegistry: TComponentRegistry = new TComponentRegistry();
-        typeRegistry: TComponentTypeRegistry | null = null;
+        //typeRegistry: TComponentTypeRegistry | null = null;
         constructor(name: string) {
                 super(name, null, null);
                 this.form = this;
                 TForm.forms.set(name, this);
         }
 
+        /*
         getClass(type: string): IControl | undefined {
+                
                 if (!this.typeRegistry) {
                         this.typeRegistry = new TComponentTypeRegistry();
                         registerBuiltins(this.typeRegistry);
                 }
+                        
                 return this.typeRegistry?.get(type);
         }
+                */
 
         //get application(): IApplication {
         //return this.form?.application ?? TApplication.TheApplication;
@@ -221,8 +225,8 @@ export class TForm extends TContainer implements IForm {
 
                 getApplication()!.showForm(this);
 
-                const focusTarget = this.elem.querySelector<HTMLElement>('[autofocus], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])');
-                focusTarget?.focus();
+                //const focusTarget = this.elem.querySelector<HTMLElement>('[autofocus], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])');
+                //focusTarget?.focus();
         }
 
         destroy(): void {

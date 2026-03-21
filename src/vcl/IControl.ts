@@ -23,6 +23,7 @@ import { TObject, TMetaclass, TMetaObject } from './Oops';
 
 export interface IControl {
         isAForm(): boolean;
+        //getClass(type: string): IControl | undefined;
 }
 
 export interface IMetaControl {

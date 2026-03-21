@@ -37,12 +37,14 @@ export class TContainer extends TControl {
                 super(name, form, parent);
         }
 
+        /*
         syncDomFromProps() {
                 const el = this.htmlElement;
                 if (!el) return;
 
                 super.syncDomFromProps();
         }
+                */
 
         allowsChildren(): boolean {
                 return true;

@@ -236,7 +236,14 @@ export class TComponentRegistry extends TObject {
                 const type = el.getAttribute('data-delphine-component');
 
                 //const cls = getApplication()?.types.get(type!);
-                const cls = type != null ? form?.getClass(type) : null;
+                //if (!this.typeRegistry) {
+                //this.typeRegistry = new TComponentTypeRegistry();
+                //registerBuiltins(this.typeRegistry);
+                //}
+
+                const cls = type != null ? getApplication()?.getClass(type) : null;
+                //form?.getClass(type) : null;
+
                 if (!cls) return null;
 
                 let child = parent;
@@ -259,7 +266,10 @@ export class TComponentRegistry extends TObject {
 
                 // We collect
                 this.parsePropsFromElement(child);
-                child.syncDomFromProps();
+
+                // !!!!!! TODO
+                //child.syncDomFromProps();
+
                 (child as any).onAttachedToDom?.();
 
                 // Done in the constructor //parent.children.push(child);

@@ -20,6 +20,7 @@
 
 import { TMetaObject, TObject } from './Oops';
 import { TMetaComponent } from './Component';
+import type { IMetaComponent } from './IComponent';
 
 export class TMetaComponentTypeRegistry extends TMetaObject {
         static readonly metaclass: TMetaComponentTypeRegistry = new TMetaComponentTypeRegistry(TMetaObject.metaClass, 'TComponentTypeRegistry');
@@ -37,7 +38,7 @@ export class TComponentTypeRegistry extends TObject {
         getMetaclass(): TMetaComponentTypeRegistry {
                 return TMetaComponentTypeRegistry.metaClass;
         }
-        private readonly classes = new Map<string, TMetaComponent>();
+        private readonly classes = new Map<string, IMetaComponent>();
 
         register(meta: TMetaComponent) {
                 if (this.classes.has(meta.typeName)) {

@@ -4,6 +4,7 @@ const params = new URLSearchParams(window.location.search);
 const appName = params.get('app') ?? 'MainApp';
 
 async function main(): Promise<void> {
+        debugger;
         // 1. Load app config
         const appConfigUrl = `/src/apps/${appName}/app.json`;
 
@@ -19,7 +20,7 @@ async function main(): Promise<void> {
 
         try {
                 // Try to load user-defined Application
-                const module = await import(/* @vite-ignore */ `/src/apps/${appName}/MainApp.ts`);
+                const module = await import(/* @vite-ignore */ `/src/apps/${appName}/application.ts`);
                 const AppClass = module.default ?? module[appName] ?? module.MainApp;
 
                 if (AppClass) {

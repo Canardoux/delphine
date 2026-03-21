@@ -20,9 +20,11 @@
  */
 
 import { TObject, TMetaclass, TMetaObject } from './Oops';
+import type { IControl } from './IControl';
 
 export interface IComponent {
         isAForm(): boolean;
+        //getClass(type: string): IControl | undefined;
 }
 
 export interface IMetaComponent {

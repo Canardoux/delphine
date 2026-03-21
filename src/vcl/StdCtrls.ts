@@ -67,6 +67,7 @@ export class TButton extends TControl {
         constructor(name: string, form: IForm, parent: TControl) {
                 super(name, form, parent);
         }
+        /*
         syncDomFromProps() {
                 const el = this.htmlElement;
                 if (!el) return;
@@ -75,6 +76,7 @@ export class TButton extends TControl {
                 this.htmlButton().disabled = !this.enabled;
                 super.syncDomFromProps();
         }
+                */
 }
 
 export class TMetaButton<T extends TButton> extends TMetaControl {
@@ -129,12 +131,14 @@ export class TPanel extends TContainer {
         constructor(name: string, form: IForm | null, parent: TControl | null) {
                 super(name, form, parent);
         }
+        /*
         syncDomFromProps() {
                 const el = this.htmlElement;
                 if (!el) return;
 
                 super.syncDomFromProps();
         }
+                */
         //toto = 12;
 }
 
