@@ -102,6 +102,7 @@ function htmlToTsUri(htmlUri: vscode.Uri): vscode.Uri {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
+        debugger;
         console.log('[Delphine] registering projects provider');
         const formsProvider = new FormsProvider();
         const projectsProvider = new ProjectsProvider();

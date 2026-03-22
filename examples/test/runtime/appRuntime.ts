@@ -1,6 +1,12 @@
+import { TApplication } from '@vcl';
+
+const params = new URLSearchParams(window.location.search);
+const appName = params.get('app') ?? 'MainApp';
+
 async function main(): Promise<void> {
-        // 1. Charger la config de l'app
-        const appConfigUrl = '/src/apps/MainApp/app.json';
+        debugger;
+        // 1. Load app config
+        const appConfigUrl = `/src/apps/${appName}/app.json`;
 
         const appConfigResponse = await fetch(appConfigUrl);
         if (!appConfigResponse.ok) {
@@ -8,53 +14,30 @@ async function main(): Promise<void> {
         }
 
         const appConfig = await appConfigResponse.json();
-        const formName = appConfig.mainForm;
 
-        if (!formName) {
-                throw new Error('mainForm not defined in app.json');
-        }
+        // 2. Create App
+        let app: TApplication;
 
-        // 2. Construire les chemins
-        const basePath = `/src/apps/MainApp/forms/${formName}.form`;
-
-        const modulePath = `${basePath}/${formName}.ts`;
-        const htmlPath = `${basePath}/${formName}.html`;
-
-        // 3. Charger le module TS
-        let module: any;
         try {
-                module = await import(/* @vite-ignore */ modulePath);
-        } catch (e) {
-                console.error('Failed to load TS module:', e);
-                throw e;
+                // Try to load user-defined Application
+                const module = await import(/* @vite-ignore */ `/src/apps/${appName}/application.ts`);
+                const AppClass = module.default ?? module[appName] ?? module.MainApp;
+
+                if (AppClass) {
+                        app = new AppClass(appName, appConfig);
+                } else {
+                        throw new Error('No App class found');
+                }
+        } catch {
+                // Fallback: default Application
+                app = new TApplication(appName, appConfig);
         }
 
-        // 4. Charger le HTML
-        const response = await fetch(htmlPath);
-        if (!response.ok) {
-                throw new Error(`Cannot load ${htmlPath}`);
-        }
-
-        const htmlSource = await response.text();
-
-        // 5. Injecter dans #app
-        const app = document.getElementById('app');
-        if (!app) {
-                throw new Error('#app not found');
-        }
-
-        app.innerHTML = htmlSource;
-
-        // 6. Instancier la Form
-        const FormClass = module.default ?? module[formName];
-        if (!FormClass) {
-                throw new Error(`Cannot resolve class ${formName}`);
-        }
-
-        const form = new FormClass(formName);
-
-        // 7. Lancer Delphine
-        form.show();
+        // 3. Initialize and run
+        await app.initialize();
+        //app.runWhenDomReady(() => {
+        app.start();
+        //});
 }
 
 void main().catch((e) => {

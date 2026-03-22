@@ -1,3 +1,4 @@
 {
-        "defaultApp": "MainApp"
+        "defaultApp": "Test",
+        "name": "Test"
 }

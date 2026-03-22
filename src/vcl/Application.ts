@@ -54,6 +54,7 @@ export class TApplication implements IApplication {
         protected appName: string;
         protected appConfig: TApplicationConfig;
         private formStack: TForm[] = [];
+        private handlingBrowserPop = false;
 
         getMetaclass(): TMetaApplication {
                 return TMetaApplication.metaclass;
@@ -120,7 +121,7 @@ export class TApplication implements IApplication {
                         // this.registerForm(form);
                 }
                 //form?.show();
-                this.activateForm(form);
+                this.showForm(form);
         }
 
         destroy(form: TForm | null) {
@@ -180,12 +181,22 @@ export class TApplication implements IApplication {
         }
 
         pushForm(form: TForm): void {
+                if (!form.elem) {
+                        throw new Error(`Form ${form.name} not created`);
+                }
+
                 if (this.currentForm) {
                         this.currentForm.hide();
                         this.formStack.push(this.currentForm);
                 }
 
                 this.activateForm(form);
+
+                if (!this.handlingBrowserPop) {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('form', form.name);
+                        history.pushState({ form: form.name }, '', url);
+                }
         }
 
         async createAndPushForm(name: string): Promise<void> {
@@ -201,13 +212,11 @@ export class TApplication implements IApplication {
 
         popForm(): void {
                 if (this.formStack.length === 0) {
-                        // TODO
                         //this.onExitRequested();
                         return;
                 }
 
                 const previous = this.formStack.pop()!;
-
                 this.currentForm?.hide();
                 this.activateForm(previous);
         }
@@ -243,17 +252,34 @@ export class TApplication implements IApplication {
                 const form = this.getFormByName(formName);
                 if (form) this.showForm(form);
         }
-        // By default we show() the main Form
-        // This method can be overriden in a user TApplication
-        run() {
-                debugger;
-                this.runWhenDomReady(() => {
-                        if (this.mainForm) {
-                                this.mainForm.show();
-                        } else {
-                                this.autoStart();
+
+        installBrowserBackHandler(): void {
+                window.addEventListener('popstate', (_event) => {
+                        this.handlingBrowserPop = true;
+                        try {
+                                this.popForm();
+                        } finally {
+                                this.handlingBrowserPop = false;
                         }
                 });
+        }
+
+        // By default we show() the main Form
+        // This method can be overriden in a user TApplication
+        start() {
+                debugger;
+                this.runWhenDomReady(() => {
+                        this.installBrowserBackHandler();
+                        this.run();
+                        //if (this.mainForm) {
+                        //} else {
+                        //this.autoStart();
+                        //}
+                });
+        }
+
+        run() {
+                this.mainForm?.show();
         }
 
         // By default, we create a TForm for every Forms declared in app.json.
@@ -275,6 +301,7 @@ export class TApplication implements IApplication {
                 }
         }
 
+        /*
         protected autoStart(): void {
                 debugger;
                 //if (this.forms.length > 0) {
@@ -282,6 +309,7 @@ export class TApplication implements IApplication {
                 this.mainForm!.show();
                 //}
         }
+                */
 
         runWhenDomReady(fn: () => void): void {
                 if (document.readyState === 'loading') {
