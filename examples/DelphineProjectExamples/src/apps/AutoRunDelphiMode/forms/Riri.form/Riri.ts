@@ -1,6 +1,8 @@
 import { TForm, TControl, TButton, TColor, TApplication } from '@vcl';
 import { getApplication } from '@vcl/IApplication';
 
+import './Riri.css';
+
 export default class RiriForm extends TForm {
         button1_onclick(_ev: Event | null, _sender: TControl) {
                 const btn = this.componentRegistry.get<TButton>('button1');
@@ -12,8 +14,8 @@ export default class RiriForm extends TForm {
                 console.log('Button1 clicked!!!!');
                 const app = getApplication() as TApplication;
                 //const mainForm = app.getFormByName('MainForm');
-                //app?.showFormByName('MainForm');
-                app.replaceForm('MainForm');
+                app?.showFormByName('MainForm');
+                //app.replaceForm('MainForm');
         }
 
         button2_onclick(_ev: Event | null, _sender: TControl) {

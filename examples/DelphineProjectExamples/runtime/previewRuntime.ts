@@ -1,67 +1,42 @@
+import { TApplication } from '@vcl';
+
 const params = new URLSearchParams(window.location.search);
 const formName = params.get('form');
 const appName = params.get('app') ?? 'MainApp';
-
-console.log('*** PREVIEW RUNTIME ***', import.meta.url);
 
 if (!formName) {
         throw new Error('Missing form name');
 }
 
 async function main(): Promise<void> {
+        // 1. Create fake application
+        const app = new TApplication(appName, { mainForm: formName });
+
+        // 2. Load Form module
         const basePath = `/src/apps/${appName}/forms/${formName}.form`;
         const modulePath = `${basePath}/${formName}.ts`;
         const htmlPath = `${basePath}/${formName}.html`;
 
-        console.log('Loading TS module:', modulePath);
+        const module = await import(/* @vite-ignore */ modulePath);
+        const response = await fetch(htmlPath);
+        const htmlSource = await response.text();
 
-        let module: any;
-        try {
-                module = await import(/* @vite-ignore */ modulePath);
-                console.log('TS module loaded');
-        } catch (e) {
-                console.error('Failed to load TS module:', e);
-                throw e;
-        }
-
-        console.log('Loading HTML text:', htmlPath);
-
-        let htmlSource: string;
-        try {
-                const response = await fetch(htmlPath);
-                if (!response.ok) {
-                        throw new Error(`HTTP ${response.status} while loading ${htmlPath}`);
-                }
-                htmlSource = await response.text();
-                console.log('HTML loaded');
-        } catch (e) {
-                console.error('Failed to load HTML:', e);
-                throw e;
-        }
-
-        const FormClass = module.default ?? module[formName!];
+        const FormClass = module.default ?? module[formName];
         if (!FormClass) {
                 throw new Error(`Unable to resolve form class ${formName}`);
         }
 
-        const app = document.getElementById('app');
-        if (!app) {
-                throw new Error('Preview container #app not found');
-        }
-
-        app.innerHTML = htmlSource;
-
+        // 3. Create form
         const form = new FormClass(formName);
+        form.create(htmlSource);
+
+        // 4. Register it as main form
+        app.mainForm = form;
+
+        // 5. Show it
         form.show();
 }
 
 void main().catch((e) => {
         console.error('previewRuntime failed:', e);
 });
-
-if (import.meta.hot) {
-        import.meta.hot.on('vite:beforeUpdate', (payload) => {
-                console.log('Vite update detected in preview runtime:', payload);
-                window.location.reload();
-        });
-}

@@ -165,7 +165,8 @@ export class TForm extends TContainer implements IForm {
          * Create the Form DOM under <body>, hidden by default,
          * then build the component tree from the injected HTML.
          */
-        create(htmlSource: string): void {
+        //create(htmlSource: string): void {
+        create(htmlSource: string, parent?: HTMLElement): void {
                 if (this._created) {
                         return;
                 }
