@@ -1,13 +1,13 @@
-import { TForm, TControl, TButton, TColor, TApplication, TPanel } from '@vcl';
+import { TForm, TControl, TButton, TColor, TApplication, TPanel, TPluginHost } from '@vcl';
 import { getApplication } from '@vcl/IApplication';
 
 import './MainForm.css';
 
 export default class MainForm extends TForm {
-        button1_onclick(_ev: Event | null, _sender: TControl) {
-                const btn = this.componentRegistry.get<TButton>('button1');
+        buttona_onclick(_ev: Event | null, _sender: TControl) {
+                const btn = this.componentRegistry.get<TButton>('button-a');
                 if (!btn) {
-                        console.warn('button1 not found in registry');
+                        console.warn('button-a not found in registry');
                         return;
                 }
                 btn!.color = TColor.rgb(255, 255, 2);
@@ -17,10 +17,10 @@ export default class MainForm extends TForm {
                 //app.replaceForm('Riri');
         }
 
-        button2_onclick(_ev: Event | null, _sender: TControl) {
-                const btn = this.componentRegistry.get<TButton>('button2');
+        buttonb_onclick(_ev: Event | null, _sender: TControl) {
+                const btn = this.componentRegistry.get<TButton>('button-b');
                 if (!btn) {
-                        console.warn('button2 not found in registry');
+                        console.warn('button-b not found in registry');
                         return;
                 }
                 btn!.color = TColor.rgb(0, 128, 0);
@@ -40,5 +40,38 @@ export default class MainForm extends TForm {
                 }
                 //btn.color = TColor.rgb(0, 0, 255);
                 panel!.backgroundColor = TColor.rgb(54, 127, 173);
+        }
+
+        button1_onclick(_ev: Event | null, _sender: TControl) {
+                const btn = this.componentRegistry.get<TButton>('button1');
+                if (!btn) {
+                        console.warn('button1 not found in registry');
+                        return;
+                }
+                //btn.color = TColor.rgb(0, 0, 255);
+                btn!.color = TColor.rgb(0, 0, 255);
+                btn!.caption = 'MIMI';
+                btn!.enabled = false;
+                console.log('Button1 clicked!!!!');
+        }
+
+        subButton1_onclick(_ev: Event | null, _sender: TControl) {
+                const panel = this.componentRegistry.get<TPanel>('myPanel');
+                if (!panel) {
+                        console.warn('myPanel not found in registry');
+                        return;
+                }
+                panel!.backgroundColor = TColor.rgb(54, 127, 173);
+
+                const vue = this.componentRegistry.get<TPluginHost>('myvueplugin');
+                //vue!.props.message = 'Message updated from Delphine!!!'
+                vue!.setPluginProp('message', 'Message updated from Delphine!!!');
+        }
+
+        zaza_onclick(_ev: Event | null, _sender: TControl) {
+                const btn = this.componentRegistry.get<TButton>('buttonx');
+                btn!.color = TColor.rgb(0, 255, 0);
+                console.log('zazaVue clicked!!!!');
+                //btn!.enabled = false;
         }
 }

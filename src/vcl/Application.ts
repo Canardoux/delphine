@@ -211,6 +211,10 @@ export class TApplication implements IApplication {
         }
 
         popForm(): void {
+                history.back();
+        }
+
+        private performPopForm(): void {
                 if (this.formStack.length === 0) {
                         //this.onExitRequested();
                         return;
@@ -229,9 +233,11 @@ export class TApplication implements IApplication {
                 }
 
                 const old = this.currentForm;
-                const previous = this.formStack.pop()!;
+                //this.performPopForm();
+                this.popForm();
+                //const previous = this.formStack.pop()!;
 
-                this.activateForm(previous);
+                //this.activateForm(previous);
                 this.destroy(old);
                 //old?.destroy();
         }
@@ -257,7 +263,7 @@ export class TApplication implements IApplication {
                 window.addEventListener('popstate', (_event) => {
                         this.handlingBrowserPop = true;
                         try {
-                                this.popForm();
+                                this.performPopForm();
                         } finally {
                                 this.handlingBrowserPop = false;
                         }
@@ -270,6 +276,9 @@ export class TApplication implements IApplication {
                 debugger;
                 this.runWhenDomReady(() => {
                         this.installBrowserBackHandler();
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('form', this.mainForm!.name);
+                        history.replaceState({ form: this.mainForm!.name }, '', url);
                         this.run();
                         //if (this.mainForm) {
                         //} else {

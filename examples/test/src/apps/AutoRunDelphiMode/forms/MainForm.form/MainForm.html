@@ -13,7 +13,78 @@
         Hello from AutoRunDelphiMode : MainForm
 
         <div id="mypanel" data-delphine-name="myPanel" data-delphine-component="TPanel">
-                <button id="button1" data-delphine-component="TButton" data-delphine-caption="Riri" data-delphine-name="button1" data-delphine-onclick="button1_onclick">Riri!</button>
-                <button id="button2" data-delphine-component="TButton" data-delphine-caption="push Riri" data-delphine-name="button2" data-delphine-onclick="button2_onclick">Push Riri</button>
+                <button id="button-a" data-delphine-component="TButton" data-delphine-caption="Riri" data-delphine-name="button-a" data-delphine-onclick="buttona_onclick">Riri!</button>
+                <button id="button-b" data-delphine-component="TButton" data-delphine-caption="push Riri" data-delphine-name="button-b" data-delphine-onclick="buttonb_onclick">Push Riri</button>
         </div>
+
+
+    <button
+      id="button1"
+      data-delphine-component="TButton"
+      data-delphine-name="button1"
+      data-delphine-props='{
+    
+    "onclick": "button1_onclick",
+    "caption": "Delphine button1 caption",
+    "enabled": true,
+    "name": "button1"
+  }'
+    >
+      zaza
+    </button>
+
+    <button
+      id="buttonx"
+      data-delphine-component="TButton"
+      data-delphine-caption="Delphine buttonx caption"
+      data-delphine-name="buttonx"
+    >
+      Titi
+    </button>
+
+    <h1 id="igfu">Mon titreX</h1>
+
+    <div
+      id="myvueplugin"
+      data-delphine-name="myvueplugin"
+      data-delphine-component="hello-vue"
+      data-delphine-plugin="hello-vue"
+      data-delphine-message="Bonjour depuis Delphine!!!"
+      data-delphine-props='{
+    "message": "Hello depuis Delphine",
+    "count": 3,
+    "enabled": true
+  }'
+    >MY-VUE-PLUGIN</div>
+
+    <div id="mypanel" data-delphine-name="myPanel" data-delphine-component="TPanel">
+      <button
+        data-delphine-component="TButton"
+        data-delphine-caption="sub-button1"
+        data-delphine-name="sub-button1"
+        data-delphine-onclick="subButton1_onclick"
+      >
+        Click Me!
+      </button>
+      <button data-delphine-component="TButton" data-delphine-caption="sub-button2" data-delphine-name="sub-button2">
+        Click Me
+      </button>
+    </div>
+
+    <div
+      id="mydcc"
+      data-delphine-component="TMyDCC"
+      data-delphine-plugin="hello-dcc"
+      data-delphine-name="my-DCC"
+      data-delphine-props='{"message":"Bonjour"}'
+        >
+      <button
+        data-delphine-component="TButton"
+        data-delphine-caption="dcc-button1"
+        data-delphine-name="dcc-button1"
+        data-delphine-onclick="dcc_onclick"
+      >
+
+    DCC</div>
+
 </div>

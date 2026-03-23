@@ -30,6 +30,7 @@ import { TMetaclass, TObject } from './Oops';
 import type { IPluginHost } from './IPlugin';
 import { getApplication } from './IApplication';
 import type { IApplication } from './IApplication';
+import { TPluginHost } from './Plugin';
 
 export type ComponentFactory = (name: string, form: IForm, owner: TControl) => TControl;
 type UnknownRecord = Record<string, unknown>;
@@ -235,14 +236,7 @@ export class TComponentRegistry extends TObject {
                 const name = el.getAttribute('data-delphine-name');
                 const type = el.getAttribute('data-delphine-component');
 
-                //const cls = getApplication()?.types.get(type!);
-                //if (!this.typeRegistry) {
-                //this.typeRegistry = new TComponentTypeRegistry();
-                //registerBuiltins(this.typeRegistry);
-                //}
-
                 const cls = type != null ? getApplication()?.getClass(type) : null;
-                //form?.getClass(type) : null;
 
                 if (!cls) return null;
 
@@ -254,15 +248,9 @@ export class TComponentRegistry extends TObject {
                 }
 
                 this.registerInstance(name!, child);
-                // name: string, form: TForm, parent: TComponent, elem: HTMLElement
                 if (!child) return null;
 
-                //child.parent = component;
-
                 child.elem = el;
-                //child.form = form;
-                //child.name = name!;
-                //child.props = {};
 
                 // We collect
                 this.parsePropsFromElement(child);
@@ -275,21 +263,12 @@ export class TComponentRegistry extends TObject {
                 // Done in the constructor //parent.children.push(child);
                 const maybeHost = child as unknown as Partial<IPluginHost>;
                 if (maybeHost && typeof maybeHost.setPluginSpec === 'function') {
-                        /*
+                        //maybeHost.setPluginSpec(cls);
                         const plugin = el.getAttribute('data-delphine-plugin');
                         const raw = el.getAttribute('data-delphine-props');
                         const props = raw ? JSON.parse(raw) : {};
 
-                        maybeHost.setPluginSpec({ plugin, props });
-                        maybeHost.mountPluginIfReady!(this._toto.services);
-                        //maybeHost.mountFromRegistry(services);
-                        */
-
-                        const plugin = el.getAttribute('data-delphine-plugin');
-                        const raw = el.getAttribute('data-delphine-props');
-                        const props = raw ? JSON.parse(raw) : {};
-
-                        maybeHost.setPluginSpec({ plugin, props });
+                        maybeHost.setPluginSpec({ plugin, props, meta: cls });
                         maybeHost.mountPluginIfReady!();
                 }
 

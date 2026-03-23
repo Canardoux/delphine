@@ -17,7 +17,35 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { IComponent } from 'grapesjs';
+export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
+
 export type UIPluginMessage = { type: 'setProp'; hostName: string; key: string; value: any } | { type: 'event'; hostName: string; name: string; detail?: any };
+
+export interface UIPluginInstance<Props extends Json = Json> {
+        readonly id: string;
+
+        // Called exactly once after creation (for a given instance).
+        mount(container: HTMLElement, props: Props, services: DelphineServices): void;
+
+        // Called any time props change (may be frequent).
+        update(props: Props): void;
+
+        // Called exactly once before disposal.
+        unmount(): void;
+
+        // Finished with this plugin
+        dispose?(): void;
+
+        // Optional ergonomics.
+        getSizeHints?(): number;
+        focus?(): void;
+
+        // Optional persistence hook (Delphine may store & restore this).
+        serializeState?(): Json;
+}
+
+export type UIPluginFactory<Props extends Json = Json> = (args: { host: IPluginHost; form: IComponent }) => UIPluginInstance<Props>;
 
 export interface DelphineServices {
         log: {
@@ -45,6 +73,9 @@ export interface DelphineServices {
         // nav?: ...
 }
 export interface IPluginHost {
-        setPluginSpec(spec: { plugin: string | null; props: any }): void;
+        setPluginSpec(spec: { plugin: string | null; props: any; meta: IMetaPluginHost }): void;
         mountPluginIfReady(/*services: DelphineServices*/): void;
+        getName(): string;
 }
+
+export interface IMetaPluginHost {}

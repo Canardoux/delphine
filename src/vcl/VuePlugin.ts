@@ -18,7 +18,7 @@
  */
 
 import { createApp, reactive, type App as VueApp, type Component } from 'vue';
-import type { UIPluginFactory } from './Plugin';
+import type { UIPluginFactory } from './IPlugin';
 
 export function defineVuePlugin(component: Component): UIPluginFactory {
         return ({ host }) => {
@@ -34,7 +34,7 @@ export function defineVuePlugin(component: Component): UIPluginFactory {
                                 app = createApp(component, {
                                         state,
                                         services,
-                                        hostName: host.name
+                                        hostName: host.getName()
                                 });
 
                                 app.mount(container);
