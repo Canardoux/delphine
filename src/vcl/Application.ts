@@ -42,9 +42,9 @@ export class TMetaApplication extends TMetaclass {
         protected constructor(superClass: TMetaclass, name: string) {
                 super(superClass, name);
         }
-        getMetaclass(): TMetaApplication {
-                return TMetaApplication.metaclass;
-        }
+        //getMetaclass(): TMetaApplication {
+        //return TMetaApplication.metaclass;
+        //}
 }
 
 export class TApplication implements IApplication {
@@ -56,9 +56,9 @@ export class TApplication implements IApplication {
         private formStack: TForm[] = [];
         private handlingBrowserPop = false;
 
-        getMetaclass(): TMetaApplication {
-                return TMetaApplication.metaclass;
-        }
+        //getMetaclass(): TMetaApplication {
+        //return TMetaApplication.metaclass;
+        //}
         private forms: Map<string, TForm> = new Map<string, TForm>();
 
         constructor(appName: string, appConfig: TApplicationConfig) {
@@ -66,7 +66,7 @@ export class TApplication implements IApplication {
                 this.appName = appName;
                 this.appConfig = appConfig;
                 setApplication(this);
-                this.typeRegistry = new TComponentTypeRegistry();
+                this.typeRegistry = new TComponentTypeRegistry(TMetaApplication.metaclass);
                 registerBuiltins(this.typeRegistry);
 
                 //registerBuiltins(this.types);

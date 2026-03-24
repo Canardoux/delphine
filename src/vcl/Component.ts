@@ -37,11 +37,11 @@ export type ComponentProps = Record<string, unknown>;
 export type PropKind = 'string' | 'number' | 'boolean' | 'color' | 'handler';
 
 export class TComponent extends TObject implements IComponent {
-        getMetaclass() {
-                return TMetaComponent.metaclass;
-        }
-        constructor(name: string, form: IForm | null, parent: TComponent | null) {
-                super();
+        //getMetaclass() {
+        //return TMetaComponent.metaclass;
+        //}
+        constructor(metaclass: TMetaclass, name: string, form: IForm | null, parent: TComponent | null) {
+                super(metaclass);
                 //super(name, form, parent);
         }
         isAForm(): boolean {
@@ -66,7 +66,7 @@ export class TComponent extends TObject implements IComponent {
 }
 
 export class TMetaComponent extends TMetaObject {
-        static readonly metaclass: TMetaComponent = new TMetaComponent(TMetaObject.metaClass, 'TMetacomponent');
+        static readonly metaclass: TMetaComponent = new TMetaComponent(TMetaObject.metaclass, 'TMetacomponent');
 
         protected constructor(superClass: TMetaObject, name: string) {
                 super(superClass, name);
@@ -74,12 +74,12 @@ export class TMetaComponent extends TMetaObject {
         }
 
         create(name: string, form: IForm, parent: TComponent): TComponent {
-                return new TComponent(name, form, parent);
+                return new TComponent(TMetaComponent.metaclass, name, form, parent);
         }
 
-        getMetaclass() {
-                return TMetaComponent.metaclass;
-        }
+        //getMetaclass() {
+        //return TMetaComponent.metaclass;
+        //}
 
         isAForm(): boolean {
                 return false;

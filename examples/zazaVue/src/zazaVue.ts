@@ -109,9 +109,9 @@ class ZazaVue extends TForm {
 //}
 
 class MyDCC extends TCompositeDCC {
-        getMetaclass() {
-                return TMetaMyDCC.metaclass
-        }
+        //getMetaclass() {
+        //return TMetaMyDCC.metaclass
+        //}
 
         constructor(name: string, form: TForm, parent: TControl) {
                 super(name, form, parent)
@@ -137,9 +137,9 @@ export class TMetaMyDCC extends TMetaCompositeDCC {
                 super(superClass, name)
                 // et vous changez juste le nom :
         }
-        getMetaclass(): TMetaMyDCC {
-                return TMetaMyDCC.metaclass
-        }
+        //getMetaclass(): TMetaMyDCC {
+        //return TMetaMyDCC.metaclass
+        //}
 
         create(name: string, form: TForm, parent: TControl) {
                 return new MyDCC(name, form, parent)

@@ -23,25 +23,32 @@ export abstract class TMetaclass {
         static metaclass: TMetaclass;
         readonly superClass: TMetaclass | null = null;
 
-        abstract getMetaclass(): TMetaclass;
+        //getMetaclass(): TMetaclass {
+        //return this.metaclass;
+        //}
         protected constructor(superClass: TMetaclass | null, typeName = 'TMetaclass') {
+                //this.metaclass = metaclass;
                 this.superClass = superClass;
                 this.typeName = typeName;
         }
 }
 
 export class TObject {
-        getMetaClass(): TMetaObject {
-                return TMetaObject.metaClass;
+        metaclass: TMetaclass;
+        constructor(metaclass: TMetaclass) {
+                this.metaclass = metaclass;
+        }
+        getMetaclass(): TMetaObject {
+                return this.metaclass;
         }
 }
 
 export class TMetaObject extends TMetaclass {
-        static readonly metaClass: TMetaObject = new TMetaObject(TMetaclass.metaclass, 'TObject');
+        static metaclass: TMetaObject = new TMetaObject(TMetaclass.metaclass, 'TObject');
 
-        getMetaclass(): TMetaObject {
-                return TMetaObject.metaClass;
-        }
+        //getMetaclass(): TMetaObject {
+        //return TMetaObject.metaclass;
+        //}
         constructor(superClass: TMetaclass, name: string) {
                 super(superClass, name);
         }

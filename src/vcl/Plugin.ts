@@ -18,6 +18,7 @@
  */
 
 import { TForm } from './Form';
+import { IForm } from './IForm';
 import { TControl, TMetaControl } from './Base';
 import type { PropSpec } from './Component';
 import { TApplication } from './Application';
@@ -111,19 +112,21 @@ export interface UIPluginInstance<Props extends Json = Json> {
         */
 
 export class TMetaPluginHost extends TMetaControl implements IMetaPluginHost {
-        pluginFactory: UIPluginFactory;
-        //static metaclass = new TMetaPluginHost(TMetaControl.metaclass, 'TPluginHost');
+        pluginFactory: UIPluginFactory | null;
+        static metaclass = new TMetaPluginHost(TMetaControl.metaclass, 'TPluginHost', null);
         //getMetaclass() {
         //        return TMetaPluginHost.metaclass;
         //}
 
-        public constructor(superClass: TMetaControl, name: string, pluginFactory: UIPluginFactory) {
+        public constructor(superClass: TMetaControl, name: string, pluginFactory: UIPluginFactory | null) {
                 super(superClass, name);
                 this.pluginFactory = pluginFactory;
         }
 
         create(name: string, form: TForm, parent: TControl) {
-                return new TPluginHost(name, form, parent);
+                const pluginHost = new TPluginHost(name, form, parent);
+                pluginHost.metaclass = this;
+                return pluginHost;
         }
 
         defProps(): PropSpec<TPluginHost>[] {
@@ -158,12 +161,16 @@ export class TPluginHost extends TControl {
         private pluginPropsKey: string = '';
         //private factory: UIPluginFactory | null = null;
         //private pluginDef: UIPluginDef<Json> | null = null;
-        private meta: TMetaPluginHost | null = null;
+        //private meta: TMetaPluginHost | null = null;
 
         private mountPoint: HTMLElement | null = null;
         private observer: MutationObserver | null = null;
 
         private updateScheduled = false;
+
+        constructor(name: string, form: IForm, parent: TControl) {
+                super(TMetaPluginHost.metaclass, name, form, parent);
+        }
 
         /** Replace ALL plugin props (rare). */
         setPluginProps(next: Record<string, any>) {
@@ -230,11 +237,13 @@ export class TPluginHost extends TControl {
                 */
 
         // Called by buildComponentTree()
-        setPluginSpec(spec: { plugin: string | null; props: any; meta: IMetaComponent }) {
+        setPluginSpec(spec: { plugin: string | null; props: any }) {
                 this.pluginName = spec.plugin;
                 this.pluginProps = spec.props ?? {};
-                const meta = spec.meta as TMetaPluginHost;
-                this.meta = meta;
+                //this.metaclass = spec.meta as TMetaPluginHost;
+                //const meta = spec.meta as TMetaPluginHost;
+                //meta.
+                //this.meta = meta;
                 //this.factory = spec.factory;
         }
 
@@ -350,7 +359,8 @@ export class TPluginHost extends TControl {
                 //const meta = this.getMetaClass() as TMetaPluginHost;
                 //const def = meta.pluginFactory;
                 //const def = this.factory;
-                const def = this.meta?.defProps; //PluginRegistry.pluginRegistry.get(this.pluginName);
+                const meta = this.getMetaclass() as TMetaPluginHost;
+                const def = meta.defProps; //PluginRegistry.pluginRegistry.get(this.pluginName);
                 if (!def) {
                         services.log.warn('Unknown plugin', { plugin: this.pluginName as any });
                         this.unmount();
@@ -359,7 +369,8 @@ export class TPluginHost extends TControl {
 
                 // Hard remount
                 this.unmount();
-                this.instance = this.meta?.pluginFactory({ host: this, form: this.form as IComponent }) ?? null; // The instance is created Here !---------------
+                //const meta = this.getMetaclass() as TMetaPluginHost;
+                this.instance = meta.pluginFactory!({ host: this, form: this.form as IComponent }) ?? null; // The instance is created Here !---------------
                 this.instance?.mount(this.mountPoint, this.pluginProps, services); // Puis est monté ici ----------------------
         }
 
@@ -387,7 +398,8 @@ export class TPluginHost extends TControl {
                 //const def = this.factory; // meta.pluginFactory;
 
                 //const def = PluginRegistry.pluginRegistry.get(this.pluginName);
-                const def = this.meta?.defProps;
+                const meta = this.getMetaclass() as TMetaPluginHost;
+                const def = meta.defProps;
                 if (!def) {
                         services.log.warn('Unknown plugin', { plugin: this.pluginName });
                         return;
@@ -395,7 +407,8 @@ export class TPluginHost extends TControl {
 
                 this.unmount();
 
-                this.instance = this.meta?.pluginFactory({ host: this, form: this.form! as IComponent }) ?? null;
+                //const meta = this.getMetaclass as TMetaPluginHost;
+                this.instance = meta.pluginFactory!({ host: this, form: this.form! as IComponent }) ?? null;
 
                 this.instance?.mount(el, this.pluginProps, services);
         }

@@ -22,19 +22,20 @@
 import { TControl, TMetaControl } from './Base';
 import type { PropSpec } from './Component';
 import type { IForm } from './IForm';
+import type { TMetaclass } from './Oops';
 
 // This clas does not do anything except overrides allowsChildren()
 export class TContainer extends TControl {
-        getMetaclass(): TMetaContainer {
-                return TMetaContainer.metaclass;
-        }
+        //getMetaclass(): TMetaContainer {
+        //return TMetaContainer.metaclass;
+        //}
 
         //private get cprops(): ContainerProps {
         //return this.props as ContainerProps;
         //}
 
-        constructor(name: string, form: IForm | null, parent: TControl | null) {
-                super(name, form, parent);
+        constructor(metaclass: TMetaclass, name: string, form: IForm | null, parent: TControl | null) {
+                super(metaclass, name, form, parent);
         }
 
         /*
@@ -53,17 +54,17 @@ export class TContainer extends TControl {
 }
 
 export class TMetaContainer extends TMetaControl {
-        static readonly metaclass: TMetaContainer = new TMetaContainer(TMetaControl.metaclass, 'TContainer');
+        static metaclass: TMetaContainer = new TMetaContainer(TMetaControl.metaclass, 'TContainer');
 
         protected constructor(superClass: TMetaControl, name: string) {
                 super(superClass, name);
         }
-        getMetaclass() {
-                return TMetaContainer.metaclass;
-        }
+        //getMetaclass() {
+        //return TMetaContainer.metaclass;
+        //}
 
         create(name: string, form: IForm, parent: TControl): TContainer {
-                return new TContainer(name, form, parent);
+                return new TContainer(TMetaContainer.metaclass, name, form, parent);
         }
 
         defProps(): PropSpec<any>[] {

@@ -62,9 +62,9 @@ export class THandler {
 // --------------------------------------
 
 export class TControl extends TComponent implements IControl {
-        getMetaclass() {
-                return TMetaControl.metaclass;
-        }
+        //getMetaclass() {
+        //return TMetaControl.metaclass;
+        //}
 
         readonly name: string;
         readonly parent: TControl | null = null;
@@ -76,8 +76,8 @@ export class TControl extends TComponent implements IControl {
         get htmlElement(): HTMLElement | null {
                 return this.elem as HTMLElement | null;
         }
-        constructor(name: string, form: IForm | null, parent: TControl | null) {
-                super(name, form, parent);
+        constructor(metaclass: TMetaclass, name: string, form: IForm | null, parent: TControl | null) {
+                super(metaclass, name, form, parent);
                 this.name = name;
                 this.parent = parent;
                 parent?.children.push(this); // Could be done in buildComponentTree()
@@ -172,9 +172,9 @@ export class TMetaControl extends TMetaComponent implements IMetaControl {
                 super(superClass, name);
         }
 
-        getMetaclass() {
-                return TMetaComponent.metaclass;
-        }
+        //getMetaclass() {
+        //return TMetaComponent.metaclass;
+        //}
 
         isAForm(): boolean {
                 return false;
@@ -182,7 +182,7 @@ export class TMetaControl extends TMetaComponent implements IMetaControl {
 
         // Create the runtime instance and attach it to the DOM element.
         create(name: string, form: IForm, parent: TControl): TControl {
-                return new TControl(name, form, parent);
+                return new TControl(TMetaControl.metaclass, name, form, parent);
         }
 
         defProps(): PropSpec<any>[] {

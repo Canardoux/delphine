@@ -23,21 +23,21 @@ import { TMetaComponent } from './Component';
 import type { IMetaComponent } from './IComponent';
 
 export class TMetaComponentTypeRegistry extends TMetaObject {
-        static readonly metaclass: TMetaComponentTypeRegistry = new TMetaComponentTypeRegistry(TMetaObject.metaClass, 'TComponentTypeRegistry');
+        static readonly metaclass: TMetaComponentTypeRegistry = new TMetaComponentTypeRegistry(TMetaObject.metaclass, 'TComponentTypeRegistry');
         protected constructor(superClass: TMetaObject, name: string) {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
-        getMetaclass(): TMetaComponentTypeRegistry {
-                return TMetaComponentTypeRegistry.metaclass;
-        }
+        //getMetaclass(): TMetaComponentTypeRegistry {
+        //return TMetaComponentTypeRegistry.metaclass;
+        //}
 }
 
 export class TComponentTypeRegistry extends TObject {
         // We store heterogeneous metas, so we keep them as TMetaComponent<any>.
-        getMetaclass(): TMetaComponentTypeRegistry {
-                return TMetaComponentTypeRegistry.metaClass;
-        }
+        //getMetaclass(): TMetaComponentTypeRegistry {
+        //return TMetaComponentTypeRegistry.metaclass;
+        //}
         private readonly classes = new Map<string, IMetaComponent>();
 
         register(meta: TMetaComponent) {

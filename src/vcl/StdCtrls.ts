@@ -23,12 +23,13 @@ import { TMetaContainer, TContainer } from './Container';
 import type { PropSpec } from './Component';
 import type { IForm } from './IForm';
 import type { IControl } from './IControl';
+import type { TMetaclass } from './Oops';
 //import { TForm } from './Form';
 
 export class TButton extends TControl {
-        getMetaclass() {
-                return TMetaControl.metaclass;
-        }
+        //getMetaclass() {
+        //return TMetaControl.metaclass;
+        //}
 
         htmlButton(): HTMLButtonElement {
                 return this.htmlElement! as HTMLButtonElement;
@@ -65,7 +66,7 @@ export class TButton extends TControl {
         }
 
         constructor(name: string, form: IForm, parent: TControl) {
-                super(name, form, parent);
+                super(TMetaButton.metaclass, name, form, parent);
         }
         /*
         syncDomFromProps() {
@@ -80,15 +81,15 @@ export class TButton extends TControl {
 }
 
 export class TMetaButton<T extends TButton> extends TMetaControl {
-        static readonly metaclass = new TMetaButton(TMetaControl.metaclass, 'TButton');
+        static metaclass = new TMetaButton(TMetaControl.metaclass, 'TButton');
 
         protected constructor(superClass: TMetaControl, name: string) {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
-        getMetaclass() {
-                return TMetaButton.metaclass;
-        }
+        //getMetaclass() {
+        //return TMetaButton.metaclass;
+        //}
 
         create(name: string, form: IForm, parent: TControl) {
                 return new TButton(name, form, parent) as T;
@@ -120,16 +121,16 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
 // --------------------------------------
 
 export class TPanel extends TContainer {
-        getMetaclass(): TMetaPanel {
-                return TMetaPanel.metaclass;
-        }
+        //getMetaclass(): TMetaPanel {
+        //return TMetaPanel.metaclass;
+        //}
 
         //protected get pprops(): PanelProps {
         //return this.props as PanelProps;
         //}
 
         constructor(name: string, form: IForm | null, parent: TControl | null) {
-                super(name, form, parent);
+                super(TMetaControl.metaclass, name, form, parent);
         }
         /*
         syncDomFromProps() {
@@ -149,9 +150,9 @@ export class TMetaPanel extends TMetaContainer {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
-        getMetaclass(): TMetaPanel {
-                return TMetaPanel.metaclass;
-        }
+        //getMetaclass(): TMetaPanel {
+        //return TMetaPanel.metaclass;
+        //}
 
         create(name: string, form: IForm, parent: TControl): TPanel {
                 return new TPanel(name, form, parent);
@@ -166,12 +167,12 @@ export class TMetaPanel extends TMetaContainer {
 }
 
 export class TSimpleDCC extends TControl {
-        getMetaclass() {
-                return TMetaSimpleDCC.metaclass;
-        }
+        //getMetaclass() {
+        //return TMetaSimpleDCC.metaclass;
+        //}
 
         constructor(name: string, form: IForm, parent: TControl) {
-                super(name, form, parent);
+                super(TMetaSimpleDCC.metaclass, name, form, parent);
         }
 
         /*
@@ -188,9 +189,9 @@ export class TMetaSimpleDCC extends TMetaControl {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
-        getMetaclass(): TMetaSimpleDCC {
-                return TMetaSimpleDCC.metaclass;
-        }
+        //getMetaclass(): TMetaSimpleDCC {
+        //return TMetaSimpleDCC.metaclass;
+        //}
 
         create(name: string, form: IForm, parent: TControl) {
                 return new TSimpleDCC(name, form, parent);
@@ -215,12 +216,12 @@ export type CompositeDCCProps = ComponentProps & {
 // Note: this class does not do anything. Perhaps that DCC can herit directly from TContainer or TPanel
 // TContainer or TPanel ? Actually this is not clear. Those two class do not do anything useful abof TComponent
 export class TCompositeDCC extends TContainer {
-        getMetaclass() {
-                return TMetaCompositeDCC.metaclass;
-        }
+        //getMetaclass() {
+        //return TMetaCompositeDCC.metaclass;
+        //}
 
         constructor(name: string, form: IForm, parent: TControl) {
-                super(name, form, parent);
+                super(TMetaCompositeDCC.metaclass, name, form, parent);
         }
         /*
         protected get dccprops(): CompositeDCCProps {
@@ -236,9 +237,9 @@ export class TMetaCompositeDCC extends TMetaContainer {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
-        getMetaclass(): TMetaCompositeDCC {
-                return TMetaCompositeDCC.metaclass;
-        }
+        //getMetaclass(): TMetaCompositeDCC {
+        //return TMetaCompositeDCC.metaclass;
+        //}
 
         create(name: string, form: IForm, parent: TControl) {
                 return new TCompositeDCC(name, form, parent);

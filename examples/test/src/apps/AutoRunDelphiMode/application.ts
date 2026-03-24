@@ -9,7 +9,7 @@ export default class Application extends TApplication {
 
         override async initialize(): Promise<void> {
                 debugger;
-                const metaPlugin = new TMetaPluginHost(TMetaControl.metaclass, 'hello-vue', createHelloVuePlugin);
+                const metaPlugin = new TMetaPluginHost(TMetaPluginHost.metaclass, 'hello-vue', createHelloVuePlugin);
                 this.typeRegistry?.register(metaPlugin);
                 //PluginRegistry.pluginRegistry.register('hello-vue', { factory: createHelloVuePlugin }); // Must be done before the createForms() !!!
                 this.mainForm = (await this.createFormByName('MainForm')) as MainForm;

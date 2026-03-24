@@ -73,7 +73,7 @@ export interface DelphineServices {
         // nav?: ...
 }
 export interface IPluginHost {
-        setPluginSpec(spec: { plugin: string | null; props: any; meta: IMetaPluginHost }): void;
+        setPluginSpec(spec: { plugin: string | null; props: any }): void;
         mountPluginIfReady(/*services: DelphineServices*/): void;
         getName(): string;
 }

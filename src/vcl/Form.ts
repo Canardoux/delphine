@@ -32,9 +32,9 @@ import { getApplication } from './IApplication';
 
 export class TMetaForm extends TMetaContainer {
         static readonly metaclass: TMetaForm = new TMetaForm(TMetaContainer.metaclass, 'TForm');
-        getMetaClass() {
-                return TMetaForm.metaclass;
-        }
+        //getMetaClass() {
+        //return TMetaForm.metaclass;
+        //}
 
         protected constructor(superClass: TMetaContainer, name: string) {
                 super(superClass, name);
@@ -58,16 +58,16 @@ export class TMetaForm extends TMetaContainer {
 }
 
 export class TForm extends TContainer implements IForm {
-        getMetaclass() {
-                return TMetaForm.metaclass;
-        }
+        //getMetaclass() {
+        //return TMetaForm.metaclass;
+        //}
         static forms = new Map<string, TForm>();
         private _mounted = false;
         // Each Form has its own componentRegistry
         componentRegistry: TComponentRegistry = new TComponentRegistry();
         //typeRegistry: TComponentTypeRegistry | null = null;
         constructor(name: string) {
-                super(name, null, null);
+                super(TMetaForm.metaclass, name, null, null);
                 this.form = this;
                 TForm.forms.set(name, this);
         }
@@ -118,8 +118,8 @@ export class TForm extends TContainer implements IForm {
                 for (const type of ['click', 'input', 'change', 'keydown']) {
                         root.addEventListener(type, handler, { capture: true, signal });
                 }
-
-                for (const type in this.getMetaclass().domEvents) {
+                const meta = this.getMetaclass() as TMetaForm;
+                for (const type in meta.domEvents) {
                         root.addEventListener(type, handler, { capture: true, signal });
                 }
         }

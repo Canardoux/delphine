@@ -26,7 +26,7 @@ export class TDocument extends TObject {
         static body = document.body;
         htmlDoc: Document;
         constructor(htmlDoc: Document) {
-                super();
+                super(TMetaDocument.metaclass);
                 this.htmlDoc = htmlDoc;
         }
 }
@@ -38,7 +38,7 @@ export class TMetaDocument extends TMetaObject {
                 super(superClass, name);
                 // et vous changez juste le nom :
         }
-        getMetaclass() {
-                return TMetaDocument.metaclass;
-        }
+        //getMetaclass() {
+        //return TMetaDocument.metaclass;
+        //}
 }

@@ -39,7 +39,6 @@ const RESERVED_DATA_ATTRS = new Set<string>([
         'data-delphine-component',
         'data-delphine-name',
         'data-delphine-props',
-        'data-delphine-plugin',
         'data-delphine-message' // add any meta/framework attrs you don't want treated as props
 ]);
 
@@ -49,21 +48,21 @@ export class TMetaComponentRegistry extends TMetaclass {
         protected constructor(superClass: TMetaclass, name: string) {
                 super(superClass, name);
         }
-        getMetaclass(): TMetaComponentRegistry {
-                return TMetaComponentRegistry.metaclass;
-        }
+        //getMetaclass(): TMetaComponentRegistry {
+        //return TMetaComponentRegistry.metaclass;
+        //}
 }
 
 export class TComponentRegistry extends TObject {
         //_toto: Toto = new Toto();
-        getMetaclass(): TMetaComponentRegistry {
-                return TMetaComponentRegistry.metaclass;
-        }
+        //getMetaclass(): TMetaComponentRegistry {
+        //return TMetaComponentRegistry.metaclass;
+        //}
 
         private instances = new Map<string, TControl>();
 
         constructor() {
-                super();
+                super(TMetaComponentRegistry.metaclass);
         }
 
         registerInstance(name: string, c: TControl) {
@@ -228,8 +227,8 @@ export class TComponentRegistry extends TObject {
                 const dataAttrs = this.extractDataAttributes(el);
 
                 // 3) Apply JSON first, then data-delphine-xxx overrides
-                this.applyPropsFromSource(comp, jsonProps, comp.getMetaclass());
-                this.applyPropsFromSource(comp, dataAttrs, comp.getMetaclass());
+                this.applyPropsFromSource(comp, jsonProps, comp.getMetaclass() as TMetaControl);
+                this.applyPropsFromSource(comp, dataAttrs, comp.getMetaclass() as TMetaControl);
         }
 
         private processElem(el: Element, form: IForm, parent: TControl): TControl | null {
@@ -268,7 +267,7 @@ export class TComponentRegistry extends TObject {
                         const raw = el.getAttribute('data-delphine-props');
                         const props = raw ? JSON.parse(raw) : {};
 
-                        maybeHost.setPluginSpec({ plugin, props, meta: cls });
+                        maybeHost.setPluginSpec({ plugin, props });
                         maybeHost.mountPluginIfReady!();
                 }
 
