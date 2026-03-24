@@ -1,6 +1,6 @@
 import RiriForm from './forms/Riri.form/Riri';
 import MainForm from './forms/MainForm.form/MainForm';
-import { TApplication, PluginRegistry, TMetaPluginHost, TMetaControl } from '@vcl';
+import { TApplication, TMetaPluginHost, TMetaControl } from '@vcl';
 import { createHelloVuePlugin } from './plugins/HelloVuePlugin/createHelloVuePlugin';
 
 export default class Application extends TApplication {

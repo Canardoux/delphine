@@ -193,14 +193,21 @@ export class TPluginHost extends TControl {
                 this.instance?.update(next);
         }
 
+        getPluginProp<T = any>(name: string): T | undefined {
+                return this.pluginProps[name] as T | undefined;
+        }
+
+        defProps(): PropSpec<any>[] {
+                return [
+                        //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
+                        //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
+                ];
+        }
+
         /** Patch many props at once (preferred). */
         patchPluginProps(patch: Record<string, any>) {
                 Object.assign(this.pluginProps, patch);
                 this.scheduleUpdate();
-        }
-
-        getPluginProp<T = any>(name: string): T | undefined {
-                return this.pluginProps[name] as T | undefined;
         }
 
         getName() {
@@ -296,7 +303,7 @@ export class TPluginHost extends TControl {
                                 for (const m of mutations) {
                                         if (m.type === 'attributes') {
                                                 const a = m.attributeName;
-                                                if (a === 'data-delphine-plugin' || a === 'data-delphine-props') {
+                                                if (a === 'data-delphine-props') {
                                                         this.refreshFromDom();
                                                         break;
                                                 }
@@ -314,7 +321,7 @@ export class TPluginHost extends TControl {
                 const hostEl = this.htmlElement;
                 if (!services || !hostEl || !this.form || !this.mountPoint) return;
 
-                const newPlugin = hostEl.getAttribute('data-delphine-plugin'); // string | null
+                const newPlugin = hostEl.getAttribute('data-delphine-component'); // string | null
                 const newProps = safeParseJson(hostEl.getAttribute('data-delphine-props'));
                 const newKey = stableStringify(newProps);
 

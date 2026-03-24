@@ -263,11 +263,11 @@ export class TComponentRegistry extends TObject {
                 const maybeHost = child as unknown as Partial<IPluginHost>;
                 if (maybeHost && typeof maybeHost.setPluginSpec === 'function') {
                         //maybeHost.setPluginSpec(cls);
-                        const plugin = el.getAttribute('data-delphine-plugin');
+                        //const plugin = el.getAttribute('data-delphine-plugin');
                         const raw = el.getAttribute('data-delphine-props');
                         const props = raw ? JSON.parse(raw) : {};
 
-                        maybeHost.setPluginSpec({ plugin, props });
+                        maybeHost.setPluginSpec({ plugin: type, props });
                         maybeHost.mountPluginIfReady!();
                 }
 
