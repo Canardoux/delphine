@@ -1,4 +1,5 @@
 // Plugin.ts
+// ---------
 /*
  * Copyright 2026 Canardoux.
  *

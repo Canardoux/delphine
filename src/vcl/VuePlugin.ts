@@ -1,4 +1,5 @@
 // VuePlugin.ts
+// ------------
 /*
  * Copyright 2026 Canardoux.
  *
@@ -17,21 +18,21 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { createApp, reactive, type App as VueApp, type Component } from 'vue';
-import type { UIPluginFactory } from './IPlugin';
+import { createApp, reactive, type Component } from 'vue';
+import type { UIPluginFactory, PluginSchema } from './IPlugin';
 
-export function defineVuePlugin(component: Component): UIPluginFactory {
-        return ({ host }) => {
-                let app: VueApp | null = null;
+export function defineVuePlugin(schema: PluginSchema): UIPluginFactory {
+        const factory: UIPluginFactory = ({ host }) => {
+                let app: any = null;
                 const state = reactive<Record<string, unknown>>({});
 
                 return {
-                        id: (component as any).name ?? 'vue-plugin',
+                        id: (schema.component as any).name ?? 'vue-plugin',
 
                         mount(container, props, services) {
                                 Object.assign(state, props);
 
-                                app = createApp(component, {
+                                app = createApp(schema.component, {
                                         state,
                                         services,
                                         hostName: host.getName()
@@ -50,4 +51,7 @@ export function defineVuePlugin(component: Component): UIPluginFactory {
                         }
                 };
         };
+
+        (factory as any).propSchema = schema.props;
+        return factory;
 }

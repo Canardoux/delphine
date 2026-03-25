@@ -79,3 +79,25 @@ export interface IPluginHost {
 }
 
 export interface IMetaPluginHost {}
+
+export type PluginPropSchema = Record<
+        string,
+        {
+                kind: 'string' | 'number' | 'boolean' | 'json';
+                default?: unknown;
+        }
+>;
+
+export type PluginSchema = {
+        name: string;
+        component: any;
+        props?: PluginPropSchema;
+
+        // GrapesJS / designer
+        label?: string;
+        category?: string;
+        icon?: string;
+
+        // Optional default HTML representation
+        defaultProps?: Record<string, any>;
+};
