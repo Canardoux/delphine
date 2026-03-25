@@ -21,6 +21,7 @@
 
 import { TObject, TMetaclass, TMetaObject } from './Oops';
 import type { IControl } from './IControl';
+import type { PropKind } from './Component';
 
 export interface IComponent {
         isAForm(): boolean;
@@ -31,3 +32,26 @@ export interface IMetaComponent {
         create(name: string, form: any, parent: any): any;
         isAForm(): boolean;
 }
+
+export type PropSchema = Record<
+        string,
+        {
+                kind: PropKind;
+
+                default?: unknown;
+        }
+>;
+
+export type ComponentSchema = {
+        name: string;
+        component: any;
+        props?: PropSchema;
+
+        // GrapesJS / designer
+        label?: string;
+        category?: string;
+        icon?: string;
+
+        // Optional default HTML representation
+        defaultProps?: Record<string, any>;
+};

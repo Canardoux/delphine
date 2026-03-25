@@ -19,9 +19,10 @@
  */
 
 import { createApp, reactive, type Component } from 'vue';
-import type { UIPluginFactory, PluginSchema } from './IPlugin';
+import type { UIPluginFactory } from './IPlugin';
+import type { ComponentSchema } from './IComponent';
 
-export function defineVuePlugin(schema: PluginSchema): UIPluginFactory {
+export function defineVuePlugin(schema: ComponentSchema): UIPluginFactory {
         const factory: UIPluginFactory = ({ host }) => {
                 let app: any = null;
                 const state = reactive<Record<string, unknown>>({});

@@ -21,7 +21,7 @@
 
 import { TMetaclass } from './Oops';
 import { TForm } from './Form';
-import { TComponentTypeRegistry } from './ComponentTypeRegistry';
+import { TTypeRegistry } from './TypeRegistry';
 import { registerBuiltins } from './RegisterVcl';
 import { getApplication, setApplication } from './IApplication';
 import type { IApplication } from './IApplication';
@@ -48,7 +48,7 @@ export class TMetaApplication extends TMetaclass {
 }
 
 export class TApplication implements IApplication {
-        typeRegistry: TComponentTypeRegistry | null = null;
+        typeRegistry: TTypeRegistry | null = null;
         currentForm: TForm | null = null;
         mainForm: TForm | null = null;
         protected appName: string;
@@ -66,7 +66,7 @@ export class TApplication implements IApplication {
                 this.appName = appName;
                 this.appConfig = appConfig;
                 setApplication(this);
-                this.typeRegistry = new TComponentTypeRegistry(TMetaApplication.metaclass);
+                this.typeRegistry = new TTypeRegistry(TMetaApplication.metaclass);
                 registerBuiltins(this.typeRegistry);
 
                 //registerBuiltins(this.types);

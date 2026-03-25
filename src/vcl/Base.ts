@@ -190,6 +190,7 @@ export class TMetaControl extends TMetaComponent implements IMetaControl {
                         //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
                         {
                                 name: 'onclick',
+                                default: '',
                                 kind: 'handler',
                                 retrieve: (o) => {
                                         return o.onclick;

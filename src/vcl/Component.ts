@@ -24,11 +24,12 @@ import { TMetaclass, TObject, TMetaObject } from './Oops';
 import type { IForm } from './IForm';
 //import type { IControl, IMetaControl } from './IControl';
 //import { TControl } from './Base';
-import type { IComponent, IMetaComponent } from './IComponent';
+import type { IComponent, IMetaComponent, ComponentSchema, PropSchema } from './IComponent';
 
 export type PropSpec<T, V = unknown> = {
         name: string;
         kind: PropKind;
+        default: unknown;
         retrieve: (obj: T) => V;
         apply: (obj: T, value: V) => void;
 };
@@ -114,4 +115,17 @@ export class TMetaComponent extends TMetaObject {
                 ];
         }
                 */
+
+        propSpecsToSchemaProps(): PropSchema {
+                const result: PropSchema = {};
+
+                for (const spec of this.defProps()) {
+                        result[spec.name] = {
+                                kind: spec.kind,
+                                default: spec.default
+                        };
+                }
+
+                return result;
+        }
 }

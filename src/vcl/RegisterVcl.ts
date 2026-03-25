@@ -19,16 +19,18 @@
  */
 
 // import { TMetaPluginHost } from '@vcl';
-import { TComponentTypeRegistry } from './ComponentTypeRegistry';
-import { TMetaButton, TMetaPanel } from './StdCtrls';
+import { TTypeRegistry } from './TypeRegistry';
+import { TMetaButton, TMetaPanel, TMetaCompositeDCC, TMetaSimpleDCC } from './StdCtrls';
 import { TMetaForm } from './Form';
 import { TMetaPluginHost } from './Plugin';
 
-export function registerBuiltins(types: TComponentTypeRegistry) {
+export function registerBuiltins(types: TTypeRegistry) {
         types.register(TMetaButton.metaclass);
         types.register(TMetaPluginHost.metaclass);
         types.register(TMetaForm.metaclass);
         types.register(TMetaPanel.metaclass);
+        types.register(TMetaSimpleDCC.metaclass);
+        types.register(TMetaCompositeDCC.metaclass);
 }
 
 /*

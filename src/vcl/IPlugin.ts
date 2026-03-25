@@ -17,7 +17,7 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IComponent } from 'grapesjs';
+import type { IComponent } from 'grapesjs';
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
 export type UIPluginMessage = { type: 'setProp'; hostName: string; key: string; value: any } | { type: 'event'; hostName: string; name: string; detail?: any };
@@ -79,25 +79,3 @@ export interface IPluginHost {
 }
 
 export interface IMetaPluginHost {}
-
-export type PluginPropSchema = Record<
-        string,
-        {
-                kind: 'string' | 'number' | 'boolean' | 'json';
-                default?: unknown;
-        }
->;
-
-export type PluginSchema = {
-        name: string;
-        component: any;
-        props?: PluginPropSchema;
-
-        // GrapesJS / designer
-        label?: string;
-        category?: string;
-        icon?: string;
-
-        // Optional default HTML representation
-        defaultProps?: Record<string, any>;
-};

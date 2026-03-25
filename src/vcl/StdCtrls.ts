@@ -21,6 +21,7 @@
 import { TControl, TMetaControl } from './Base';
 import { TMetaContainer, TContainer } from './Container';
 import type { PropSpec } from './Component';
+import type { ComponentSchema } from './IComponent';
 import type { IForm } from './IForm';
 import type { IControl } from './IControl';
 import type { TMetaclass } from './Oops';
@@ -85,11 +86,7 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
 
         protected constructor(superClass: TMetaControl, name: string) {
                 super(superClass, name);
-                // et vous changez juste le nom :
         }
-        //getMetaclass() {
-        //return TMetaButton.metaclass;
-        //}
 
         create(name: string, form: IForm, parent: TControl) {
                 return new TButton(name, form, parent) as T;
@@ -100,6 +97,7 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
                         {
                                 name: 'caption',
                                 kind: 'string',
+                                default: 'Caption',
                                 retrieve: (o) => {
                                         return o.caption;
                                 },
@@ -108,12 +106,24 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
                         {
                                 name: 'enabled',
                                 kind: 'boolean',
+                                default: true,
                                 retrieve: (o) => {
                                         return o.enabled;
                                 },
                                 apply: (o, v) => (o.enabled = Boolean(v))
                         }
                 ];
+        }
+
+        getSchema(): ComponentSchema {
+                return {
+                        name: this.typeName,
+                        label: 'TButton',
+                        category: 'Standard Control',
+                        icon: undefined,
+                        component: this,
+                        props: this.propSpecsToSchemaProps()
+                };
         }
 }
 
@@ -164,6 +174,15 @@ export class TMetaPanel extends TMetaContainer {
                         //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
                 ];
         }
+
+        schema: ComponentSchema = {
+                name: this.typeName,
+                label: 'TPanel',
+                category: 'Standard Control',
+                icon: undefined,
+                component: TMetaPanel.metaclass,
+                props: this.propSpecsToSchemaProps()
+        };
 }
 
 export class TSimpleDCC extends TControl {
@@ -203,6 +222,15 @@ export class TMetaSimpleDCC extends TMetaControl {
                         //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
                 ];
         }
+
+        schema: ComponentSchema = {
+                name: this.typeName,
+                label: 'TSimpleDCC',
+                category: 'Standard Control',
+                icon: undefined,
+                component: TMetaSimpleDCC.metaclass,
+                props: this.propSpecsToSchemaProps()
+        };
 }
 
 /*
@@ -251,4 +279,13 @@ export class TMetaCompositeDCC extends TMetaContainer {
                         //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
                 ];
         }
+
+        schema: ComponentSchema = {
+                name: this.typeName,
+                label: 'TCompositeDCC',
+                category: 'Standard Control',
+                icon: undefined,
+                component: TMetaCompositeDCC.metaclass,
+                props: this.propSpecsToSchemaProps()
+        };
 }

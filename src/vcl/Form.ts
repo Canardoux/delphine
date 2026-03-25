@@ -23,12 +23,13 @@ import { TComponent } from './Component';
 import { TMetaContainer, TContainer } from './Container';
 import type { PropSpec, TMetaComponent } from './Component';
 import { TComponentRegistry } from './ComponentRegistry';
-import { TComponentTypeRegistry } from './ComponentTypeRegistry';
+import { TTypeRegistry } from './TypeRegistry';
 import type { IForm } from './IForm';
 import type { IApplication } from './IApplication';
 import type { IMetaControl, IControl } from './IControl';
 import { registerBuiltins } from './RegisterVcl';
 import { getApplication } from './IApplication';
+import type { ComponentSchema } from './IComponent';
 
 export class TMetaForm extends TMetaContainer {
         static readonly metaclass: TMetaForm = new TMetaForm(TMetaContainer.metaclass, 'TForm');
@@ -55,6 +56,17 @@ export class TMetaForm extends TMetaContainer {
                         //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
                 ];
         }
+
+        getSchema(): ComponentSchema {
+                return {
+                        name: this.typeName,
+                        label: 'TForm',
+                        category: 'Standard Control',
+                        icon: undefined,
+                        component: this,
+                        props: this.propSpecsToSchemaProps()
+                };
+        }
 }
 
 export class TForm extends TContainer implements IForm {
@@ -70,6 +82,10 @@ export class TForm extends TContainer implements IForm {
                 super(TMetaForm.metaclass, name, null, null);
                 this.form = this;
                 TForm.forms.set(name, this);
+        }
+
+        getName() {
+                return this.name;
         }
 
         /*
@@ -176,6 +192,8 @@ export class TForm extends TContainer implements IForm {
                 host.hidden = true;
                 host.setAttribute('data-delphine-form-host', this.name);
                 document.body.appendChild(host);
+                //const root = document.getElementById('delphine-root') ?? document.body;
+                //root.appendChild(host);
 
                 // 2. Inject the user HTML inside that host
                 host.innerHTML = htmlSource;

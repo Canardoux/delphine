@@ -19,13 +19,13 @@
  */
 
 import { TForm } from './Form';
-import { IForm } from './IForm';
+import type { IForm } from './IForm';
 import { TControl, TMetaControl } from './Base';
 import type { PropSpec } from './Component';
 import { TApplication } from './Application';
 import type { DelphineServices, UIPluginMessage, UIPluginInstance, UIPluginFactory, IMetaPluginHost, Json } from './IPlugin';
-import { IMetaComponent } from './IComponent';
-import { IComponent } from 'grapesjs';
+import type { IMetaComponent } from './IComponent';
+import type { IComponent } from 'grapesjs';
 
 // ============================================= PLUGINHOST ==========================================================
 

@@ -24,4 +24,5 @@ import type { IControl } from './IControl';
 
 export interface IForm {
         //getClass(type: string): IControl | undefined;
+        getName(): string;
 }
