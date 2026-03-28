@@ -1,33 +1,55 @@
 import type { UIPluginFactory } from './IPlugin';
+import type { ComponentSchema, PropSchema } from './IComponent';
+import type { IPluginHost, UIPluginInstance, DelphineServices } from './IPlugin';
+import type { IForm } from './IForm';
+import type { Json } from './IPlugin';
 
-export function defineVanillaPlugin(
-        render: (ctx: { container: HTMLElement; props: any; services: any; hostName: string }) => {
-                update?: (props: any) => void;
-                destroy?: () => void;
-        }
-): UIPluginFactory {
-        return ({ host }) => {
-                let instance: any;
+type VanillaRenderContext<Props> = {
+        container: HTMLElement;
+        props: Props;
+        services: DelphineServices;
+        hostName: string;
+        formName: string;
+};
+
+type VanillaRenderResult<Props> = {
+        update?: (props: Props) => void;
+        destroy?: () => void;
+        focus?: () => void;
+};
+
+export function defineVanillaPlugin<Props>(schema: ComponentSchema, renderFn: (ctx: VanillaRenderContext<Props>) => VanillaRenderResult<Props>) {
+        const factory = ({ host, form }: any) => {
+                let api: VanillaRenderResult<Props> | null = null;
 
                 return {
-                        id: 'vanilla-plugin',
+                        id: schema.name,
 
-                        mount(container, props, services) {
-                                instance = render({
+                        mount(container: HTMLElement, props: Props, services: any) {
+                                api = renderFn({
                                         container,
                                         props,
                                         services,
-                                        hostName: host.getName()
+                                        hostName: host.getName(),
+                                        formName: form.getName()
                                 });
                         },
 
-                        update(props) {
-                                instance?.update?.(props);
+                        update(props: Props) {
+                                api?.update?.(props);
                         },
 
                         unmount() {
-                                instance?.destroy?.();
+                                api?.destroy?.();
+                                api = null;
+                        },
+
+                        focus() {
+                                api?.focus?.();
                         }
                 };
         };
+
+        (factory as any).propSchema = schema.props;
+        return factory;
 }

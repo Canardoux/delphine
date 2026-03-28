@@ -1,0 +1,11 @@
+{
+        "mainForm": "MainForm",
+        "forms": ["MainForm", "Riri"],
+        "plugins": [
+                {
+                        "id": "hello-vanilla",
+                        "type": "vanilla",
+                        "factory": "./plugins/hello-vanilla/index.ts"
+                }
+        ]
+}

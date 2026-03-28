@@ -54,4 +54,11 @@ export type ComponentSchema = {
 
         // Optional default HTML representation
         defaultProps?: Record<string, any>;
+
+        sizeHints?: {
+                minWidth?: number;
+                minHeight?: number;
+                preferredWidth?: number;
+                preferredHeight?: number;
+        };
 };
