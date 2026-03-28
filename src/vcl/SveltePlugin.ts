@@ -1,65 +1,60 @@
-// VuePlugin.ts
-// ------------
-/*
- * Copyright 2026 Canardoux.
- *
- * This file is part of the Delphine project.
- *
- * Delphine is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 3 (GPL3), as published by
- * the Free Software Foundation.
- *
- * Delphine is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
- */
+import { mount, unmount, flushSync } from 'svelte';
+import type { Component } from 'svelte';
 
 import type { UIPluginFactory } from './IPlugin';
 import type { ComponentSchema } from './IComponent';
 import type { IPluginHost, UIPluginInstance } from './IPlugin';
-import { IForm } from './IForm';
+import type { IForm } from './IForm';
 import type { Json } from './IPlugin';
 
-type SvelteComponentConstructor = new (options: { target: HTMLElement; props?: Record<string, unknown> }) => {
+function toRecord(value: unknown): Record<string, unknown> {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+                return value as Record<string, unknown>;
+        }
+        return {};
+}
+
+type MountedSvelteInstance = {
         $set?: (props: Record<string, unknown>) => void;
-        $destroy?: () => void;
 };
 
 export function defineSveltePlugin<Props extends Json = Json>(schema: ComponentSchema): UIPluginFactory<Props> {
-        const SvelteComponent = schema.component as SvelteComponentConstructor;
+        const SvelteComponent = schema.component as Component<Record<string, unknown>>;
+
         const factory: UIPluginFactory<Props> = ({ host, form }: { host: IPluginHost; form: IForm }): UIPluginInstance<Props> => {
-                let instance: {
-                        $set?: (props: Record<string, unknown>) => void;
-                        $destroy?: () => void;
-                } | null = null;
+                let instance: MountedSvelteInstance | null = null;
 
                 return {
                         id: schema.name,
 
                         mount(container, props, services) {
-                                instance = new SvelteComponent({
+                                const pluginProps = toRecord(props);
+
+                                instance = mount(SvelteComponent, {
                                         target: container,
                                         props: {
-                                                state: props,
+                                                ...pluginProps,
                                                 services,
                                                 hostName: host.getName(),
                                                 formName: form.getName()
                                         }
-                                });
+                                }) as MountedSvelteInstance;
+
+                                flushSync();
                         },
 
                         update(props) {
-                                instance?.$set?.({
-                                        state: props
-                                });
+                                const pluginProps = toRecord(props);
+                                console.log('SVELTE PLUGIN UPDATE', pluginProps);
+
+                                instance?.$set?.(pluginProps);
+                                flushSync();
                         },
 
                         unmount() {
-                                instance?.$destroy?.();
+                                if (instance) {
+                                        void unmount(instance as Record<string, unknown>);
+                                }
                                 instance = null;
                         }
                 };
@@ -68,3 +63,4 @@ export function defineSveltePlugin<Props extends Json = Json>(schema: ComponentS
         (factory as any).propSchema = schema.props;
         return factory;
 }
+//

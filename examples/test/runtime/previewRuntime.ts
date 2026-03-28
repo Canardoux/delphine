@@ -10,7 +10,7 @@ if (!formName) {
 
 async function main(): Promise<void> {
         // 1. Create fake application
-        const app = new TApplication(appName, { mainForm: formName });
+        const app = new TApplication(appName, { mainForm: formName ?? undefined });
 
         // 2. Load Form module
         const basePath = `/src/apps/${appName}/forms/${formName}.form`;
@@ -21,7 +21,7 @@ async function main(): Promise<void> {
         const response = await fetch(htmlPath);
         const htmlSource = await response.text();
 
-        const FormClass = module.default ?? module[formName];
+        const FormClass = module.default ?? module[formName!];
         if (!FormClass) {
                 throw new Error(`Unable to resolve form class ${formName}`);
         }

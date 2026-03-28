@@ -128,4 +128,23 @@ export class TMetaComponent extends TMetaObject {
 
                 return result;
         }
+        schemaPropsToPropSpecs(): PropSpec<any>[] {
+                const schemaProps = (this as { schema?: ComponentSchema }).schema?.props;
+                if (!schemaProps) return [];
+
+                const result: PropSpec<any>[] = [];
+
+                for (const name in schemaProps) {
+                        const spec = schemaProps[name];
+                        result.push({
+                                name,
+                                kind: spec!.kind,
+                                default: spec!.default,
+                                retrieve: (obj) => obj.getProp(name),
+                                apply: (obj, value) => obj.setProp(name, value)
+                        });
+                }
+
+                return result;
+        }
 }

@@ -64,7 +64,7 @@ export default class MainForm extends TForm {
                 panel!.backgroundColor = TColor.rgb(54, 127, 173);
 
                 const vue = this.componentRegistry.get<TPluginHost>('myvueplugin');
-                //vue!.props.message = 'Message updated from Delphine!!!'
+                //vue!.props.message = 'Message updated from Delphine!!!';
                 vue!.setPluginProp('message', 'Message updated from Delphine!!!');
         }
 

@@ -13,5 +13,5 @@
                         "@vcl/*": ["../../src/vcl/*"]
                 }
         },
-        "include": ["**/*.ts"]
+        "include": ["**/*.ts", "**/*.d.ts", "**/*.svelte"]
 }

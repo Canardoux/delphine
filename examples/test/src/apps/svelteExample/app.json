@@ -1,0 +1,11 @@
+{
+        "mainForm": "MainForm",
+        "forms": ["MainForm", "Riri"],
+        "plugins": [
+                {
+                        "id": "hello-svelte",
+                        "type": "svelte",
+                        "factory": "./plugins/hello-svelte/index.ts"
+                }
+        ]
+}

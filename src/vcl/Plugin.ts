@@ -180,17 +180,26 @@ export class TPluginHost extends TControl {
         }
 
         setPluginProp(key: string, value: any) {
-                // 1) Update cached props object
-                const next = { ...(this.pluginProps ?? {}), [key]: value };
-                this.pluginProps = next;
+                console.log('SET PROP', key, value);
+                console.log('pluginProps before =', this.pluginProps);
 
-                // 2) Reflect to DOM so Grapes/HTML stay canonical
+                const current = this.pluginProps?.[key];
+                if (Object.is(current, value)) {
+                        return;
+                }
+
+                const next = { ...(this.pluginProps ?? {}), [key]: value };
+                const nextKey = stableStringify(next);
+
+                this.pluginProps = next;
+                this.pluginPropsKey = nextKey;
+
                 const el = this.htmlElement;
                 if (el) {
                         el.setAttribute('data-delphine-props', JSON.stringify(next));
                 }
 
-                // 3) Push to plugin instance
+                console.log('CALLING PLUGIN UPDATE', next, this.instance);
                 this.instance?.update(next);
         }
 
@@ -199,10 +208,7 @@ export class TPluginHost extends TControl {
         }
 
         defProps(): PropSpec<any>[] {
-                return [
-                        //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
-                        //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
-                ];
+                return (this.metaclass as TMetaPluginHost).schemaPropsToPropSpecs();
         }
 
         /** Patch many props at once (preferred). */
