@@ -19,6 +19,7 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import type { IComponent } from './IComponent';
 import { TObject, TMetaclass, TMetaObject } from './Oops';
 
 export interface IControl {

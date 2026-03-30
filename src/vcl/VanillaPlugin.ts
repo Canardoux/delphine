@@ -18,34 +18,51 @@ type VanillaRenderResult<Props> = {
         focus?: () => void;
 };
 
-export function defineVanillaPlugin<Props>(schema: ComponentSchema, renderFn: (ctx: VanillaRenderContext<Props>) => VanillaRenderResult<Props>) {
+export function defineVanillaPlugin<Props>(schema: ComponentSchema) {
         const factory = ({ host, form }: any) => {
-                let api: VanillaRenderResult<Props> | null = null;
+                let controller: any = null;
+                let containerRef: HTMLElement | null = null;
 
                 return {
                         id: schema.name,
 
-                        mount(container: HTMLElement, props: Props, services: any) {
-                                api = renderFn({
-                                        container,
-                                        props,
-                                        services,
-                                        hostName: host.getName(),
-                                        formName: form.getName()
-                                });
+                        mount(container: HTMLElement, props: Props, services: DelphineServices) {
+                                containerRef = container;
+
+                                const component: any = schema.component;
+
+                                // 1. Inject template if present
+                                if (component?.template) {
+                                        container.innerHTML = component.template;
+                                }
+
+                                // 2. Create controller
+                                if (component?.createController) {
+                                        controller = component.createController({
+                                                services,
+                                                hostName: host.getName(),
+                                                formName: form.getName()
+                                        });
+
+                                        controller.mount?.(container);
+                                        controller.update?.(props);
+                                }
                         },
 
                         update(props: Props) {
-                                api?.update?.(props);
+                                controller?.update?.(props);
                         },
 
                         unmount() {
-                                api?.destroy?.();
-                                api = null;
+                                controller?.destroy?.();
+                                controller = null;
+                                if (containerRef) {
+                                        containerRef.innerHTML = '';
+                                }
                         },
 
                         focus() {
-                                api?.focus?.();
+                                controller?.focus?.();
                         }
                 };
         };

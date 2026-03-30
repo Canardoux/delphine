@@ -20,12 +20,14 @@
 
 import { TForm } from './Form';
 import type { IForm } from './IForm';
-import { TControl, TMetaControl } from './Base';
+import { TControl, TMetaControl } from './Control';
 import type { PropSpec } from './Component';
 import { TApplication } from './Application';
 import type { DelphineServices, UIPluginMessage, UIPluginInstance, UIPluginFactory, IMetaPluginHost, Json } from './IPlugin';
-import type { IMetaComponent } from './IComponent';
-import type { IComponent } from 'grapesjs';
+import type { IMetaComponent, IComponent } from './IComponent';
+//import type { IComponent } from 'grapesjs';
+import type { IControl } from './IControl';
+import { TContainer, TMetaContainer } from './Container';
 
 // ============================================= PLUGINHOST ==========================================================
 
@@ -112,7 +114,7 @@ export interface UIPluginInstance<Props extends Json = Json> {
 }
         */
 
-export class TMetaPluginHost extends TMetaControl implements IMetaPluginHost {
+export class TMetaPluginHost extends TMetaContainer implements IMetaPluginHost {
         pluginFactory: UIPluginFactory | null;
         static metaclass = new TMetaPluginHost(TMetaControl.metaclass, 'TPluginHost', null);
         //getMetaclass() {
@@ -153,7 +155,7 @@ function stableStringify(v: any): string {
         }
 }
 
-export class TPluginHost extends TControl {
+export class TPluginHost extends TContainer {
         private instance: UIPluginInstance | null = null;
         private services: DelphineServices | null = null;
 
@@ -164,7 +166,7 @@ export class TPluginHost extends TControl {
         //private pluginDef: UIPluginDef<Json> | null = null;
         //private meta: TMetaPluginHost | null = null;
 
-        private mountPoint: HTMLElement | null = null;
+        //private mountPoint: HTMLElement | null = null;
         private observer: MutationObserver | null = null;
 
         private updateScheduled = false;
@@ -295,11 +297,13 @@ export class TPluginHost extends TControl {
                 };
 
                 // Create a stable mount point INSIDE the host
+                /*
                 if (!this.mountPoint) {
                         this.mountPoint = document.createElement('div');
                         this.mountPoint.setAttribute('data-delphine-delphine-mount', '1');
                         hostEl.replaceChildren(this.mountPoint);
                 }
+                        */
 
                 // Initial mount from DOM attributes
                 this.refreshFromDom();
@@ -326,7 +330,7 @@ export class TPluginHost extends TControl {
         private refreshFromDom() {
                 const services = this.services;
                 const hostEl = this.htmlElement;
-                if (!services || !hostEl || !this.form || !this.mountPoint) return;
+                if (!services || !hostEl || !this.form || !this.elem) return;
 
                 const newPlugin = hostEl.getAttribute('data-delphine-component'); // string | null
                 const newProps = safeParseJson(hostEl.getAttribute('data-delphine-props'));
@@ -349,7 +353,7 @@ export class TPluginHost extends TControl {
                         this.pluginName = newPlugin;
                         this.pluginProps = newProps;
                         this.pluginPropsKey = newKey;
-                        this.remount();
+                        this.mountPlugin(services);
                         return;
                 }
 
@@ -360,7 +364,9 @@ export class TPluginHost extends TControl {
                         this.instance?.update(newProps);
                 }
         }
+        /*
         private remount() {
+                / * 
                 const services = this.services;
                 if (!services || !this.form || !this.mountPoint) return;
 
@@ -381,12 +387,16 @@ export class TPluginHost extends TControl {
                         return;
                 }
 
+                * /
+
                 // Hard remount
                 this.unmount();
+                this.mountPlugin(this.services!);
                 //const meta = this.getMetaclass() as TMetaPluginHost;
-                this.instance = meta.pluginFactory!({ host: this, form: this.form as IComponent }) ?? null; // The instance is created Here !---------------
-                this.instance?.mount(this.mountPoint, this.pluginProps, services); // Puis est monté ici ----------------------
+                //this.instance = meta.pluginFactory!({ host: this, form: this.form as IComponent }) ?? null; // The instance is created Here !---------------
+                //this.instance?.mount(this.mountPoint, this.pluginProps, services); // Puis est monté ici ----------------------
         }
+        */
 
         unmount() {
                 try {
@@ -401,7 +411,7 @@ export class TPluginHost extends TControl {
                 this.unmount();
                 this.observer?.disconnect();
                 this.observer = null;
-                this.mountPoint = null;
+                //this.mountPoint = null;
                 this.services = null;
         }
 
@@ -422,9 +432,10 @@ export class TPluginHost extends TControl {
                 this.unmount();
 
                 //const meta = this.getMetaclass as TMetaPluginHost;
-                this.instance = meta.pluginFactory!({ host: this, form: this.form! as IComponent }) ?? null;
+                this.instance = meta.pluginFactory!({ host: this, form: this.form! as IControl }) ?? null;
 
                 this.instance?.mount(el, this.pluginProps, services);
+                //this.buildComponentTree(el, this.form!, this);
         }
 
         updatePlugin() {

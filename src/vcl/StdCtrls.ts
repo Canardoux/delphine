@@ -18,7 +18,7 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { TControl, TMetaControl } from './Base';
+import { TControl, TMetaControl } from './Control';
 import { TMetaContainer, TContainer } from './Container';
 import type { PropSpec } from './Component';
 import type { ComponentSchema } from './IComponent';

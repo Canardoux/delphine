@@ -22,7 +22,8 @@
 import type { IComponent } from './IComponent';
 import type { IControl } from './IControl';
 
-export interface IForm {
+export interface IForm extends IControl {
         //getClass(type: string): IControl | undefined;
         getName(): string;
+        registerInstance(name: string, c: IControl): void;
 }

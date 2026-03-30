@@ -21,7 +21,7 @@ export * from './StdCtrls';
 export * from './Plugin';
 export * from './IPlugin';
 export * from './VuePlugin';
-export * from './Base';
+export * from './Control';
 export * from './Application';
 export * from './Form';
 export * from './Component';

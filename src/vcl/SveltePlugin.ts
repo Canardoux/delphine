@@ -21,7 +21,7 @@ type MountedSvelteInstance = {
 export function defineSveltePlugin<Props extends Json = Json>(schema: ComponentSchema): UIPluginFactory<Props> {
         const SvelteComponent = schema.component as Component<Record<string, unknown>>;
 
-        const factory: UIPluginFactory<Props> = ({ host, form }: { host: IPluginHost; form: IForm }): UIPluginInstance<Props> => {
+        const factory: UIPluginFactory<Props> = ({ host, form }: any) => {
                 let instance: MountedSvelteInstance | null = null;
 
                 return {

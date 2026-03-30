@@ -26,7 +26,7 @@ import { registerBuiltins } from './RegisterVcl';
 import { getApplication, setApplication } from './IApplication';
 import type { IApplication } from './IApplication';
 import type { IControl, IMetaControl } from './IControl';
-import { TMetaControl } from './Base';
+import { TMetaControl } from './Control';
 import type { IMetaComponent } from './IComponent';
 
 //export TheApplication : TApplication | null = null;
@@ -126,7 +126,7 @@ export class TApplication implements IApplication {
 
         destroy(form: TForm | null) {
                 if (form) {
-                        form?.destroy();
+                        form?.xdestroy();
                         this.forms.delete(form!.name);
                 }
         }

@@ -28,9 +28,11 @@
                         value: (count ?? 0) + 1
                 });
         }
+
+        
 </script>
 
-<div style="border: 1px solid #ccc; padding: 8px;">
+<div style="border: 1px solid #ccc; padding: 8px;" id="mypanel1" data-delphine-name="myPanel1" data-delphine-component="TPanel">
         <h2>Svelte</h2>
         <div>Message: {message}</div>
         <div>Count: {count}</div>
@@ -42,4 +44,7 @@
         <button on:click|stopPropagation={incrementCount} disabled={!enabled}>
                 Increment count
         </button>
+
+        <button data-delphine-component="TButton" data-delphine-caption="Delphine PLUGINxxx" data-delphine-name="delphine-plugin-button" data-delphine-onclick="delphineplugin_onclick">Delphine PLUGINxxx!</button>
+        
 </div>

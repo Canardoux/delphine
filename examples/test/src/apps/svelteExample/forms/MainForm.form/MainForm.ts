@@ -74,4 +74,14 @@ export default class MainForm extends TForm {
                 console.log('zazaVue clicked!!!!');
                 //btn!.enabled = false;
         }
+
+        delphineplugin_onclick(_ev: Event | null, _sender: TControl) {
+                console.log('delphineplugin_onclick');
+                const panel = this.componentRegistry.get<TPanel>('myPanel');
+                if (!panel) {
+                        console.warn('myPanel not found in registry');
+                        return;
+                }
+                panel!.backgroundColor = TColor.rgb(240, 186, 10);
+        }
 }

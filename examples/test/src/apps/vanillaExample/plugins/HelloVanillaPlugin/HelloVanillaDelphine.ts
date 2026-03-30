@@ -1,5 +1,4 @@
 import template from './HelloVanilla.template.html?raw';
-
 import type { DelphineServices } from '@vcl/IPlugin';
 
 type HelloVanillaProps = {
@@ -13,6 +12,8 @@ export default {
 
         createController({ services, hostName }: { services: DelphineServices; hostName: string }) {
                 let root: HTMLElement;
+                let changeButton: HTMLButtonElement | null = null;
+                let incrementButton: HTMLButtonElement | null = null;
 
                 function changeMessage(e: Event) {
                         e.stopPropagation();
@@ -30,7 +31,7 @@ export default {
                                 type: 'setProp',
                                 hostName,
                                 key: 'count',
-                                value: undefined
+                                value: 77
                         });
                 }
 
@@ -38,9 +39,11 @@ export default {
                         mount(r: HTMLElement) {
                                 root = r;
 
-                                root.querySelector('[data-action="changeMessage"]')?.addEventListener('click', changeMessage);
+                                changeButton = root.querySelector('[data-action="changeMessage"]');
+                                incrementButton = root.querySelector('[data-action="incrementCount"]');
 
-                                root.querySelector('[data-action="incrementCount"]')?.addEventListener('click', incrementCount);
+                                changeButton?.addEventListener('click', changeMessage);
+                                incrementButton?.addEventListener('click', incrementCount);
                         },
 
                         update(props: HelloVanillaProps) {
@@ -49,9 +52,15 @@ export default {
 
                                 if (msg) msg.textContent = props.message;
                                 if (cnt) cnt.textContent = String(props.count);
+
+                                const disabled = !props.enabled;
+                                if (changeButton) changeButton.disabled = disabled;
+                                if (incrementButton) incrementButton.disabled = disabled;
                         },
 
                         destroy() {
+                                changeButton?.removeEventListener('click', changeMessage);
+                                incrementButton?.removeEventListener('click', incrementCount);
                                 root.innerHTML = '';
                         }
                 };

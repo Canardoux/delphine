@@ -17,7 +17,7 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { IComponent } from 'grapesjs';
+import type { IComponent } from './IComponent';
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
 export type UIPluginMessage = { type: 'setProp'; hostName: string; key: string; value: any } | { type: 'event'; hostName: string; name: string; detail?: any };

@@ -18,7 +18,7 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { THandler } from './Base';
+import { TControl, THandler } from './Control';
 import { TComponent } from './Component';
 import { TMetaContainer, TContainer } from './Container';
 import type { PropSpec, TMetaComponent } from './Component';
@@ -30,8 +30,10 @@ import type { IMetaControl, IControl } from './IControl';
 import { registerBuiltins } from './RegisterVcl';
 import { getApplication } from './IApplication';
 import type { ComponentSchema } from './IComponent';
+import type { IComponent } from './IComponent';
+import type { IMetaComponent } from './IComponent';
 
-export class TMetaForm extends TMetaContainer {
+export class TMetaForm extends TMetaContainer implements IMetaComponent, IMetaControl {
         static readonly metaclass: TMetaForm = new TMetaForm(TMetaContainer.metaclass, 'TForm');
         //getMetaClass() {
         //return TMetaForm.metaclass;
@@ -69,7 +71,7 @@ export class TMetaForm extends TMetaContainer {
         }
 }
 
-export class TForm extends TContainer implements IForm {
+export class TForm extends TContainer implements IForm, IControl, IComponent {
         //getMetaclass() {
         //return TMetaForm.metaclass;
         //}
@@ -86,6 +88,10 @@ export class TForm extends TContainer implements IForm {
 
         getName() {
                 return this.name;
+        }
+
+        registerInstance(name: string, c: IControl): void {
+                this.componentRegistry.registerInstance(name, c as TControl);
         }
 
         /*
@@ -177,6 +183,22 @@ export class TForm extends TContainer implements IForm {
         //elem: Element | null = null;
         protected _created = false;
 
+        resolveRoot(container: HTMLElement): HTMLElement {
+                // Look for first element marked as a Delphine component root
+                for (const child of Array.from(container.children)) {
+                        if (child instanceof HTMLElement && child.hasAttribute('data-delphine-component')) {
+                                // Debug (optional)
+                                for (const c of Array.from(container.children)) {
+                                        console.log('child:', c.tagName, c.getAttribute('data-delphine-component'));
+                                }
+
+                                return child;
+                        }
+                }
+
+                throw new Error('Delphine: no root component found in container');
+        }
+
         /**
          * Create the Form DOM under <body>, hidden by default,
          * then build the component tree from the injected HTML.
@@ -202,14 +224,15 @@ export class TForm extends TContainer implements IForm {
                 //    In your current architecture, resolveRoot() knows how to find:
                 //    - <body> if it is itself the root
                 //    - or the first child carrying TForm metadata
-                this.elem = this.componentRegistry.resolveRoot(host);
+                this.elem = this.resolveRoot(host);
 
                 if (!this.elem) {
                         throw new Error(`Unable to resolve root element for form '${this.name}'`);
                 }
 
                 // 4. Build Delphine component tree
-                this.componentRegistry.buildComponentTree(this, this);
+                this.componentRegistry.clear();
+                this.buildComponentTree(this.elem, this, this);
 
                 // 5. Install event routing
                 this.installEventRouter();
@@ -248,7 +271,7 @@ export class TForm extends TContainer implements IForm {
                 //focusTarget?.focus();
         }
 
-        destroy(): void {
+        xdestroy(): void {
                 if (!this.elem) {
                         return;
                 }
