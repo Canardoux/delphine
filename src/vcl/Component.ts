@@ -64,6 +64,10 @@ export class TComponent extends TObject implements IComponent {
                 return Object.prototype.hasOwnProperty.call(this.props, name);
         }
         //protected props: ComponentProps = Object.create(null);
+
+        isACompositeControl(): boolean {
+                return false;
+        }
 }
 
 export class TMetaComponent extends TMetaObject {
@@ -78,11 +82,26 @@ export class TMetaComponent extends TMetaObject {
                 return new TComponent(TMetaComponent.metaclass, name, form, parent);
         }
 
+        getSchema(): ComponentSchema {
+                return {
+                        name: this.typeName,
+                        label: 'TComponent',
+                        category: 'Standard Control',
+                        icon: undefined,
+                        component: this,
+                        props: this.propSpecsToSchemaProps()
+                };
+        }
+
         //getMetaclass() {
         //return TMetaComponent.metaclass;
         //}
 
         isAForm(): boolean {
+                return false;
+        }
+
+        isACompositeControl(): boolean {
                 return false;
         }
 

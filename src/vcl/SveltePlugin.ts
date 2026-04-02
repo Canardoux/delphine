@@ -5,7 +5,7 @@ import type { UIPluginFactory } from './IPlugin';
 import type { ComponentSchema } from './IComponent';
 import type { IPluginHost, UIPluginInstance } from './IPlugin';
 import type { IForm } from './IForm';
-import type { Json } from './IPlugin';
+import type { Json } from './IComponent';
 
 function toRecord(value: unknown): Record<string, unknown> {
         if (value && typeof value === 'object' && !Array.isArray(value)) {

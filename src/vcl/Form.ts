@@ -22,7 +22,6 @@ import { TControl, THandler } from './Control';
 import { TComponent } from './Component';
 import { TMetaContainer, TContainer } from './Container';
 import type { PropSpec, TMetaComponent } from './Component';
-import { TComponentRegistry } from './ComponentRegistry';
 import { TTypeRegistry } from './TypeRegistry';
 import type { IForm } from './IForm';
 import type { IApplication } from './IApplication';
@@ -32,9 +31,11 @@ import { getApplication } from './IApplication';
 import type { ComponentSchema } from './IComponent';
 import type { IComponent } from './IComponent';
 import type { IMetaComponent } from './IComponent';
+import { TMetaCompositeControl, TCompositeControl } from './CompositeControl';
+import type { ICompositeControl } from './ICompositeControl';
 
-export class TMetaForm extends TMetaContainer implements IMetaComponent, IMetaControl {
-        static readonly metaclass: TMetaForm = new TMetaForm(TMetaContainer.metaclass, 'TForm');
+export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, IMetaControl {
+        static readonly metaclass: TMetaForm = new TMetaForm(TMetaCompositeControl.metaclass, 'TForm');
         //getMetaClass() {
         //return TMetaForm.metaclass;
         //}
@@ -71,14 +72,14 @@ export class TMetaForm extends TMetaContainer implements IMetaComponent, IMetaCo
         }
 }
 
-export class TForm extends TContainer implements IForm, IControl, IComponent {
+export class TForm extends TCompositeControl implements IForm, IControl, IComponent {
         //getMetaclass() {
         //return TMetaForm.metaclass;
         //}
         static forms = new Map<string, TForm>();
         private _mounted = false;
         // Each Form has its own componentRegistry
-        componentRegistry: TComponentRegistry = new TComponentRegistry();
+
         //typeRegistry: TComponentTypeRegistry | null = null;
         constructor(name: string) {
                 super(TMetaForm.metaclass, name, null, null);
@@ -88,10 +89,6 @@ export class TForm extends TContainer implements IForm, IControl, IComponent {
 
         getName() {
                 return this.name;
-        }
-
-        registerInstance(name: string, c: IControl): void {
-                this.componentRegistry.registerInstance(name, c as TControl);
         }
 
         /*
@@ -151,6 +148,23 @@ export class TForm extends TContainer implements IForm, IControl, IComponent {
                 this._ac = null;
         }
 
+        getComponentFromName(composit: TCompositeControl, name: string): { comp: TControl; composit: TCompositeControl } | null {
+                let comp = name ? composit.componentRegistry.get(name) : null;
+                //while (!comp) {
+                if (comp) {
+                        return { comp, composit };
+                }
+                for (const frame of composit.frames) {
+                        composit = frame as TCompositeControl;
+                        const r = this.getComponentFromName(composit, name);
+                        if (r) {
+                                return r;
+                        }
+                }
+                //}
+                return null;
+        }
+
         // We received an DOM Event. Dispatch it
         private dispatchDomEvent(ev: Event) {
                 const targetElem = ev.target as Element | null;
@@ -161,17 +175,20 @@ export class TForm extends TContainer implements IForm, IControl, IComponent {
                 let el: Element | null = targetElem.closest('[data-delphine-component]');
                 if (!el) return;
                 const name = el.getAttribute('data-delphine-name');
-                let comp = name ? this.componentRegistry.get(name) : null;
-                while (comp) {
-                        const handler = comp.getProp<THandler>(propName); // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                const r = this.getComponentFromName(this, name!);
+
+                let rc = r?.comp ?? null;
+                //let comp = name ? this.getComponentFromName(this, name) : null;
+                while (r && rc) {
+                        const handler = rc.getProp<THandler>(propName); // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
                         //const handler = comp.getProperty(propName); //comp?.props[propName as keyof typeof comp.props] as THandler | null;
                         if (handler && handler.s && handler.s != '') {
-                                handler.fire(this, propName, ev, comp);
+                                handler.fire(r.composit, propName, ev, rc);
                                 return;
                         }
                         //el = next ?? el.parentElement?.closest('[data-delphine-component]') ?? null;
-                        comp = comp.parent;
+                        rc = rc.parent;
                 }
 
                 // No handler here: try going "up" using your component tree if possible
@@ -271,7 +288,7 @@ export class TForm extends TContainer implements IForm, IControl, IComponent {
                 //focusTarget?.focus();
         }
 
-        xdestroy(): void {
+        destroy(): void {
                 if (!this.elem) {
                         return;
                 }

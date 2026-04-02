@@ -23,14 +23,19 @@ import { TObject, TMetaclass, TMetaObject } from './Oops';
 import type { IControl } from './IControl';
 import type { PropKind } from './Component';
 
+export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
+
 export interface IComponent {
         isAForm(): boolean;
+        isACompositeControl(): boolean;
         //getClass(type: string): IControl | undefined;
 }
 
 export interface IMetaComponent {
         create(name: string, form: any, parent: any): any;
         isAForm(): boolean;
+        isACompositeControl(): boolean;
+        getSchema(): ComponentSchema;
 }
 
 export type PropSchema = Record<

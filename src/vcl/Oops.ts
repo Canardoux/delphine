@@ -53,3 +53,24 @@ export class TMetaObject extends TMetaclass {
                 super(superClass, name);
         }
 }
+
+export function findMethod(obj: any, name: string): Function | null {
+        let o = obj;
+        while (o) {
+                const desc = Object.getOwnPropertyDescriptor(o, name);
+                if (desc && typeof desc.value === 'function') {
+                        return desc.value;
+                }
+                o = Object.getPrototypeOf(o);
+        }
+        return null;
+}
+
+export function dumpObject(obj: any) {
+        let o = obj;
+        while (o) {
+                console.log('----', o.constructor?.name);
+                console.log(Object.getOwnPropertyNames(o));
+                o = Object.getPrototypeOf(o);
+        }
+}

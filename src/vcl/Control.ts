@@ -26,6 +26,7 @@ import type { IForm } from './IForm';
 import type { IControl, IMetaControl } from './IControl';
 import { TComponent, TMetaComponent } from './Component';
 import type { PropSpec } from './Component';
+import { findMethod, dumpObject } from './Oops';
 
 export class TColor {
         s: string;
@@ -48,9 +49,16 @@ export class THandler {
                 this.s = s;
         }
         fire(form: IForm, handlerName: string, ev: Event, sender: any) {
-                const maybeMethod = (form as any)[this.s];
+                console.log('handler name =', this.s);
+                console.log('form[this.s] =', (form as any)[this.s]);
+                console.log('typeof =', typeof (form as any)[this.s]);
+                console.log(form);
+                console.dir(form);
+
+                const maybeMethod = findMethod(form, this.s);
                 if (typeof maybeMethod !== 'function') {
                         console.log('NOT A METHOD', handlerName);
+                        dumpObject(form);
                         return false;
                 }
 
@@ -177,6 +185,10 @@ export class TMetaControl extends TMetaComponent implements IMetaControl {
         //}
 
         isAForm(): boolean {
+                return false;
+        }
+
+        isACompositeControl(): boolean {
                 return false;
         }
 

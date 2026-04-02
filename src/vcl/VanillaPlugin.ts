@@ -1,8 +1,8 @@
-import type { UIPluginFactory } from './IPlugin';
+//import type { UIPluginFactory } from './IPlugin';
 import type { ComponentSchema, PropSchema } from './IComponent';
-import type { IPluginHost, UIPluginInstance, DelphineServices } from './IPlugin';
-import type { IForm } from './IForm';
-import type { Json } from './IPlugin';
+import type { IPluginHost, DelphineServices } from './IPlugin';
+//import type { IForm } from './IForm';
+//import type { Json } from './IPlugin';
 
 type VanillaRenderContext<Props> = {
         container: HTMLElement;

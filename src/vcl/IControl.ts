@@ -25,9 +25,11 @@ import { TObject, TMetaclass, TMetaObject } from './Oops';
 export interface IControl {
         isAForm(): boolean;
         //getClass(type: string): IControl | undefined;
+        isACompositeControl(): boolean;
 }
 
 export interface IMetaControl {
         create(name: string, form: any, parent: any): any;
         isAForm(): boolean;
+        isACompositeControl(): boolean;
 }

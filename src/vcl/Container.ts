@@ -26,6 +26,10 @@ import type { IApplication } from './IApplication';
 import type { IPluginHost } from './IPlugin';
 import { TControl, TMetaControl, TColor, THandler } from './Control';
 import type { PropSpec, PropKind } from './Component';
+import type { IMetaCompositeControl, ICompositeControl } from './ICompositeControl';
+import { TCompositeControl } from './CompositeControl';
+//import { IFrame } from './IFrame'
+//import { TMetaHostFrame, THostFrame } from './Frame';
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -205,35 +209,48 @@ export class TContainer extends TControl {
                 if (!cls) return null;
 
                 let child = parent;
+                // The TForm are already created by the user.
                 if (!cls.isAForm()) {
                         const metaComp = cls as TMetaControl;
-                        // The TForm are already created by the user.
-                        child = metaComp.create(name!, form, parent);
+                        child = metaComp.create(name!, form, parent); // ------- The instance variable is created HERE!
+                        if (cls.isACompositeControl()) {
+                                const comp = child as any as ICompositeControl;
+                                form.registerFrame(name!, comp);
+                                form = comp; // We pretend that we are the Form
+                        }
                 }
 
-                form.registerInstance(name!, child);
                 if (!child) return null;
-
                 child.elem = el;
+
+                form.registerInstance(name!, child);
 
                 // We collect
                 this.parsePropsFromElement(child);
 
-                // !!!!!! TODO
                 //child.syncDomFromProps();
 
                 (child as any).onAttachedToDom?.();
 
+                const maybeFrame = el.getAttribute('data-delphine-frame');
+
+                if (maybeFrame && maybeFrame != '') {
+                        const frame = getApplication()?.getClass(maybeFrame);
+                        const schema = frame?.getSchema();
+                        child.elem.innerHTML = schema?.component;
+                        //form = child as any as ICompositeControl;
+                }
+
                 // Done in the constructor //parent.children.push(child);
-                const maybeHost = child as unknown as Partial<IPluginHost>;
-                if (maybeHost && typeof maybeHost.setPluginSpec === 'function') {
+                const maybePluginHost = child as unknown as IPluginHost;
+                if (maybePluginHost && typeof maybePluginHost.setPluginSpec === 'function') {
                         //maybeHost.setPluginSpec(cls);
                         //const plugin = el.getAttribute('data-delphine-plugin');
                         const raw = el.getAttribute('data-delphine-props');
                         const props = raw ? JSON.parse(raw) : {};
 
-                        maybeHost.setPluginSpec({ plugin: type, props });
-                        maybeHost.mountPluginIfReady!();
+                        maybePluginHost?.setPluginSpec!({ plugin: type, props });
+                        maybePluginHost?.mountPluginIfReady!();
                 }
 
                 if (child.allowsChildren()) {

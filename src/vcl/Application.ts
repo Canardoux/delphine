@@ -126,7 +126,7 @@ export class TApplication implements IApplication {
 
         destroy(form: TForm | null) {
                 if (form) {
-                        form?.xdestroy();
+                        form?.destroy();
                         this.forms.delete(form!.name);
                 }
         }

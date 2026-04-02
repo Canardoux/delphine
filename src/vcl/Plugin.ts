@@ -23,15 +23,17 @@ import type { IForm } from './IForm';
 import { TControl, TMetaControl } from './Control';
 import type { PropSpec } from './Component';
 import { TApplication } from './Application';
-import type { DelphineServices, UIPluginMessage, UIPluginInstance, UIPluginFactory, IMetaPluginHost, Json } from './IPlugin';
+import type { IMetaCompositeControl } from './ICompositeControl';
 import type { IMetaComponent, IComponent } from './IComponent';
 //import type { IComponent } from 'grapesjs';
 import type { IControl } from './IControl';
 import { TContainer, TMetaContainer } from './Container';
+import type { UIPluginFactory, IMetaPluginHost } from './IPlugin';
+import { TCompositeControl, TMetaCompositeControl } from './CompositeControl';
+import type { Json } from './IComponent';
+import type { DelphineServices, UIPluginMessage, UIPluginInstance } from './IPlugin';
 
 // ============================================= PLUGINHOST ==========================================================
-
-//export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
 export interface DelphineLogger {
         debug(msg: string, data?: Json): void;
@@ -52,6 +54,26 @@ export interface DelphineStorage {
         get(key: string): Promise<Json | undefined>;
         set(key: string, value: Json): Promise<void>;
         remove(key: string): Promise<void>;
+}
+
+export class TMetaPluginHost extends TMetaCompositeControl implements IMetaPluginHost {
+        pluginFactory: UIPluginFactory | null;
+        static metaclass = new TMetaPluginHost(TMetaCompositeControl.metaclass, 'TPluginHost', null);
+
+        public constructor(superClass: TMetaCompositeControl, name: string, pluginFactory: UIPluginFactory | null) {
+                super(superClass, name);
+                this.pluginFactory = pluginFactory;
+        }
+
+        create(name: string, form: TForm, parent: TControl) {
+                const pluginHost = new TPluginHost(name, form, parent);
+                pluginHost.metaclass = this;
+                return pluginHost;
+        }
+
+        defProps(): PropSpec<TPluginHost>[] {
+                return [];
+        }
 }
 
 export class Toto {
@@ -89,90 +111,29 @@ export class Toto {
 }
 const toto: Toto = new Toto();
 
-/*
-export interface UIPluginInstance<Props extends Json = Json> {
-        readonly id: string;
-
-        // Called exactly once after creation (for a given instance).
-        mount(container: HTMLElement, props: Props, services: DelphineServices): void;
-
-        // Called any time props change (may be frequent).
-        update(props: Props): void;
-
-        // Called exactly once before disposal.
-        unmount(): void;
-
-        // Finished with this plugin
-        dispose?(): void;
-
-        // Optional ergonomics.
-        getSizeHints?(): number;
-        focus?(): void;
-
-        // Optional persistence hook (Delphine may store & restore this).
-        serializeState?(): Json;
-}
-        */
-
-export class TMetaPluginHost extends TMetaContainer implements IMetaPluginHost {
-        pluginFactory: UIPluginFactory | null;
-        static metaclass = new TMetaPluginHost(TMetaControl.metaclass, 'TPluginHost', null);
-        //getMetaclass() {
-        //        return TMetaPluginHost.metaclass;
-        //}
-
-        public constructor(superClass: TMetaControl, name: string, pluginFactory: UIPluginFactory | null) {
-                super(superClass, name);
-                this.pluginFactory = pluginFactory;
-        }
-
-        create(name: string, form: TForm, parent: TControl) {
-                const pluginHost = new TPluginHost(name, form, parent);
-                pluginHost.metaclass = this;
-                return pluginHost;
-        }
-
-        defProps(): PropSpec<TPluginHost>[] {
-                return [];
-        }
-}
-
-function safeParseJson(s: string | null): any {
-        if (!s) return {};
-        try {
-                return JSON.parse(s);
-        } catch {
-                return {};
-        }
-}
-
-function stableStringify(v: any): string {
-        // Good enough for cheap change detection
-        try {
-                return JSON.stringify(v);
-        } catch {
-                return '';
-        }
-}
-
-export class TPluginHost extends TContainer {
-        private instance: UIPluginInstance | null = null;
-        private services: DelphineServices | null = null;
-
-        private pluginName: string | null = null;
-        private pluginProps: any = {};
-        private pluginPropsKey: string = '';
+export class TPluginHost extends TCompositeControl {
         //private factory: UIPluginFactory | null = null;
         //private pluginDef: UIPluginDef<Json> | null = null;
         //private meta: TMetaPluginHost | null = null;
 
         //private mountPoint: HTMLElement | null = null;
         private observer: MutationObserver | null = null;
-
+        private instance: UIPluginInstance | null = null;
+        private services: DelphineServices | null = null;
         private updateScheduled = false;
 
         constructor(name: string, form: IForm, parent: TControl) {
                 super(TMetaPluginHost.metaclass, name, form, parent);
+        }
+
+        defProps(): PropSpec<any>[] {
+                return (this.metaclass as TMetaPluginHost).schemaPropsToPropSpecs();
+        }
+
+        /** Patch many props at once (preferred). */
+        patchPluginProps(patch: Record<string, any>) {
+                Object.assign(this.pluginProps, patch);
+                this.scheduleUpdate();
         }
 
         /** Replace ALL plugin props (rare). */
@@ -191,7 +152,7 @@ export class TPluginHost extends TContainer {
                 }
 
                 const next = { ...(this.pluginProps ?? {}), [key]: value };
-                const nextKey = stableStringify(next);
+                const nextKey = this.stableStringify(next);
 
                 this.pluginProps = next;
                 this.pluginPropsKey = nextKey;
@@ -209,49 +170,6 @@ export class TPluginHost extends TContainer {
                 return this.pluginProps[name] as T | undefined;
         }
 
-        defProps(): PropSpec<any>[] {
-                return (this.metaclass as TMetaPluginHost).schemaPropsToPropSpecs();
-        }
-
-        /** Patch many props at once (preferred). */
-        patchPluginProps(patch: Record<string, any>) {
-                Object.assign(this.pluginProps, patch);
-                this.scheduleUpdate();
-        }
-
-        getName() {
-                return this.name;
-        }
-
-        private scheduleUpdate() {
-                if (this.updateScheduled) return;
-                this.updateScheduled = true;
-
-                queueMicrotask(() => {
-                        this.updateScheduled = false;
-                        this.instance?.update(this.pluginProps);
-                });
-        }
-
-        /*
-        mountPlugin(props: Json, services: DelphineServices) {
-                const container = this.htmlElement;
-                if (!container) return;
-
-                if (!this.factory) {
-                        services.log.warn('TPluginHost: no plugin factory set', { host: this.name as any });
-                        return;
-                }
-
-                // Dispose old instance if any
-                this.unmount();
-
-                // Create plugin instance then mount
-                this.instance = this.factory({ host: this, form: this.form! });
-                this.instance!.mount(container, props, services);
-        }
-                */
-
         // Called by buildComponentTree()
         setPluginSpec(spec: { plugin: string | null; props: any }) {
                 this.pluginName = spec.plugin;
@@ -263,12 +181,15 @@ export class TPluginHost extends TContainer {
                 //this.factory = spec.factory;
         }
 
-        /*
-        // Called by the metaclass (or by your registry) right after creation
-        setPluginFactory(factory: UIPluginFactory) {
-                this.factory = factory;
+        private scheduleUpdate() {
+                if (this.updateScheduled) return;
+                this.updateScheduled = true;
+
+                queueMicrotask(() => {
+                        this.updateScheduled = false;
+                        this.instance?.update(this.pluginProps);
+                });
         }
-                */
 
         private onPluginMessage(msg: UIPluginMessage) {
                 if (msg.type === 'setProp') {
@@ -325,7 +246,51 @@ export class TPluginHost extends TContainer {
                 }
         }
 
-        // English comments as requested.
+        mountPlugin(services: DelphineServices) {
+                const el = this.htmlElement;
+                if (!el || !this.pluginName) return;
+                //const meta = this.getMetaclass() as TMetaPluginHost;
+                //const def = this.factory; // meta.pluginFactory;
+
+                //const def = PluginRegistry.pluginRegistry.get(this.pluginName);
+                const meta = this.getMetaclass() as TMetaPluginHost;
+                const def = meta.defProps;
+                if (!def) {
+                        services.log.warn('Unknown plugin', { plugin: this.pluginName });
+                        return;
+                }
+
+                this.unmount();
+
+                //const meta = this.getMetaclass as TMetaPluginHost;
+                if (meta.pluginFactory) {
+                        this.instance = meta.pluginFactory({ host: this, form: this.form! as IControl });
+                }
+
+                this.instance?.mount(el, this.pluginProps, services);
+                //this.buildComponentTree(el, this.form!, this);
+        }
+
+        unmount() {
+                try {
+                        this.instance?.unmount();
+                } finally {
+                        this.instance = null;
+                }
+        }
+
+        dispose() {
+                // Call this when the component is destroyed (if you have such a hook)
+                this.unmount();
+                this.observer?.disconnect();
+                this.observer = null;
+                //this.mountPoint = null;
+                this.services = null;
+        }
+
+        updatePlugin() {
+                this.instance?.update(this.pluginProps);
+        }
 
         private refreshFromDom() {
                 const services = this.services;
@@ -333,8 +298,8 @@ export class TPluginHost extends TContainer {
                 if (!services || !hostEl || !this.form || !this.elem) return;
 
                 const newPlugin = hostEl.getAttribute('data-delphine-component'); // string | null
-                const newProps = safeParseJson(hostEl.getAttribute('data-delphine-props'));
-                const newKey = stableStringify(newProps);
+                const newProps = this.safeParseJson(hostEl.getAttribute('data-delphine-props'));
+                const newKey = this.stableStringify(newProps);
 
                 // Nothing to mount => unmount and exit
                 if (!newPlugin) {
@@ -364,86 +329,7 @@ export class TPluginHost extends TContainer {
                         this.instance?.update(newProps);
                 }
         }
-        /*
-        private remount() {
-                / * 
-                const services = this.services;
-                if (!services || !this.form || !this.mountPoint) return;
-
-                // Resolve plugin
-                if (!this.pluginName) {
-                        this.unmount();
-                        return;
-                }
-
-                //const meta = this.getMetaClass() as TMetaPluginHost;
-                //const def = meta.pluginFactory;
-                //const def = this.factory;
-                const meta = this.getMetaclass() as TMetaPluginHost;
-                const def = meta.defProps; //PluginRegistry.pluginRegistry.get(this.pluginName);
-                if (!def) {
-                        services.log.warn('Unknown plugin', { plugin: this.pluginName as any });
-                        this.unmount();
-                        return;
-                }
-
-                * /
-
-                // Hard remount
-                this.unmount();
-                this.mountPlugin(this.services!);
-                //const meta = this.getMetaclass() as TMetaPluginHost;
-                //this.instance = meta.pluginFactory!({ host: this, form: this.form as IComponent }) ?? null; // The instance is created Here !---------------
-                //this.instance?.mount(this.mountPoint, this.pluginProps, services); // Puis est monté ici ----------------------
-        }
-        */
-
-        unmount() {
-                try {
-                        this.instance?.unmount();
-                } finally {
-                        this.instance = null;
-                }
-        }
-
-        dispose() {
-                // Call this when the component is destroyed (if you have such a hook)
-                this.unmount();
-                this.observer?.disconnect();
-                this.observer = null;
-                //this.mountPoint = null;
-                this.services = null;
-        }
-
-        mountPlugin(services: DelphineServices) {
-                const el = this.htmlElement;
-                if (!el || !this.pluginName) return;
-                //const meta = this.getMetaclass() as TMetaPluginHost;
-                //const def = this.factory; // meta.pluginFactory;
-
-                //const def = PluginRegistry.pluginRegistry.get(this.pluginName);
-                const meta = this.getMetaclass() as TMetaPluginHost;
-                const def = meta.defProps;
-                if (!def) {
-                        services.log.warn('Unknown plugin', { plugin: this.pluginName });
-                        return;
-                }
-
-                this.unmount();
-
-                //const meta = this.getMetaclass as TMetaPluginHost;
-                this.instance = meta.pluginFactory!({ host: this, form: this.form! as IControl }) ?? null;
-
-                this.instance?.mount(el, this.pluginProps, services);
-                //this.buildComponentTree(el, this.form!, this);
-        }
-
-        updatePlugin() {
-                this.instance?.update(this.pluginProps);
-        }
 }
-
-//export type UIPluginFactory<Props extends Json = Json> = (args: { host: TPluginHost; form: TForm }) => UIPluginInstance<Props>;
 
 export interface SizeHints {
         minWidth?: number;
@@ -459,23 +345,3 @@ export type UIPluginDef<Props extends Json> = {
         defaultProps?: Props;
         propSchema?: Record<string, PropertyDefinition>;
 };
-
-/*
-export class PluginRegistry {
-        static pluginRegistry = new PluginRegistry();
-        private readonly plugins = new Map<string, UIPluginDef<Json>>();
-
-        register(name: string, def: UIPluginDef<Json>) {
-                if (this.plugins.has(name)) throw new Error(`Plugin already registered: ${name}`);
-                this.plugins.set(name, def);
-        }
-
-        get(name: string): UIPluginDef<Json> | undefined {
-                return this.plugins.get(name);
-        }
-
-        has(name: string): boolean {
-                return this.plugins.has(name);
-        }
-}
-        */

@@ -20,10 +20,9 @@
  */
 
 import type { IComponent } from './IComponent';
+import type { ICompositeControl } from './ICompositeControl';
 import type { IControl } from './IControl';
 
-export interface IForm extends IControl {
+export interface IForm extends ICompositeControl {
         //getClass(type: string): IControl | undefined;
-        getName(): string;
-        registerInstance(name: string, c: IControl): void;
 }

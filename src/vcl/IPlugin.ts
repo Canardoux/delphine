@@ -18,7 +18,8 @@
  */
 
 import type { IComponent } from './IComponent';
-export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
+import type { ICompositeControl } from './ICompositeControl';
+import type { Json } from './IComponent';
 
 export type UIPluginMessage = { type: 'setProp'; hostName: string; key: string; value: any } | { type: 'event'; hostName: string; name: string; detail?: any };
 
@@ -45,8 +46,6 @@ export interface UIPluginInstance<Props extends Json = Json> {
         serializeState?(): Json;
 }
 
-export type UIPluginFactory<Props extends Json = Json> = (args: { host: IPluginHost; form: IComponent }) => UIPluginInstance<Props>;
-
 export interface DelphineServices {
         log: {
                 debug(msg: string, data?: any): void;
@@ -72,10 +71,12 @@ export interface DelphineServices {
         // i18n?: ...
         // nav?: ...
 }
+
 export interface IPluginHost {
-        setPluginSpec(spec: { plugin: string | null; props: any }): void;
-        mountPluginIfReady(/*services: DelphineServices*/): void;
-        getName(): string;
+        mountPluginIfReady(/*services: DelphineServices*/): void; // Used by buildComponentTree()
+        setPluginSpec(spec: { plugin: string | null; props: any }): void; // Used by buildComponentTree()
 }
 
 export interface IMetaPluginHost {}
+
+export type UIPluginFactory<Props extends Json = Json> = (args: { host: ICompositeControl; form: IComponent }) => UIPluginInstance<Props>;

@@ -138,10 +138,10 @@ export class TPanel extends TContainer {
         //protected get pprops(): PanelProps {
         //return this.props as PanelProps;
         //}
-
-        constructor(name: string, form: IForm | null, parent: TControl | null) {
-                super(TMetaControl.metaclass, name, form, parent);
+        constructor(name: string, form: IForm, parent: TControl) {
+                super(TMetaPanel.metaclass, name, form, parent);
         }
+
         /*
         syncDomFromProps() {
                 const el = this.htmlElement;
@@ -185,6 +185,7 @@ export class TMetaPanel extends TMetaContainer {
         };
 }
 
+/*
 export class TSimpleDCC extends TControl {
         //getMetaclass() {
         //return TMetaSimpleDCC.metaclass;
@@ -194,11 +195,11 @@ export class TSimpleDCC extends TControl {
                 super(TMetaSimpleDCC.metaclass, name, form, parent);
         }
 
-        /*
+        / *
         protected get dccprops(): SimpleDCCProps {
                 return this.props as SimpleDCCProps;
         }
-                */
+                * /
 }
 
 export class TMetaSimpleDCC extends TMetaControl {
@@ -233,13 +234,13 @@ export class TMetaSimpleDCC extends TMetaControl {
         };
 }
 
-/*
+/ *
 export type CompositeDCCProps = ComponentProps & {
         //caption?: string;
         //enabled?: boolean;
         //color?: TColor; // ou TColor, etc.
 };
-*/
+* /
 
 // Note: this class does not do anything. Perhaps that DCC can herit directly from TContainer or TPanel
 // TContainer or TPanel ? Actually this is not clear. Those two class do not do anything useful abof TComponent
@@ -251,12 +252,13 @@ export class TCompositeDCC extends TContainer {
         constructor(name: string, form: IForm, parent: TControl) {
                 super(TMetaCompositeDCC.metaclass, name, form, parent);
         }
-        /*
+        / *
         protected get dccprops(): CompositeDCCProps {
                 return this.props as CompositeDCCProps;
         }
-                */
+                * /
 }
+        
 
 export class TMetaCompositeDCC extends TMetaContainer {
         static readonly metaclass: TMetaCompositeDCC = new TMetaCompositeDCC(TMetaContainer.metaclass, 'TCompositDCC');
@@ -289,3 +291,4 @@ export class TMetaCompositeDCC extends TMetaContainer {
                 props: this.propSpecsToSchemaProps()
         };
 }
+*/
