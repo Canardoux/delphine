@@ -27,7 +27,7 @@ import type { IForm } from './IForm';
 //import { TMetaButton, TMetaPanel } from './StdCtrls';
 //import { TApplication } from './Application';
 import { TMetaclass, TObject } from './Oops';
-import type { IPluginHost } from './IPlugin';
+//import type { IPluginHost } from './IPlugin';
 import { getApplication } from './IApplication';
 import type { IApplication } from './IApplication';
 import { TPluginHost } from './Plugin';
@@ -52,6 +52,9 @@ export class TComponentRegistry extends TObject {
         //}
 
         private instances = new Map<string, TControl>();
+        getInstances(): Map<string, TControl> {
+                return this.instances;
+        }
 
         constructor() {
                 super(TMetaComponentRegistry.metaclass);

@@ -22,16 +22,12 @@ import { TForm } from './Form';
 import type { IForm } from './IForm';
 import { TControl, TMetaControl } from './Control';
 import type { PropSpec } from './Component';
-import { TApplication } from './Application';
-import type { IMetaCompositeControl } from './ICompositeControl';
-import type { IMetaComponent, IComponent } from './IComponent';
-//import type { IComponent } from 'grapesjs';
 import type { IControl } from './IControl';
-import { TContainer, TMetaContainer } from './Container';
-import type { UIPluginFactory, IMetaPluginHost } from './IPlugin';
+import type { UIPluginFactory, IMetaPluginHost, UIPluginInstance } from './IPlugin';
 import { TCompositeControl, TMetaCompositeControl } from './CompositeControl';
+import type { UIPluginMessage } from './CompositeControl';
 import type { Json } from './IComponent';
-import type { DelphineServices, UIPluginMessage, UIPluginInstance } from './IPlugin';
+import type { DelphineServices } from './IPlugin';
 
 // ============================================= PLUGINHOST ==========================================================
 
@@ -117,30 +113,7 @@ export class TPluginHost extends TCompositeControl {
         //private meta: TMetaPluginHost | null = null;
 
         //private mountPoint: HTMLElement | null = null;
-        private observer: MutationObserver | null = null;
         private instance: UIPluginInstance | null = null;
-        private services: DelphineServices | null = null;
-        private updateScheduled = false;
-
-        constructor(name: string, form: IForm, parent: TControl) {
-                super(TMetaPluginHost.metaclass, name, form, parent);
-        }
-
-        defProps(): PropSpec<any>[] {
-                return (this.metaclass as TMetaPluginHost).schemaPropsToPropSpecs();
-        }
-
-        /** Patch many props at once (preferred). */
-        patchPluginProps(patch: Record<string, any>) {
-                Object.assign(this.pluginProps, patch);
-                this.scheduleUpdate();
-        }
-
-        /** Replace ALL plugin props (rare). */
-        setPluginProps(next: Record<string, any>) {
-                this.pluginProps = next ?? {};
-                this.scheduleUpdate();
-        }
 
         setPluginProp(key: string, value: any) {
                 console.log('SET PROP', key, value);
@@ -162,12 +135,37 @@ export class TPluginHost extends TCompositeControl {
                         el.setAttribute('data-delphine-props', JSON.stringify(next));
                 }
 
-                console.log('CALLING PLUGIN UPDATE', next, this.instance);
+                console.log('CALLING PLUGIN UPDATE', next);
                 this.instance?.update(next);
         }
 
         getPluginProp<T = any>(name: string): T | undefined {
                 return this.pluginProps[name] as T | undefined;
+        }
+
+        private observer: MutationObserver | null = null;
+
+        private services: DelphineServices | null = null;
+        private updateScheduled = false;
+
+        constructor(name: string, form: IForm, parent: TControl) {
+                super(TMetaPluginHost.metaclass, name, form, parent);
+        }
+
+        defProps(): PropSpec<any>[] {
+                return (this.metaclass as TMetaPluginHost).schemaPropsToPropSpecs();
+        }
+
+        /** Patch many props at once (preferred). */
+        patchPluginProps(patch: Record<string, any>) {
+                Object.assign(this.pluginProps, patch);
+                this.scheduleUpdate();
+        }
+
+        /** Replace ALL plugin props (rare). */
+        setPluginProps(next: Record<string, any>) {
+                this.pluginProps = next ?? {};
+                this.scheduleUpdate();
         }
 
         // Called by buildComponentTree()

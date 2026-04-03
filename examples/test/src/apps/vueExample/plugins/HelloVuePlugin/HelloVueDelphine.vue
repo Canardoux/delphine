@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { UIPluginMessage } from '@vcl';
+//import type { UIPluginMessage } from '@vcl'/;
+import type { UIPluginMessage } from '@vcl/CompositeControl';
 
 const props = defineProps<{
         state: { message: string };

@@ -22,7 +22,7 @@
 //import { TControl, THandler } from './Control';
 //import { TComponent } from './Component';
 import { TMetaContainer, TContainer } from './Container';
-import type { PropSpec, TMetaComponent } from './Component';
+import type { PropSpec } from './Component';
 //import { TComponentRegistry } from './ComponentRegistry';
 //import { TTypeRegistry } from './TypeRegistry';
 //import type { IForm } from './IForm';
@@ -35,10 +35,43 @@ import type { IComponent } from './IComponent';
 import type { IMetaComponent } from './IComponent';
 import type { ICompositeControl, IMetaCompositeControl } from './ICompositeControl';
 import { TComponentRegistry } from './ComponentRegistry';
-import { TControl, THandler } from './Control';
+import { TControl } from './Control';
 
 //import type { UIPluginInstance } from './ICompositeControl';
-//import { Json } from './IComponent';
+//import type { Json } from './IComponent';
+
+export interface DelphineServices {
+        log: {
+                debug(msg: string, data?: any): void;
+                info(msg: string, data?: any): void;
+                warn(msg: string, data?: any): void;
+                error(msg: string, data?: any): void;
+        };
+
+        bus: {
+                on(event: string, handler: (payload: any) => void): () => void;
+                emit(event: string, payload: any): void;
+        };
+
+        storage: {
+                get(key: string): Promise<any> | null;
+                set(key: string, value: any): Promise<void> | null;
+                remove(key: string): Promise<void> | null;
+        };
+
+        notify?: (msg: UIPluginMessage) => void;
+
+        // futur
+        // i18n?: ...
+        // nav?: ...
+}
+
+export interface IPluginHost {
+        mountPluginIfReady(/*services: DelphineServices*/): void; // Used by buildComponentTree()
+        setPluginSpec(spec: { plugin: string | null; props: any }): void; // Used by buildComponentTree()
+}
+
+export type UIPluginMessage = { type: 'setProp'; hostName: string; key: string; value: any } | { type: 'event'; hostName: string; name: string; detail?: any };
 
 export class TMetaCompositeControl extends TMetaContainer implements IMetaComponent, IMetaControl, IMetaCompositeControl {
         static readonly metaclass: TMetaCompositeControl = new TMetaCompositeControl(TMetaContainer.metaclass, 'TCompositeControl');
@@ -79,6 +112,7 @@ export class TCompositeControl extends TContainer implements IControl, IComponen
         pluginName: string | null = null;
         pluginProps: any = {};
         pluginPropsKey: string = '';
+        //private instance: UIPluginInstance | null = null;
 
         isACompositeControl(): boolean {
                 return true;

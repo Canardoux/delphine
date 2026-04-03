@@ -20,8 +20,7 @@
 import type { IComponent } from './IComponent';
 import type { ICompositeControl } from './ICompositeControl';
 import type { Json } from './IComponent';
-
-export type UIPluginMessage = { type: 'setProp'; hostName: string; key: string; value: any } | { type: 'event'; hostName: string; name: string; detail?: any };
+import type { UIPluginMessage } from './CompositeControl';
 
 export interface UIPluginInstance<Props extends Json = Json> {
         readonly id: string;

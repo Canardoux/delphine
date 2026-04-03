@@ -33,6 +33,7 @@ import type { IComponent } from './IComponent';
 import type { IMetaComponent } from './IComponent';
 import { TMetaCompositeControl, TCompositeControl } from './CompositeControl';
 import type { ICompositeControl } from './ICompositeControl';
+import { BuildComponentTree } from './BuildComponentTree';
 
 export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, IMetaControl {
         static readonly metaclass: TMetaForm = new TMetaForm(TMetaCompositeControl.metaclass, 'TForm');
@@ -165,6 +166,20 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
                 return null;
         }
 
+        getControlFromElement(composit: TCompositeControl, el: Element): TControl | null {
+                const comps = composit.componentRegistry.getInstances().values();
+                for (const c of comps) {
+                        if (c.elem == el) return c;
+                }
+                for (const frame of composit.frames) {
+                        const f = frame as TCompositeControl;
+                        const c = this.getControlFromElement(f, el);
+                        if (c) return c;
+                }
+                return null;
+        }
+
+        /*
         // We received an DOM Event. Dispatch it
         private dispatchDomEvent(ev: Event) {
                 const targetElem = ev.target as Element | null;
@@ -192,6 +207,33 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
                 }
 
                 // No handler here: try going "up" using your component tree if possible
+        }
+                */
+
+        private dispatchDomEvent(ev: Event) {
+                const targetElem = ev.target as Element | null;
+                if (!targetElem) return;
+
+                const propName = `on${ev.type}`;
+
+                let el = targetElem.closest('[data-delphine-component]');
+                if (!el) return;
+
+                let comp = this.getControlFromElement(this, el); // très important
+
+                const sender = comp;
+
+                while (comp) {
+                        const handler = comp.getProp<THandler>(propName);
+
+                        if (handler && handler.s) {
+                                const owner = comp.form as TCompositeControl; // Frame ou Form
+                                handler.fire(owner, propName, ev, sender);
+                                return;
+                        }
+
+                        comp = comp.parent;
+                }
         }
 
         // Form.ts
@@ -249,7 +291,7 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
 
                 // 4. Build Delphine component tree
                 this.componentRegistry.clear();
-                this.buildComponentTree(this.elem, this, this);
+                BuildComponentTree.singeleton.buildComponentTree(this.elem, this, this);
 
                 // 5. Install event routing
                 this.installEventRouter();

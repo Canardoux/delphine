@@ -2,6 +2,8 @@ import { TForm, TControl, TButton, TColor, TApplication, TPanel, TPluginHost } f
 import { getApplication } from '@vcl/IApplication';
 
 import './MainForm.css';
+import { HelloFrame } from '../../plugins/HelloFramePlugin/HelloFrame';
+import { THostFrame } from '@vcl/Frame';
 
 export default class MainForm extends TForm {
         buttona_onclick(_ev: Event | null, _sender: TControl) {
@@ -61,10 +63,17 @@ export default class MainForm extends TForm {
                         console.warn('myPanel not found in registry');
                         return;
                 }
-                panel!.backgroundColor = TColor.rgb(54, 127, 173);
+                panel!.backgroundColor = TColor.rgb(28, 188, 28);
 
+                const hostFrame = this.componentRegistry.get<THostFrame>('myframeplugin');
+                const frame = hostFrame!.getFrame() as HelloFrame;
+                const btn = frame.componentRegistry.get<TButton>('myframeButton');
+                btn!.caption = 'Message updated from Delphine!!!';
+                //frame.setProp('message', 'Message updated from Delphine!!!');
+        }
+
+        subButton2_onclick(_ev: Event | null, _sender: TControl) {
                 const frame = this.componentRegistry.get<TPluginHost>('myframeplugin');
-                //vue!.props.message = 'Message updated from Delphine!!!';
                 frame!.setPluginProp('message', 'Message updated from Delphine!!!');
         }
 

@@ -107,4 +107,8 @@ export class THostFrame extends TContainer {
         getSchema(): ComponentSchema {
                 return TMetaHostFrame.metaclass.getSchema();
         }
+
+        getFrame() {
+                return this.children[0] as TFrame;
+        }
 }

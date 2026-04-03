@@ -74,3 +74,5 @@ export function dumpObject(obj: any) {
                 o = Object.getPrototypeOf(o);
         }
 }
+
+export type UnknownRecord = Record<string, unknown>;
