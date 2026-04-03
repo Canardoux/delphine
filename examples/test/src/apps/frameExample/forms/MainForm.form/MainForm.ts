@@ -83,4 +83,20 @@ export default class MainForm extends TForm {
                 console.log('zazaVue clicked!!!!');
                 //btn!.enabled = false;
         }
+
+        myframe_onFrameEvent(ev: CustomEvent | null, _sender: TControl) {
+                console.log('myframe_onFrameEvent!!!!');
+                switch (ev?.detail?.eventType) {
+                        case 'MessageChanged':
+                                const hostFrame = this.componentRegistry.get<THostFrame>('myframeplugin');
+                                const frame = hostFrame!.getFrame() as HelloFrame;
+                                const btn = frame.componentRegistry.get<TButton>('myframeButton');
+                                btn!.caption = ev.detail.data.message;
+
+                                break;
+
+                        default:
+                                break;
+                }
+        }
 }

@@ -64,7 +64,22 @@ export class TMetaFrame<T extends TFrame> extends TMetaCompositeControl implemen
         }
 }
 
-export class TFrame extends TCompositeControl implements IControl, IComponent {}
+export class TFrame extends TCompositeControl implements IControl, IComponent {
+        emit(type: string, o: object) {
+                // create custom events
+                const e = new CustomEvent('frameevent', { detail: { eventType: type, data: o } });
+                this.elem!.dispatchEvent(e);
+        }
+
+        get onframeevent(): THandler {
+                const handler = this.props.onframeevent as THandler;
+                return handler ?? new THandler('');
+        }
+
+        set onframeevent(handler) {
+                this.props.onclick = handler;
+        }
+}
 
 export class TMetaHostFrame<T extends THostFrame> extends TMetaContainer {
         static readonly metaclass: TMetaHostFrame<THostFrame> = new TMetaHostFrame(TMetaContainer.metaclass, 'THostFrame');
@@ -73,10 +88,20 @@ export class TMetaHostFrame<T extends THostFrame> extends TMetaContainer {
                 super(superClass, name);
         }
 
-        defProps(): PropSpec<any>[] {
+        defProps(): PropSpec<TFrame>[] {
                 return [
-                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
-                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
+                        //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
+                        {
+                                name: 'onframeevent',
+                                default: '',
+                                kind: 'handler',
+                                retrieve: (o) => {
+                                        return o.onframeevent;
+                                },
+                                //apply: (o, v) => (o.onclick = new THandler(String(v)))
+                                apply: (o, v) => (o.onframeevent = v as THandler)
+                        }
+                        //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
                 ];
         }
 

@@ -99,7 +99,6 @@ export class TControl extends TComponent implements IControl {
         //props: ComponentProps;
 
         /** May contain child components */
-        //_onclick: THandler = new THandler('');
         allowsChildren(): boolean {
                 return false;
         }
@@ -197,7 +196,7 @@ export class TMetaControl extends TMetaComponent implements IMetaControl {
                 return new TControl(TMetaControl.metaclass, name, form, parent);
         }
 
-        defProps(): PropSpec<any>[] {
+        defProps(): PropSpec<TControl>[] {
                 return [
                         //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
                         {

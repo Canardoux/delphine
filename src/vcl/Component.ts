@@ -112,29 +112,6 @@ export class TMetaComponent extends TMetaObject {
                 ];
         }
 
-        // Create the runtime instance and attach it to the DOM element.
-        /*
-        create(name: string, form: IForm, parent: TComponent): TComponent {
-                return new TComponent(name, form, parent);
-        }
-
-        defProps(): PropSpec<any>[] {
-                return [
-                        //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
-                        {
-                                name: 'onclick',
-                                kind: 'handler',
-                                retrieve: (o) => {
-                                        return o.onclick;
-                                },
-                                //apply: (o, v) => (o.onclick = new THandler(String(v)))
-                                apply: (o, v) => (o.onclick = v as THandler)
-                        }
-                        //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
-                ];
-        }
-                */
-
         propSpecsToSchemaProps(): PropSchema {
                 const result: PropSchema = {};
 

@@ -34,6 +34,8 @@ import type { IMetaComponent } from './IComponent';
 import { TMetaCompositeControl, TCompositeControl } from './CompositeControl';
 import type { ICompositeControl } from './ICompositeControl';
 import { BuildComponentTree } from './BuildComponentTree';
+import { listenerCount } from 'process';
+import { EventManager } from './event';
 
 export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, IMetaControl {
         static readonly metaclass: TMetaForm = new TMetaForm(TMetaCompositeControl.metaclass, 'TForm');
@@ -79,6 +81,7 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
         //}
         static forms = new Map<string, TForm>();
         private _mounted = false;
+        eventManager = new EventManager();
         // Each Form has its own componentRegistry
 
         //typeRegistry: TComponentTypeRegistry | null = null;
@@ -90,150 +93,6 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
 
         getName() {
                 return this.name;
-        }
-
-        /*
-        getClass(type: string): IControl | undefined {
-                
-                if (!this.typeRegistry) {
-                        this.typeRegistry = new TComponentTypeRegistry();
-                        registerBuiltins(this.typeRegistry);
-                }
-                        
-                return this.typeRegistry?.get(type);
-        }
-                */
-
-        //get application(): IApplication {
-        //return this.form?.application ?? TApplication.TheApplication;
-        //}
-
-        // English comments as requested.
-
-        findFormFromEventTarget(target: Element): TForm | null {
-                // 1) Find the nearest element that looks like a form container
-                const formElem = target.closest('[data-delphine-component="TForm"][data-delphine-name]') as Element | null;
-                if (!formElem) return null;
-
-                // 2) Resolve the TForm instance
-                const formName = formElem.getAttribute('data-delphine-name');
-                if (!formName) return null;
-
-                return TForm.forms.get(formName) ?? null;
-        }
-
-        private _ac: AbortController | null = null;
-
-        installEventRouter() {
-                this._ac?.abort();
-                this._ac = new AbortController();
-                const { signal } = this._ac;
-
-                const root = this.elem as Element | null;
-                if (!root) return;
-
-                // same handler for everybody
-                const handler = (ev: Event) => this.dispatchDomEvent(ev);
-
-                for (const type of ['click', 'input', 'change', 'keydown']) {
-                        root.addEventListener(type, handler, { capture: true, signal });
-                }
-                const meta = this.getMetaclass() as TMetaForm;
-                for (const type in meta.domEvents) {
-                        root.addEventListener(type, handler, { capture: true, signal });
-                }
-        }
-
-        disposeEventRouter() {
-                this._ac?.abort();
-                this._ac = null;
-        }
-
-        getComponentFromName(composit: TCompositeControl, name: string): { comp: TControl; composit: TCompositeControl } | null {
-                let comp = name ? composit.componentRegistry.get(name) : null;
-                //while (!comp) {
-                if (comp) {
-                        return { comp, composit };
-                }
-                for (const frame of composit.frames) {
-                        composit = frame as TCompositeControl;
-                        const r = this.getComponentFromName(composit, name);
-                        if (r) {
-                                return r;
-                        }
-                }
-                //}
-                return null;
-        }
-
-        getControlFromElement(composit: TCompositeControl, el: Element): TControl | null {
-                const comps = composit.componentRegistry.getInstances().values();
-                for (const c of comps) {
-                        if (c.elem == el) return c;
-                }
-                for (const frame of composit.frames) {
-                        const f = frame as TCompositeControl;
-                        const c = this.getControlFromElement(f, el);
-                        if (c) return c;
-                }
-                return null;
-        }
-
-        /*
-        // We received an DOM Event. Dispatch it
-        private dispatchDomEvent(ev: Event) {
-                const targetElem = ev.target as Element | null;
-                if (!targetElem) return;
-
-                const propName = `on${ev.type}`;
-
-                let el: Element | null = targetElem.closest('[data-delphine-component]');
-                if (!el) return;
-                const name = el.getAttribute('data-delphine-name');
-                const r = this.getComponentFromName(this, name!);
-
-                let rc = r?.comp ?? null;
-                //let comp = name ? this.getComponentFromName(this, name) : null;
-                while (r && rc) {
-                        const handler = rc.getProp<THandler>(propName); // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-                        //const handler = comp.getProperty(propName); //comp?.props[propName as keyof typeof comp.props] as THandler | null;
-                        if (handler && handler.s && handler.s != '') {
-                                handler.fire(r.composit, propName, ev, rc);
-                                return;
-                        }
-                        //el = next ?? el.parentElement?.closest('[data-delphine-component]') ?? null;
-                        rc = rc.parent;
-                }
-
-                // No handler here: try going "up" using your component tree if possible
-        }
-                */
-
-        private dispatchDomEvent(ev: Event) {
-                const targetElem = ev.target as Element | null;
-                if (!targetElem) return;
-
-                const propName = `on${ev.type}`;
-
-                let el = targetElem.closest('[data-delphine-component]');
-                if (!el) return;
-
-                let comp = this.getControlFromElement(this, el); // très important
-
-                const sender = comp;
-
-                while (comp) {
-                        const handler = comp.getProp<THandler>(propName);
-
-                        if (handler && handler.s) {
-                                const owner = comp.form as TCompositeControl; // Frame ou Form
-                                handler.fire(owner, propName, ev, sender);
-                                return;
-                        }
-
-                        comp = comp.parent;
-                }
         }
 
         // Form.ts
@@ -294,7 +153,7 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
                 BuildComponentTree.singeleton.buildComponentTree(this.elem, this, this);
 
                 // 5. Install event routing
-                this.installEventRouter();
+                this.eventManager.installEventRouter(this, this.elem);
 
                 // 6. Mark as created, still hidden
                 this._mounted = true;

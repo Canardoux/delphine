@@ -27,6 +27,16 @@ export class HelloFrame extends TFrame {
                 //vue!.props.message = 'Message updated from Delphine!!!';
                 //frame!.setPluginProp('message', 'Message updated from Delphine!!!');
         }
+
+        myframeButton_onclick(_ev: Event | null, _sender: TControl) {
+                debugger;
+                this.emit('MessageChanged', { message: 'New message from Frame' });
+                //const event = new CustomEvent('nm', { detail: 'la plume' });
+                //const frameButton = this.componentRegistry.get<TButton>('myframeButton');
+                //frameButton!.caption = 'New message';
+                //vue!.props.message = 'Message updated from Delphine!!!';
+                //frame!.setPluginProp('message', 'Message updated from Delphine!!!');
+        }
 }
 
 export class MetaHelloFrame extends TMetaFrame<TFrame> {

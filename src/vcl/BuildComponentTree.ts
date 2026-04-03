@@ -162,7 +162,7 @@ export class BuildComponentTree {
 
                 if (!cls) return null;
 
-                let child = parent;
+                let child = null;
                 // The TForm are already created by the user.
                 if (!cls.isAForm()) {
                         const metaComp = cls as TMetaControl;
@@ -172,8 +172,9 @@ export class BuildComponentTree {
                                 form.registerFrame(name!, comp);
                                 form = comp; // We pretend that we are the Form
                         }
+                } else {
+                        child = parent;
                 }
-
                 if (!child) return null;
                 child.elem = el;
 
