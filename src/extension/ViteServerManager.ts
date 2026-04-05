@@ -1,5 +1,5 @@
 import { ChildProcess, spawn } from 'child_process';
-import { resolveForm, resolveProjectRootFromPath, resolveApp } from './projectModel';
+import { resolveProjectRootFromPath, resolveApp, resolveUnit } from './projectModel';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -175,8 +175,8 @@ export function normalizeToFileUri(input: unknown): vscode.Uri | undefined {
         return undefined;
 }
 
-function buildPreviewUrl(port: number, appName: string, formName: string): string {
-        return `http://127.0.0.1:${port}/preview.html?app=${encodeURIComponent(appName)}&form=${encodeURIComponent(formName)}`;
+function buildPreviewUrl(port: number, appName: string, unitName: string): string {
+        return `http://127.0.0.1:${port}/preview.html?app=${appName}&unit=${unitName}`;
 }
 
 export async function previewOnViteInBrowser(uri: vscode.Uri | undefined): Promise<void> {
@@ -184,47 +184,48 @@ export async function previewOnViteInBrowser(uri: vscode.Uri | undefined): Promi
         console.log('[Delphine] typeof uri =', typeof uri);
         console.log('[Delphine] instanceof vscode.Uri =', uri instanceof vscode.Uri);
 
-        const form = resolveForm(uri);
-        if (!form) {
-                void vscode.window.showInformationMessage('No Delphine Form selected');
+        const unit = resolveUnit(uri);
+        if (!unit) {
+                vscode.window.showInformationMessage('No Delphine Form/Frame selected');
                 return;
         }
 
-        const projectPath = resolveProjectRootFromPath(form.formDir.fsPath);
+        const projectPath = resolveProjectRootFromPath(unit.unitDir.fsPath);
         if (!projectPath) {
                 void vscode.window.showErrorMessage('Unable to find Vite project root');
                 return;
         }
 
         const vite = await ensureViteServer(projectPath);
-        const url = buildPreviewUrl(vite.port, form.appName, form.name);
+        const url = buildPreviewUrl(vite.port, unit.appName, unit.name);
 
         await vscode.env.openExternal(vscode.Uri.parse(url));
 }
 
 export async function previewOnViteInVsCode(context: vscode.ExtensionContext, uri: vscode.Uri | undefined): Promise<void> {
-        const form = resolveForm(uri);
-        if (!form) {
-                void vscode.window.showInformationMessage('No Delphine Form selected');
+        const unit = resolveUnit(uri);
+        if (!unit) {
+                vscode.window.showInformationMessage('No Delphine Form/Frame selected');
                 return;
         }
 
-        const projectPath = resolveProjectRootFromPath(form.formDir.fsPath);
+        const projectPath = resolveProjectRootFromPath(unit.unitDir.fsPath);
         if (!projectPath) {
                 void vscode.window.showErrorMessage('Unable to find Vite project root');
                 return;
         }
 
         const vite = await ensureViteServer(projectPath);
-        const url = buildPreviewUrl(vite.port, form.appName, form.name);
+        const url = buildPreviewUrl(vite.port, unit.appName, unit.name);
 
         // createRuntimePreviewPanel(context, url);
 }
 
+/*
 export async function getPreviewUrlForForm(uri: vscode.Uri | undefined): Promise<string> {
-        const form = resolveForm(uri);
+        const form = resolveUnit(uri);
         if (!form) {
-                throw new Error('No Delphine Form selected');
+                throw new Error('No Delphine Form/Frame selected');
         }
 
         const projectPath = resolveProjectRootFromPath(form.formDir.fsPath);
@@ -243,7 +244,26 @@ export async function getPreviewUrlForForm(uri: vscode.Uri | undefined): Promise
 
         return url;
 }
+        */
 
+export async function getPreviewUrlForUnit(uri: vscode.Uri | undefined): Promise<string> {
+        const unit = resolveUnit(uri);
+        if (!unit) {
+                throw new Error('No Delphine Form/Frame selected');
+        }
+
+        const projectPath = resolveProjectRootFromPath(unit.unitDir.fsPath);
+        if (!projectPath) {
+                throw new Error('Unable to find Vite project root');
+        }
+
+        const vite = await ensureViteServer(projectPath);
+        const url = buildPreviewUrl(vite.port, unit.appName, unit.name);
+
+        return url;
+}
+
+/*
 function resolveAppUri(input?: unknown): vscode.Uri | undefined {
         if (!input) {
                 return undefined;
@@ -267,3 +287,4 @@ function resolveAppUri(input?: unknown): vscode.Uri | undefined {
 
         return undefined;
 }
+        */

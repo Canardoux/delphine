@@ -2,15 +2,10 @@ import type { UnknownRecord } from './Oops';
 import type { PropSpec, PropKind } from './Component';
 
 import type { IForm } from './IForm';
-import type { TMetaclass } from './Oops';
 import { getApplication } from './IApplication';
-import type { IApplication } from './IApplication';
-//import type { IPluginHost } from './IPlugin';
 import { TControl, TMetaControl, TColor, THandler } from './Control';
-//import type { PropSpec, PropKind } from './Component';
-import type { IMetaCompositeControl, ICompositeControl } from './ICompositeControl';
-import { TCompositeControl } from './CompositeControl';
 import type { IPluginHost } from './CompositeControl';
+import type { ICompositeControl } from './ICompositeControl';
 
 export class BuildComponentTree {
         RESERVED_DATA_ATTRS = new Set<string>([

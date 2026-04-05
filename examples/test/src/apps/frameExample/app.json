@@ -5,7 +5,7 @@
                 {
                         "id": "hello-frame",
                         "type": "frame",
-                        "factory": "./plugins/hello-frame/index.ts"
+                        "factory": "./frames/hello-frame/index.ts"
                 }
         ]
 }

@@ -2,7 +2,7 @@ import { TForm, TControl, TButton, TColor, TApplication, TPanel, TPluginHost } f
 import { getApplication } from '@vcl/IApplication';
 
 import './MainForm.css';
-import { HelloFrame } from '../../plugins/HelloFramePlugin/HelloFrame';
+import { HelloFrame } from '../../frames/HelloFrame.frame/HelloFrame';
 import { THostFrame } from '@vcl/Frame';
 
 export default class MainForm extends TForm {

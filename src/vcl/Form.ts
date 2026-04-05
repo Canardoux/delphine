@@ -18,24 +18,16 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { TControl, THandler } from './Control';
 import { TComponent } from './Component';
 import { TMetaContainer, TContainer } from './Container';
 import type { PropSpec, TMetaComponent } from './Component';
-import { TTypeRegistry } from './TypeRegistry';
 import type { IForm } from './IForm';
-import type { IApplication } from './IApplication';
 import type { IMetaControl, IControl } from './IControl';
-import { registerBuiltins } from './RegisterVcl';
 import { getApplication } from './IApplication';
 import type { ComponentSchema } from './IComponent';
 import type { IComponent } from './IComponent';
 import type { IMetaComponent } from './IComponent';
 import { TMetaCompositeControl, TCompositeControl } from './CompositeControl';
-import type { ICompositeControl } from './ICompositeControl';
-import { BuildComponentTree } from './BuildComponentTree';
-import { listenerCount } from 'process';
-import { EventManager } from './event';
 
 export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, IMetaControl {
         static readonly metaclass: TMetaForm = new TMetaForm(TMetaCompositeControl.metaclass, 'TForm');
@@ -79,9 +71,11 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
         //getMetaclass() {
         //return TMetaForm.metaclass;
         //}
+        //static forms = new Map<string, TForm>();
+        //private _mounted = false;
+        //protected _created = false;
         static forms = new Map<string, TForm>();
-        private _mounted = false;
-        eventManager = new EventManager();
+
         // Each Form has its own componentRegistry
 
         //typeRegistry: TComponentTypeRegistry | null = null;
@@ -99,72 +93,6 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
         // -------
 
         //elem: Element | null = null;
-        protected _created = false;
-
-        resolveRoot(container: HTMLElement): HTMLElement {
-                // Look for first element marked as a Delphine component root
-                for (const child of Array.from(container.children)) {
-                        if (child instanceof HTMLElement && child.hasAttribute('data-delphine-component')) {
-                                // Debug (optional)
-                                for (const c of Array.from(container.children)) {
-                                        console.log('child:', c.tagName, c.getAttribute('data-delphine-component'));
-                                }
-
-                                return child;
-                        }
-                }
-
-                throw new Error('Delphine: no root component found in container');
-        }
-
-        /**
-         * Create the Form DOM under <body>, hidden by default,
-         * then build the component tree from the injected HTML.
-         */
-        //create(htmlSource: string): void {
-        create(htmlSource: string, parent?: HTMLElement): void {
-                if (this._created) {
-                        return;
-                }
-
-                // 1. Create a hidden host container under <body>
-                const host = document.createElement('div');
-                host.hidden = true;
-                host.setAttribute('data-delphine-form-host', this.name);
-                document.body.appendChild(host);
-                //const root = document.getElementById('delphine-root') ?? document.body;
-                //root.appendChild(host);
-
-                // 2. Inject the user HTML inside that host
-                host.innerHTML = htmlSource;
-
-                // 3. Resolve the actual root element of the Form
-                //    In your current architecture, resolveRoot() knows how to find:
-                //    - <body> if it is itself the root
-                //    - or the first child carrying TForm metadata
-                this.elem = this.resolveRoot(host);
-
-                if (!this.elem) {
-                        throw new Error(`Unable to resolve root element for form '${this.name}'`);
-                }
-
-                // 4. Build Delphine component tree
-                this.componentRegistry.clear();
-                BuildComponentTree.singeleton.buildComponentTree(this.elem, this, this);
-
-                // 5. Install event routing
-                this.eventManager.installEventRouter(this, this.elem);
-
-                // 6. Mark as created, still hidden
-                this._mounted = true;
-                this._created = true;
-
-                console.log('created form root =', this.elem);
-                console.log('created form host =', this.elem?.parentElement);
-
-                // 7. Lifecycle hook
-                this.onCreate();
-        }
 
         hide(): void {
                 if (!this.elem) {
@@ -203,16 +131,6 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
 
                 this.elem = null;
                 this._created = false;
-        }
-
-        protected onCreate() {
-                const onShownName = this.elem!.getAttribute('data-delphine-oncreate');
-                if (onShownName) {
-                        queueMicrotask(() => {
-                                const fn = (this as any)[onShownName];
-                                if (typeof fn === 'function') fn.call(this, null, this);
-                        });
-                }
         }
 
         onShown() {

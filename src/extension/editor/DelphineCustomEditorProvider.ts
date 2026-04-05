@@ -5,6 +5,7 @@ import * as prettier from 'prettier';
 //import { splitHtmlForGrapes } from '../SplitHtml';
 import { loadFormHtml, loadFormCss } from '../loadForm';
 
+/*
 import type {
         Document as DefaultTreeDocument,
         Element as DefaultTreeElement,
@@ -12,6 +13,7 @@ import type {
         //ParentNode as DefaultTreeParentNode,
         TextNode as DefaultTreeTextNode
 } from 'parse5/dist/tree-adapters/default';
+ */
 
 /****************************************************************************************************************** */
 /**

@@ -1,7 +1,6 @@
 // createHelloVuePlugin.ts
 // -----------------------
 
-//import HelloDelphine from './HelloVueDelphine.vue';
 import { defineVuePlugin } from '@vcl/VuePlugin';
 import type { PropSchema, ComponentSchema } from '@vcl/IComponent';
 import { TFrame, TMetaFrame } from '@vcl/Frame';
@@ -11,31 +10,16 @@ import { TButton, TControl } from '@vcl';
 import type { PropSpec } from '@vcl/Component';
 import template from './HelloFrame.html?raw';
 
-//this.frameRegistry?.register(schema);
-
-//export const HelloVuePlugin: PluginSchema = defineVuePlugin();
-
-//export const createHelloVuePlugin = defineFramePlugin(schema);
-
-//changeMessage_onclick;
-
 export class HelloFrame extends TFrame {
         changeMessage_onclick(_ev: Event | null, _sender: TControl) {
                 debugger;
                 const frameButton = this.componentRegistry.get<TButton>('myframeButton');
                 frameButton!.caption = 'New message';
-                //vue!.props.message = 'Message updated from Delphine!!!';
-                //frame!.setPluginProp('message', 'Message updated from Delphine!!!');
         }
 
         myframeButton_onclick(_ev: Event | null, _sender: TControl) {
                 debugger;
                 this.emit('MessageChanged', { message: 'New message from Frame' });
-                //const event = new CustomEvent('nm', { detail: 'la plume' });
-                //const frameButton = this.componentRegistry.get<TButton>('myframeButton');
-                //frameButton!.caption = 'New message';
-                //vue!.props.message = 'Message updated from Delphine!!!';
-                //frame!.setPluginProp('message', 'Message updated from Delphine!!!');
         }
 }
 

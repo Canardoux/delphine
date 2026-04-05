@@ -4,7 +4,7 @@ import { TApplication, TMetaPluginHost, TMetaControl } from '@vcl';
 import { TMetaCompositeControl } from '@vcl/CompositeControl';
 import type { ComponentSchema } from '@vcl/IComponent';
 
-import { MetaHelloFrame } from './plugins/HelloFramePlugin/HelloFrame';
+import { MetaHelloFrame } from './frames/HelloFrame.frame/HelloFrame';
 
 //import { createHelloVuePlugin } from './plugins/HelloVuePlugin/createHelloVuePlugin';
 

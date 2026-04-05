@@ -3,7 +3,7 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { resolveForm, resolveFormSiblingUri } from './projectModel';
+import { resolveUnit } from './projectModel';
 
 export async function readTextFile(uri: vscode.Uri): Promise<string> {
         const data = await vscode.workspace.fs.readFile(uri);
@@ -11,7 +11,7 @@ export async function readTextFile(uri: vscode.Uri): Promise<string> {
 }
 
 export async function loadFormHtml(uri?: vscode.Uri): Promise<string> {
-        const form = resolveForm(uri);
+        const form = resolveUnit(uri);
         if (!form) {
                 throw new Error('Unable to resolve Form HTML');
         }
@@ -20,7 +20,7 @@ export async function loadFormHtml(uri?: vscode.Uri): Promise<string> {
 }
 
 export async function loadFormCss(uri?: vscode.Uri): Promise<string> {
-        const form = resolveForm(uri);
+        const form = resolveUnit(uri);
         if (!form) {
                 throw new Error('Unable to resolve Form CSS');
         }
@@ -29,7 +29,7 @@ export async function loadFormCss(uri?: vscode.Uri): Promise<string> {
 }
 
 export async function loadFormTs(uri?: vscode.Uri): Promise<string> {
-        const form = resolveForm(uri);
+        const form = resolveUnit(uri);
         if (!form) {
                 throw new Error('Unable to resolve Form TypeScript');
         }

@@ -77,7 +77,7 @@ export class TFrame extends TCompositeControl implements IControl, IComponent {
         }
 
         set onframeevent(handler) {
-                this.props.onclick = handler;
+                this.props.onframeevent = handler;
         }
 }
 
@@ -91,6 +91,7 @@ export class TMetaHostFrame<T extends THostFrame> extends TMetaContainer {
         defProps(): PropSpec<TFrame>[] {
                 return [
                         //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
+                        //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
                         {
                                 name: 'onframeevent',
                                 default: '',
@@ -101,7 +102,6 @@ export class TMetaHostFrame<T extends THostFrame> extends TMetaContainer {
                                 //apply: (o, v) => (o.onclick = new THandler(String(v)))
                                 apply: (o, v) => (o.onframeevent = v as THandler)
                         }
-                        //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
                 ];
         }
 

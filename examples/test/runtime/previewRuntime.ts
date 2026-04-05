@@ -1,40 +1,77 @@
 import { TApplication } from '@vcl';
 
 const params = new URLSearchParams(window.location.search);
-const formName = params.get('form');
+const unitName = params.get('unit') ?? 'MainUnit';
 const appName = params.get('app') ?? 'MainApp';
 
-if (!formName) {
-        throw new Error('Missing form name');
+if (!unitName) {
+        throw new Error('Missing unit name');
 }
 
-async function main(): Promise<void> {
-        // 1. Create fake application
-        const app = new TApplication(appName, { mainForm: formName ?? undefined });
-
-        // 2. Load Form module
-        const basePath = `/src/apps/${appName}/forms/${formName}.form`;
-        const modulePath = `${basePath}/${formName}.ts`;
-        const htmlPath = `${basePath}/${formName}.html`;
+async function tryLoadUnit(
+        appName: string,
+        unitName: string,
+        kind: 'forms' | 'frames'
+): Promise<{
+        module: any;
+        htmlSource: string;
+        kind: 'forms' | 'frames';
+}> {
+        const basePath = `/src/apps/${appName}/${kind}/${unitName}.${kind === 'forms' ? 'form' : 'frame'}`;
+        const modulePath = `${basePath}/${unitName}.ts`;
+        const htmlPath = `${basePath}/${unitName}.html`;
 
         const module = await import(/* @vite-ignore */ modulePath);
         const response = await fetch(htmlPath);
-        const htmlSource = await response.text();
 
-        const FormClass = module.default ?? module[formName!];
-        if (!FormClass) {
-                throw new Error(`Unable to resolve form class ${formName}`);
+        if (!response.ok) {
+                throw new Error(`HTTP ${response.status} while loading ${htmlPath}`);
         }
 
-        // 3. Create form
-        const form = new FormClass(formName);
-        form.create(htmlSource);
+        const htmlSource = await response.text();
+        return { module, htmlSource, kind };
+}
 
-        // 4. Register it as main form
-        app.mainForm = form;
+async function main(): Promise<void> {
+        const app = new TApplication(appName, { mainForm: unitName! });
 
-        // 5. Show it
-        form.show();
+        let loaded:
+                | {
+                          module: any;
+                          htmlSource: string;
+                          kind: 'forms' | 'frames';
+                  }
+                | undefined;
+
+        try {
+                loaded = await tryLoadUnit(appName, unitName!, 'forms');
+        } catch {
+                loaded = await tryLoadUnit(appName, unitName!, 'frames');
+        }
+
+        const { module, htmlSource, kind } = loaded;
+
+        const UnitClass = module.default ?? module[unitName!];
+        if (!UnitClass) {
+                throw new Error(`Unable to resolve class ${unitName!}`);
+        }
+
+        const unit = new UnitClass(unitName);
+        unit.create(htmlSource);
+
+        if (kind === 'forms') {
+                app.mainForm = unit;
+                unit.show();
+        } else {
+                // Preview simple d'une Frame :
+                // on l'attache directement au body.
+                document.body.innerHTML = '';
+                if (unit.elem) {
+                        document.body.appendChild(unit.elem);
+                } else {
+                        throw new Error(`Frame ${unitName} has no root element after create()`);
+                }
+        }
 }
 
 void main().catch((e) => {
