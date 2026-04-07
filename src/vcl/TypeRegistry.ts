@@ -24,6 +24,7 @@ import { TMetaComponent } from './Component';
 import type { IMetaComponent } from './IComponent';
 import type { ComponentSchema } from './IComponent';
 
+/*
 export class TMetaTypeRegistry extends TMetaObject {
         static readonly metaclass: TMetaTypeRegistry = new TMetaTypeRegistry(TMetaObject.metaclass, 'TComponentTypeRegistry');
         protected constructor(superClass: TMetaObject, name: string) {
@@ -34,13 +35,18 @@ export class TMetaTypeRegistry extends TMetaObject {
         //return TMetaComponentTypeRegistry.metaclass;
         //}
 }
+        */
 
-export class TTypeRegistry extends TObject {
+export class TTypeRegistry /*extends TObject*/ {
         // We store heterogeneous metas, so we keep them as TMetaComponent<any>.
         //getMetaclass(): TMetaComponentTypeRegistry {
         //return TMetaComponentTypeRegistry.metaclass;
         //}
         private readonly componentsClass = new Map<string, TMetaComponent>();
+
+        getAll(): IMetaComponent[] {
+                return [...this.componentsClass.values()];
+        }
 
         register(mc: TMetaComponent) {
                 if (this.componentsClass.has(mc.typeName)) {

@@ -122,6 +122,10 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
                         category: 'Standard Control',
                         icon: undefined,
                         component: this,
+                        isContainer: false,
+                        instanceName: 'button',
+                        tagName: 'button',
+
                         props: this.propSpecsToSchemaProps()
                 };
         }
@@ -181,6 +185,10 @@ export class TMetaPanel extends TMetaContainer {
                 category: 'Standard Control',
                 icon: undefined,
                 component: TMetaPanel.metaclass,
+                isContainer: true,
+                instanceName: 'panel',
+                tagName: 'div',
+
                 props: this.propSpecsToSchemaProps()
         };
 }

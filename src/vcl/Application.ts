@@ -66,7 +66,7 @@ export class TApplication implements IApplication {
                 this.appName = appName;
                 this.appConfig = appConfig;
                 setApplication(this);
-                this.typeRegistry = new TTypeRegistry(TMetaApplication.metaclass);
+                this.typeRegistry = new TTypeRegistry();
                 registerBuiltins(this.typeRegistry);
 
                 //registerBuiltins(this.types);

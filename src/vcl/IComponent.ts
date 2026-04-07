@@ -49,12 +49,14 @@ export type PropSchema = Record<
 
 export type ComponentSchema = {
         name: string;
+        instanceName: string;
+        tagName: string;
         component: any;
-        props?: PropSchema;
+        props: PropSchema;
 
         // GrapesJS / designer
-        label?: string;
-        category?: string;
+        label: string;
+        category: string;
         icon?: string;
 
         // Optional default HTML representation
@@ -66,4 +68,8 @@ export type ComponentSchema = {
                 preferredWidth?: number;
                 preferredHeight?: number;
         };
+
+        defaultHtml?: string;
+        allowedChildren?: boolean;
+        isContainer?: boolean;
 };

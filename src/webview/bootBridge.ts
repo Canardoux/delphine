@@ -11,6 +11,8 @@ type DelphineWindow = Window &
                 __delphineVsCodeApi?: DelphineVsCodeApi;
                 __delphineBootBridgeLoaded?: boolean;
                 __delphineBootEditorInjected?: boolean;
+                __delphineReceiveFromHost?: (payload: unknown) => void;
+                __delphinePendingFromHost?: unknown[];
         };
 
 (() => {
@@ -71,7 +73,7 @@ type DelphineWindow = Window &
                         const bridgeSrc = currentScript?.src;
 
                         if (bridgeSrc) {
-                                const bootEditorSrc = new URL('./bootEditor.js', bridgeSrc).toString();
+                                const bootEditorSrc = new URL('./bootEditor.bundle.js', bridgeSrc).toString();
 
                                 console.log(`[bridge ${bridgeInstanceId}] injecting bootEditor ${bootEditorSrc}`);
 
@@ -107,9 +109,21 @@ type DelphineWindow = Window &
                                 vscode.postMessage(payload);
                                 return;
                         }
-
                         if (typeof msg?.type === 'string') {
-                                console.log(`[bridge ${bridgeInstanceId}] host received VSCode message ${msg.type} (no relay needed)`);
+                                console.log(`[bridge ${bridgeInstanceId}] host -> child ${msg.type}`);
+
+                                const hostWindow = window as DelphineWindow;
+
+                                if (typeof hostWindow.__delphineReceiveFromHost === 'function') {
+                                        hostWindow.__delphineReceiveFromHost(msg);
+                                } else {
+                                        if (!hostWindow.__delphinePendingFromHost) {
+                                                hostWindow.__delphinePendingFromHost = [];
+                                        }
+                                        hostWindow.__delphinePendingFromHost.push(msg);
+                                        console.log(`[bridge ${bridgeInstanceId}] child receiver not ready, message queued`);
+                                }
+                                return;
                         }
                 });
         };

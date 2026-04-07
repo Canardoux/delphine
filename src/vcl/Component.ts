@@ -89,7 +89,9 @@ export class TMetaComponent extends TMetaObject {
                         category: 'Standard Control',
                         icon: undefined,
                         component: this,
-                        props: this.propSpecsToSchemaProps()
+                        props: this.propSpecsToSchemaProps(),
+                        instanceName: 'component',
+                        tagName: 'div'
                 };
         }
 

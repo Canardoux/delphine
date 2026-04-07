@@ -1,4 +1,8 @@
-import * as vscode from 'vscode';
+//import * as vscode from 'vscode';
+import grapesjs from 'grapesjs';
+import { TTypeRegistry } from '../vcl/TypeRegistry.js';
+import { registerBuiltins } from '../vcl/RegisterVcl.js';
+import { registerDelphineComponentsFromRegistry } from './delphineGrapesBridge.js';
 //import { ResolvedForm } from '../extension/loadForm';
 
 /*
@@ -22,11 +26,14 @@ export async function updateFormSourceFiles(form: ResolvedForm, html: string, cs
 }
         */
 
+/*
+
 declare function acquireVsCodeApi(): {
         postMessage(message: unknown): void;
         getState(): unknown;
         setState(state: unknown): void;
 };
+*/
 
 type DelphineInboundMessage =
         | {
@@ -38,17 +45,24 @@ type DelphineInboundMessage =
                   type: 'log';
                   text: string;
           };
+
+type DelphineWindow = Window &
+        typeof globalThis & {
+                __delphineReceiveFromHost?: (payload: DelphineInboundMessage) => void;
+                __delphinePendingFromHost?: DelphineInboundMessage[];
+        };
+
 const bootInstanceId = Math.random().toString(36).slice(2, 8);
 
 console.log(`[boot ${bootInstanceId}] script evaluated`);
 console.log(`[boot ${bootInstanceId}] top? ${window.top === window}`);
 console.log(`[boot ${bootInstanceId}] parent===self? ${window.parent === window}`);
-console.log(`[boot ${bootInstanceId}] typeof acquireVsCodeApi = ${typeof acquireVsCodeApi}`);
+//console.log(`[boot ${bootInstanceId}] typeof acquireVsCodeApi = ${typeof acquireVsCodeApi}`);
 console.log(`[boot ${bootInstanceId}] location = ${window.location.href}`);
 
 let messageHandler: ((payload: DelphineInboundMessage) => void) | undefined;
 const pendingMessages: DelphineInboundMessage[] = [];
-let vscodeApi: ReturnType<typeof acquireVsCodeApi> | null = null;
+//let vscodeApi: ReturnType<typeof acquireVsCodeApi> | null = null;
 
 type DocUpdateMessage = {
         type: 'doc:update';
@@ -57,17 +71,15 @@ type DocUpdateMessage = {
 };
 
 function postToVsCode(payload: unknown): void {
-        const vscode = window.__delphineVsCodeApi;
+        console.log(`[boot ${bootInstanceId}] postToVsCode payload =`, payload);
 
-        if (vscode) {
-                console.log(`[boot ${bootInstanceId}] postToVsCode via cached api`);
-                vscode.postMessage(payload);
-                return;
-        }
-
-        console.log('[boot] acquireVsCodeApi unavailable, cannot post message');
-        //console.log(`[boot ${bootInstanceId}] queue outbound message until bridge ready`);
-        //outboundQueue.push(payload);
+        window.postMessage(
+                {
+                        __delphineFromChild: true,
+                        payload
+                },
+                '*'
+        );
 }
 
 function log(text: string): void {
@@ -95,36 +107,34 @@ function extractPayload(event: MessageEvent): DelphineInboundMessage | undefined
         return undefined;
 }
 
-function installInboundMessagePump(): void {
-        window.addEventListener('message', (event: MessageEvent) => {
-                const payload = extractPayload(event);
-                if (!payload) {
-                        return;
-                }
+function installDirectHostReceiver(): void {
+        const w = window as DelphineWindow;
 
-                console.log(`[boot ${bootInstanceId}] message from VSCode: ${payload.type}`);
+        w.__delphineReceiveFromHost = (payload: DelphineInboundMessage) => {
+                console.log(`[boot ${bootInstanceId}] direct message from host: ${payload.type}`);
 
                 if (!messageHandler) {
-                        pendingMessages.push(payload);
+                        if (!w.__delphinePendingFromHost) {
+                                w.__delphinePendingFromHost = [];
+                        }
+                        w.__delphinePendingFromHost.push(payload);
                         console.log(`[boot ${bootInstanceId}] queued before editor ready: ${payload.type}`);
                         return;
                 }
 
                 messageHandler(payload);
-        });
+        };
 }
 
-function flushPendingMessages(): void {
-        if (!messageHandler) {
-                return;
-        }
+function flushPendingDirectMessages(): void {
+        const w = window as DelphineWindow;
+        const pending = w.__delphinePendingFromHost ?? [];
 
-        while (pendingMessages.length > 0) {
-                const payload = pendingMessages.shift();
-                if (!payload) {
-                        continue;
+        while (pending.length > 0) {
+                const payload = pending.shift();
+                if (payload && messageHandler) {
+                        messageHandler(payload);
                 }
-                messageHandler(payload);
         }
 }
 
@@ -139,6 +149,40 @@ async function waitForGrapesJs(): Promise<any> {
 
         throw new Error('grapesjs not available');
 }
+let rev = 0;
+let suppressOutbound = 0;
+
+function beginRemoteApply() {
+        suppressOutbound++;
+}
+
+function endRemoteApply() {
+        window.setTimeout(() => {
+                suppressOutbound = Math.max(0, suppressOutbound - 1);
+        }, 0);
+}
+
+function canSendOutbound(): boolean {
+        return suppressOutbound === 0;
+}
+
+function postContentChanged(editor: any) {
+        if (!canSendOutbound()) {
+                return;
+        }
+
+        const html = editor.getHtml();
+        const css = editor.getCss();
+
+        console.log(`[boot ${bootInstanceId}] contentChanged -> VSCode`);
+
+        postToVsCode({
+                type: 'contentChanged',
+                html,
+                css,
+                rev: ++rev
+        });
+}
 
 function grapesJSEditor(grapes: any): void {
         const editor = grapes.init({
@@ -147,7 +191,24 @@ function grapesJSEditor(grapes: any): void {
                 storageManager: false
         });
 
-        let isApplyingFromVscode = false;
+        let dirtyTimer: number | undefined;
+
+        function markDirty(_editor: any, reason: string) {
+                if (!canSendOutbound()) {
+                        return;
+                }
+
+                log(`markDirty ${reason}`);
+
+                if (dirtyTimer !== undefined) {
+                        window.clearTimeout(dirtyTimer);
+                }
+
+                dirtyTimer = window.setTimeout(() => {
+                        dirtyTimer = undefined;
+                        postContentChanged(editor);
+                }, 150);
+        }
 
         function applyDelphineBodyTraits(): void {
                 const wrapper = editor.getWrapper?.();
@@ -166,75 +227,67 @@ function grapesJSEditor(grapes: any): void {
                 log('doc:update <- VSCode');
                 log('Document changed will be processed by bootEditor');
 
-                isApplyingFromVscode = true;
+                beginRemoteApply();
 
-                editor.DomComponents.clear();
-                editor.CssComposer.clear();
+                try {
+                        editor.DomComponents.clear();
+                        editor.CssComposer.clear();
 
-                editor.setComponents(html);
-                editor.setStyle(css);
-                applyDelphineBodyTraits();
+                        editor.setComponents(html || '');
+                        editor.setStyle(css || '');
+                        applyDelphineBodyTraits();
 
-                console.log(`[boot ${bootInstanceId}] doc updated from VSCode, html length = ${html.length}, css length = ${css.length}`);
-
-                requestAnimationFrame(() => {
-                        log('Document changed has been processed by bootEditor');
-                        isApplyingFromVscode = false;
-                });
+                        console.log(`[boot ${bootInstanceId}] doc updated from VSCode, html length = ${html.length}, css length = ${css.length}`);
+                } finally {
+                        requestAnimationFrame(() => {
+                                log('Document changed has been processed by bootEditor');
+                                endRemoteApply();
+                        });
+                }
         }
 
         messageHandler = async (payload: DelphineInboundMessage) => {
                 switch (payload.type) {
                         case 'doc:update': {
-                                /*
                                 const msg = payload as DocUpdateMessage;
                                 loadDocument(msg.html ?? '', msg.css ?? '');
                                 break;
-                                */
-                                const msg = payload as DocUpdateMessage;
-                                loadDocument(msg.html!, msg.css!);
-                                //const form = resolveForm(this.htmlUri);
-                                //if (!form) {
-                                //throw new Error('Unable to resolve current Delphine Form');
-                                //}
-
-                                //await updateFormSourceFiles(form, msg.html!, msg.css!);
                         }
 
-                        default:
-                                console.log(`[boot ${bootInstanceId}] ignored message type=${payload.type}`);
+                        case 'log':
+                                break;
+
+                        //default:
+                        //console.log(`[boot ${bootInstanceId}] ignored message type=${payload.type}`);
+                        //break;
                 }
         };
-        flushPendingMessages();
+
+        const typeRegistry = new TTypeRegistry();
+        registerBuiltins(typeRegistry);
+        registerDelphineComponentsFromRegistry(editor, typeRegistry);
+        flushPendingDirectMessages();
 
         editor.on('component:update', () => {
-                if (isApplyingFromVscode) {
-                        return;
-                }
-                log('markDirty component:update');
+                markDirty(editor, 'component:update');
+        });
+
+        editor.on('component:add', () => {
+                markDirty(editor, 'component:add');
+        });
+
+        editor.on('component:remove', () => {
+                markDirty(editor, 'component:remove');
+        });
+
+        editor.on('style:update', () => {
+                markDirty(editor, 'style:update');
         });
 
         applyDelphineBodyTraits();
 }
 
 async function main(): Promise<void> {
-        const href = window.location.href;
-        const hasVsCodeApi = typeof acquireVsCodeApi === 'function';
-        const isFakeFrame = href.includes('/fake.html');
-
-        console.log(`[boot ${bootInstanceId}] href = ${href}`);
-        console.log(`[boot ${bootInstanceId}] hasVsCodeApi = ${hasVsCodeApi}`);
-        console.log(`[boot ${bootInstanceId}] has #gjs = ${!!document.getElementById('gjs')}`);
-
-        if (!hasVsCodeApi || isFakeFrame) {
-                console.warn(`[boot ${bootInstanceId}] bootEditor aborted in non-host frame`);
-                return;
-        }
-
-        //vscodeApi = xxxacquireVsCodeApi();
-
-        installInboundMessagePump();
-
         log('bootEditor:loaded');
 
         try {
@@ -242,6 +295,7 @@ async function main(): Promise<void> {
                 grapesJSEditor(grapes);
                 log('GrapesJS ready');
                 log('bootEditor:ready -> VSCode');
+                installDirectHostReceiver();
                 postToVsCode({ type: 'bootEditor:ready' });
         } catch (e) {
                 console.error(`[boot ${bootInstanceId}] FAIL`, e);

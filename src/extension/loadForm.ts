@@ -12,11 +12,25 @@ export async function readTextFile(uri: vscode.Uri): Promise<string> {
 
 export async function loadFormHtml(uri?: vscode.Uri): Promise<string> {
         const form = resolveUnit(uri);
+
         if (!form) {
                 throw new Error('Unable to resolve Form HTML');
         }
 
-        return readTextFile(form.htmlUri);
+        console.log('[loadFormHtml] uri =', uri?.toString());
+
+        console.log('[loadFormHtml] resolved form =', form);
+
+        console.log('[loadFormHtml] before read html');
+        const bytes = await vscode.workspace.fs.readFile(form.htmlUri);
+        console.log('[loadFormHtml] after read html, size =', bytes.length);
+
+        const text = Buffer.from(bytes).toString('utf8');
+        console.log('[loadFormHtml] returning html length =', text.length);
+
+        return text;
+
+        //return readTextFile(form.htmlUri);
 }
 
 export async function loadFormCss(uri?: vscode.Uri): Promise<string> {

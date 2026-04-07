@@ -128,7 +128,7 @@ export class PreviewPanel {
 
                 const nonce = crypto.randomBytes(16).toString('base64url');
 
-                const bootUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'bootPreview.js'));
+                const bootUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'webview', 'bootPreview.js'));
                 if (!fs.existsSync(bootUri.fsPath)) {
                         console.warn('bootPreview.js not found:', bootUri.fsPath);
                         // fallback, message, placeholder, etc.

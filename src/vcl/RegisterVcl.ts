@@ -30,8 +30,6 @@ export function registerBuiltins(types: TTypeRegistry) {
         types.register(TMetaPluginHost.metaclass);
         types.register(TMetaForm.metaclass);
         types.register(TMetaPanel.metaclass);
-        //types.register(TMetaSimpleDCC.metaclass);
-        //types.register(TMetaCompositeDCC.metaclass);
         types.register(TMetaHostFrame.metaclass);
         types.register(TMetaFrame.metaclass);
 }

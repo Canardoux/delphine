@@ -52,10 +52,14 @@ export class TMetaFrame<T extends TFrame> extends TMetaCompositeControl implemen
         getSchema(): ComponentSchema {
                 return {
                         name: this.typeName,
-                        label: 'TCompositeControl',
+                        label: 'TFrame',
                         category: 'Standard Control',
                         icon: undefined,
                         component: this,
+                        isContainer: true,
+                        instanceName: 'frame',
+                        tagName: 'div',
+
                         props: this.propSpecsToSchemaProps()
                 };
         }
@@ -112,6 +116,10 @@ export class TMetaHostFrame<T extends THostFrame> extends TMetaContainer {
                         category: 'Standard Control',
                         icon: undefined,
                         component: this,
+                        isContainer: true,
+                        instanceName: 'frame',
+                        tagName: 'div',
+
                         props: this.propSpecsToSchemaProps()
                 };
         }

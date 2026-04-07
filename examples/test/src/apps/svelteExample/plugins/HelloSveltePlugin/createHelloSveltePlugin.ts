@@ -10,6 +10,10 @@ const schema: ComponentSchema = {
         component: HelloDelphine,
         label: 'Hello Svelte',
         category: 'Svelte',
+        icon: undefined,
+        isContainer: false,
+        instanceName: 'helloSvelte',
+        tagName: 'div',
         props: {
                 message: { kind: 'string', default: 'Hello depuis Delphine' },
                 count: { kind: 'number', default: 0 },

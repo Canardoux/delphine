@@ -82,7 +82,10 @@ export class TMetaCompositeControl extends TMetaContainer implements IMetaCompon
                 category: 'Standard Control',
                 icon: undefined,
                 component: this,
-                props: this.propSpecsToSchemaProps()
+                props: this.propSpecsToSchemaProps(),
+                isContainer: true,
+                instanceName: 'compositeControl',
+                tagName: 'div'
         };
 
         constructor(superClass: TMetaContainer, name: string) {

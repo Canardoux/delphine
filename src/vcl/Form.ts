@@ -62,6 +62,10 @@ export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, 
                         category: 'Standard Control',
                         icon: undefined,
                         component: this,
+                        isContainer: true,
+                        instanceName: 'form',
+                        tagName: 'div',
+
                         props: this.propSpecsToSchemaProps()
                 };
         }

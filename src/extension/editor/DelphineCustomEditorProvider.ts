@@ -52,6 +52,8 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 html: string
                 //css: string
         ): Promise<boolean> {
+                console.log('[Delphine/ext] replacing full document with =');
+                console.log(html);
                 if (html === document.getText()) return false; // ✅ évite de salir le doc pour rien
                 this.isApplyingFromWebview = true;
 
@@ -77,6 +79,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 let lastRev = 0;
                 webviewPanel.webview.onDidReceiveMessage(async (msg) => {
                         //const msg = await e;
+                        console.log('[Delphine/ext] message reçu =', msg);
                         console.log(`[VSCode] ${msg.type} <- from bootEditor`);
                         switch (msg.type) {
                                 case 'alert':
@@ -104,13 +107,15 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                                                         `</html>`
                                         );
                                         */
+                                        console.log('[Delphine/ext] contentChanged html =');
+                                        console.log(msg.html);
 
                                         await this.updateTextDocument(document, msg.html ?? ''); // !!!! Pas coule !!!!
                                         //!!!!!!!!! Il faut mettre a jour aussi le CSS
                                         return;
 
                                 case 'bootEditor:ready':
-                                        updateWebview();
+                                        updateWebviewFromFile(document);
                                         return;
                                 /*
                                 case 'bootEditor:loaded':
@@ -134,13 +139,26 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 console.log(webviewPanel.webview.html);
                 console.log('-------------------------------------------------------------------');
 
-                const updateWebview = async () => {
+                const updateWebviewFromDocument = async (doc: vscode.TextDocument) => {
                         console.log(`[Delphine/ext] post doc:update panel=${panelId}`);
-                        //const { bodyInnerHtml, cssText } = splitHtmlForGrapes(document.getText());
-                        const bodyInnerHtml = await loadFormHtml(document.uri);
-                        const cssText = await loadFormCss(document.uri);
 
-                        console.log(`[VSCode] doc:update -> bootEditor`);
+                        const fullText = doc.getText();
+                        console.log('[Delphine/ext] fullText =', fullText);
+                        void webviewPanel.webview.postMessage({
+                                html: fullText,
+                                type: 'doc:update',
+                                css: '' // IL FAUDRAIT LE CSS ICI !!!!!!!!!!!!!!! // TODO
+                        });
+                };
+
+                const updateWebviewFromFile = async (doc: vscode.TextDocument) => {
+                        console.log(`[Delphine/ext] post doc:update panel=${panelId}`);
+
+                        const bodyInnerHtml = await loadFormHtml(doc.uri);
+                        const cssText = await loadFormCss(doc.uri);
+
+                        console.log('[Delphine/ext] bodyInnerHtml =', bodyInnerHtml);
+
                         void webviewPanel.webview.postMessage({
                                 html: bodyInnerHtml,
                                 type: 'doc:update',
@@ -148,10 +166,32 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                         });
                 };
 
-                // Update the webview when the document changes.
+                // PROVISOIREMENT !!!!!!!!!!!!!!!!
+                /*
+                const updateWebviewFromFile = async (doc: vscode.TextDocument) => {
+                        console.log(`[Delphine/ext] post doc:update panel=${panelId}`);
+
+                        const bodyInnerHtml = '<div><button>HELLO</button></div>';
+                        const cssText = 'button { color: red; }';
+
+                        console.log('[Delphine/ext] bodyInnerHtml =', bodyInnerHtml);
+
+                        await webviewPanel.webview.postMessage({
+                                type: 'doc:update',
+                                html: bodyInnerHtml,
+                                css: cssText
+                        });
+                };
+                */
+
                 const changeSubscription = vscode.workspace.onDidChangeTextDocument((e) => {
                         if (e.document.uri.toString() === document.uri.toString()) {
-                                updateWebview();
+                                void updateWebviewFromDocument(e.document);
+                        }
+                });
+                const saveSubscription = vscode.workspace.onDidSaveTextDocument((doc) => {
+                        if (doc.uri.toString() === document.uri.toString()) {
+                                void updateWebviewFromFile(doc);
                         }
                 });
 
@@ -212,8 +252,8 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
 
                 const grapesCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'grapes.min.css'));
                 const grapesJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'grapes.min.js'));
-                const bootUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'bootEditor.js'));
-                const bridgeUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'bootBridge.js'));
+                const bootUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'webview', 'bootEditor.js'));
+                const bridgeUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'webview', 'bootBridge.js'));
 
                 /*
                 const csp = [
@@ -278,7 +318,7 @@ const escaped = escapeHtml(bodyInnerHtml);
 
 const grapesCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'grapes.min.css'));
 const grapesJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'grapes.min.js'));
-const bootUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'bootEditor.js'));
+const bootUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'webview', 'bootEditor.js'));
 
 // IMPORTANT: allow loading scripts/styles from this webview only
 const csp = [`default-src 'none'`, `img-src ${webview.cspSource} https: data:`, `style-src ${webview.cspSource} 'unsafe-inline'`, `font-src ${webview.cspSource} https: data:`, `connect-src ${webview.cspSource} https:`, `script-src 'nonce-${nonce}' ${webview.cspSource}`].join(

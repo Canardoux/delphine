@@ -11,7 +11,11 @@ npx tsc -p src/extension/tsconfig.extension.json
 echo "=== build: webview boots ==="
 npx tsc --project src/tsconfig.web.json
 
-
+echo "=== build: webview editor ==="
+esbuild src/webview/bootEditor.ts \
+  --bundle \
+  --format=esm \
+  --outfile=media/webview/bootEditor.bundle.js
 
 echo "=== build: example test (vite) ==="
 pushd examples/test >/dev/null
@@ -30,8 +34,6 @@ npm run build
 node - <<'NODE'
 const fs = require('fs');
 const path = require('path');
-
-
 NODE
 
 
