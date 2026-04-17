@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 //import { splitHtmlForGrapes } from '../SplitHtml';
-import { loadFormHtml, loadFormCss } from '../loadForm';
+import { loadDoc } from '../loadForm';
 
 type Disposer = { dispose(): void };
 
@@ -83,7 +83,7 @@ export class PreviewPanel {
         }
         private docChangeTimer: NodeJS.Timeout | undefined;
 
-        private init(context: vscode.ExtensionContext, panel: vscode.WebviewPanel) {
+        private async init(context: vscode.ExtensionContext, panel: vscode.WebviewPanel) {
                 this.runId++;
                 //instance.gotBoot = false;
                 //instance.gotClick = false;
@@ -113,7 +113,7 @@ export class PreviewPanel {
 
                 this.startWatchingCompiledJs(this.compiledUri);
 
-                const html = this.buildHtml(panel.webview);
+                const html = await this.buildHtml(panel.webview);
                 if (!html) return;
                 panel.webview.html = html;
 
@@ -122,7 +122,7 @@ export class PreviewPanel {
                 this.safeReveal(80);
         }
 
-        private buildHtml(webview: vscode.Webview): string | null {
+        private async buildHtml(webview: vscode.Webview): Promise<string | null> {
                 //const editor = vscode.window.activeTextEditor;
                 if (!this.document) return null;
 
@@ -141,8 +141,11 @@ export class PreviewPanel {
 
                 //const doc = this.document;
                 //const { bodyInnerHtml, bodyAttrs, cssText } = splitHtmlForGrapes(this.document!.getText());
-                const bodyInnerHtml = loadFormHtml(this.document!.uri);
-                const cssText = loadFormCss(this.document!.uri);
+
+                const doc = await loadDoc(this.document!.uri);
+                const bodyInnerHtml = doc?.template;
+                const cssText = doc?.style;
+
                 console.log('---------------------------bodyInnerHtml---------------------------');
                 console.log(bodyInnerHtml);
                 console.log('--------------------------------------------------------------');
@@ -209,8 +212,8 @@ export class PreviewPanel {
                 });
         }
 
-        private refresh() {
-                const html = this.buildHtml(this.panel.webview);
+        private async refresh() {
+                const html = await this.buildHtml(this.panel.webview);
                 if (!html) return;
                 this.panel.webview.html = html;
         }

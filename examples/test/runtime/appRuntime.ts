@@ -4,9 +4,7 @@ const params = new URLSearchParams(window.location.search);
 const appName = params.get('app') ?? 'MainApp';
 
 async function main(): Promise<void> {
-        debugger;
-        // 1. Load app config
-        const appConfigUrl = `/src/apps/${appName}/app.json`;
+        const appConfigUrl = `/src/app.json`;
 
         const appConfigResponse = await fetch(appConfigUrl);
         if (!appConfigResponse.ok) {
@@ -15,29 +13,23 @@ async function main(): Promise<void> {
 
         const appConfig = await appConfigResponse.json();
 
-        // 2. Create App
         let app: TApplication;
 
         try {
-                // Try to load user-defined Application
-                const module = await import(/* @vite-ignore */ `/src/apps/${appName}/application.ts`);
-                const AppClass = module.default ?? module[appName] ?? module.MainApp;
+                const module: any = await import('../src/application');
 
+                const AppClass = module.default ?? module[appName] ?? module.MainApp;
                 if (AppClass) {
                         app = new AppClass(appName, appConfig);
                 } else {
                         throw new Error('No App class found');
                 }
         } catch {
-                // Fallback: default Application
                 app = new TApplication(appName, appConfig);
         }
 
-        // 3. Initialize and run
         await app.initialize();
-        //app.runWhenDomReady(() => {
         app.start();
-        //});
 }
 
 void main().catch((e) => {

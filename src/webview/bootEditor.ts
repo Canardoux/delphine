@@ -1,39 +1,7 @@
-//import * as vscode from 'vscode';
 import grapesjs from 'grapesjs';
 import { TTypeRegistry } from '../vcl/TypeRegistry.js';
 import { registerBuiltins } from '../vcl/RegisterVcl.js';
 import { registerDelphineComponentsFromRegistry } from './delphineGrapesBridge.js';
-//import { ResolvedForm } from '../extension/loadForm';
-
-/*
-export async function updateFormSourceFiles(form: ResolvedForm, html: string, css: string): Promise<void> {
-        const htmlDoc = await vscode.workspace.openTextDocument(form.htmlUri);
-        const cssDoc = await vscode.workspace.openTextDocument(form.cssUri);
-
-        const edit = new vscode.WorkspaceEdit();
-
-        const fullHtmlRange = new vscode.Range(htmlDoc.positionAt(0), htmlDoc.positionAt(htmlDoc.getText().length));
-
-        const fullCssRange = new vscode.Range(cssDoc.positionAt(0), cssDoc.positionAt(cssDoc.getText().length));
-
-        edit.replace(form.htmlUri, fullHtmlRange, html);
-        edit.replace(form.cssUri, fullCssRange, css);
-
-        await vscode.workspace.applyEdit(edit);
-
-        await htmlDoc.save();
-        await cssDoc.save();
-}
-        */
-
-/*
-
-declare function acquireVsCodeApi(): {
-        postMessage(message: unknown): void;
-        getState(): unknown;
-        setState(state: unknown): void;
-};
-*/
 
 type DelphineInboundMessage =
         | {
@@ -57,18 +25,19 @@ const bootInstanceId = Math.random().toString(36).slice(2, 8);
 console.log(`[boot ${bootInstanceId}] script evaluated`);
 console.log(`[boot ${bootInstanceId}] top? ${window.top === window}`);
 console.log(`[boot ${bootInstanceId}] parent===self? ${window.parent === window}`);
-//console.log(`[boot ${bootInstanceId}] typeof acquireVsCodeApi = ${typeof acquireVsCodeApi}`);
 console.log(`[boot ${bootInstanceId}] location = ${window.location.href}`);
 
 let messageHandler: ((payload: DelphineInboundMessage) => void) | undefined;
-const pendingMessages: DelphineInboundMessage[] = [];
-//let vscodeApi: ReturnType<typeof acquireVsCodeApi> | null = null;
 
 type DocUpdateMessage = {
         type: 'doc:update';
         html?: string;
         css?: string;
 };
+
+let lastSentHtml = '';
+let lastSentCss = '';
+let isApplyingRemoteDocument = false;
 
 function postToVsCode(payload: unknown): void {
         console.log(`[boot ${bootInstanceId}] postToVsCode payload =`, payload);
@@ -90,21 +59,83 @@ function log(text: string): void {
         });
 }
 
-function extractPayload(event: MessageEvent): DelphineInboundMessage | undefined {
-        const msg = event.data;
-        if (!msg || typeof msg !== 'object') {
-                return undefined;
+function decodeHtmlEntities(text: string): string {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = text;
+        return textarea.value;
+}
+
+function normalizeDelphinePropsAttributes(html: string): string {
+        return html.replace(/\sdata-delphine-props="([\s\S]*?)"/g, (_match, value) => {
+                const decoded = decodeHtmlEntities(value).replace(/'/g, '&#39;');
+                return ` data-delphine-props='${decoded}'`;
+        });
+}
+
+function stripSyntheticBody(html: string): string {
+        const trimmed = html.trim();
+        const match = trimmed.match(/^<body\b[^>]*>([\s\S]*)<\/body>$/i);
+
+        if (match) {
+                return match[1]?.trim() ?? '';
         }
 
-        if (msg.__delphineFromParent === true) {
-                return msg.payload as DelphineInboundMessage;
+        return trimmed;
+}
+
+function normalizeEditorHtml(rawHtml: string): string {
+        let html = stripSyntheticBody(rawHtml);
+        html = normalizeDelphinePropsAttributes(html);
+        return html.trim();
+}
+
+function normalizeCssDeclarationBlock(block: string): string {
+        return block
+                .split(';')
+                .map((part) => part.trim())
+                .filter((part) => part.length > 0)
+                .map((part) => {
+                        const colonIndex = part.indexOf(':');
+                        if (colonIndex < 0) {
+                                return part.replace(/\s+/g, ' ');
+                        }
+
+                        const property = part.slice(0, colonIndex).trim().toLowerCase();
+                        const value = part.slice(colonIndex + 1).trim().replace(/\s+/g, ' ');
+                        return `${property}: ${value}`;
+                })
+                .join('; ');
+}
+
+function normalizeEditorCss(rawCss: string): string {
+        const css = (rawCss ?? '').trim();
+        if (!css) {
+                return '';
         }
 
-        if (typeof msg.type === 'string') {
-                return msg as DelphineInboundMessage;
+        const ruleRegex = /([^{}]+)\{([^{}]*)\}/g;
+        const seenRules = new Set<string>();
+        const normalizedRules: string[] = [];
+        let match: RegExpExecArray | null;
+
+        while ((match = ruleRegex.exec(css)) !== null) {
+                const selector = match[1]?.trim().replace(/\s+/g, ' ') ?? '';
+                const declarations = normalizeCssDeclarationBlock(match[2] ?? '');
+
+                if (!selector || !declarations) {
+                        continue;
+                }
+
+                const key = `${selector} { ${declarations} }`;
+                if (seenRules.has(key)) {
+                        continue;
+                }
+
+                seenRules.add(key);
+                normalizedRules.push(key);
         }
 
-        return undefined;
+        return normalizedRules.join('\n');
 }
 
 function installDirectHostReceiver(): void {
@@ -149,21 +180,26 @@ async function waitForGrapesJs(): Promise<any> {
 
         throw new Error('grapesjs not available');
 }
+
 let rev = 0;
 let suppressOutbound = 0;
 
 function beginRemoteApply() {
         suppressOutbound++;
+        isApplyingRemoteDocument = true;
 }
 
 function endRemoteApply() {
         window.setTimeout(() => {
                 suppressOutbound = Math.max(0, suppressOutbound - 1);
+                if (suppressOutbound === 0) {
+                        isApplyingRemoteDocument = false;
+                }
         }, 0);
 }
 
 function canSendOutbound(): boolean {
-        return suppressOutbound === 0;
+        return suppressOutbound === 0 && !isApplyingRemoteDocument;
 }
 
 function postContentChanged(editor: any) {
@@ -171,8 +207,16 @@ function postContentChanged(editor: any) {
                 return;
         }
 
-        const html = editor.getHtml();
-        const css = editor.getCss();
+        const rawHtml = editor.getHtml();
+        const html = normalizeEditorHtml(rawHtml);
+        const css = normalizeEditorCss(editor.getCss());
+
+        if (html === lastSentHtml && css === lastSentCss) {
+                return;
+        }
+
+        lastSentHtml = html;
+        lastSentCss = css;
 
         console.log(`[boot ${bootInstanceId}] contentChanged -> VSCode`);
 
@@ -193,12 +237,10 @@ function grapesJSEditor(grapes: any): void {
 
         let dirtyTimer: number | undefined;
 
-        function markDirty(_editor: any, reason: string) {
+        function markDirty(_editor: any, _reason: string) {
                 if (!canSendOutbound()) {
                         return;
                 }
-
-                log(`markDirty ${reason}`);
 
                 if (dirtyTimer !== undefined) {
                         window.clearTimeout(dirtyTimer);
@@ -224,9 +266,6 @@ function grapesJSEditor(grapes: any): void {
         }
 
         function loadDocument(html: string, css: string): void {
-                log('doc:update <- VSCode');
-                log('Document changed will be processed by bootEditor');
-
                 beginRemoteApply();
 
                 try {
@@ -237,10 +276,12 @@ function grapesJSEditor(grapes: any): void {
                         editor.setStyle(css || '');
                         applyDelphineBodyTraits();
 
+                        lastSentHtml = normalizeEditorHtml(html || '');
+                        lastSentCss = normalizeEditorCss(css || '');
+
                         console.log(`[boot ${bootInstanceId}] doc updated from VSCode, html length = ${html.length}, css length = ${css.length}`);
                 } finally {
                         requestAnimationFrame(() => {
-                                log('Document changed has been processed by bootEditor');
                                 endRemoteApply();
                         });
                 }
@@ -256,10 +297,6 @@ function grapesJSEditor(grapes: any): void {
 
                         case 'log':
                                 break;
-
-                        //default:
-                        //console.log(`[boot ${bootInstanceId}] ignored message type=${payload.type}`);
-                        //break;
                 }
         };
 

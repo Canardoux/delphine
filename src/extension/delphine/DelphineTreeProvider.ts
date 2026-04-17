@@ -1,169 +1,298 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
 
-type NodeType = 'project' | 'app' | 'formsFolder' | 'framesFolder' | 'form' | 'frame' | 'formFile' | 'frameFile';
+import { listForms, listFrames, resolveProject, type ResolvedProject, type ResolvedUnit } from '../projectModel.js';
+
+export type DelphineTreeItemType = 'project' | 'applicationFile' | 'formsFolder' | 'framesFolder' | 'pluginsFolder' | 'form' | 'frame' | 'dformFile' | 'tsFile';
 
 export class DelphineTreeItem extends vscode.TreeItem {
-        constructor(
-                public readonly type: NodeType,
-                public readonly fullPath: string,
-                label: string,
-                collapsibleState: vscode.TreeItemCollapsibleState,
-                public readonly parentName?: string
-        ) {
-                super(label, collapsibleState);
-                this.contextValue = type;
+        public readonly type: DelphineTreeItemType;
+        public readonly fileUri?: vscode.Uri;
+        public readonly project?: ResolvedProject;
+        public readonly unit?: ResolvedUnit;
 
-                if (type === 'formFile' || type === 'frameFile') {
-                        this.command = {
-                                command: 'vscode.open',
-                                title: 'Open File',
-                                arguments: [vscode.Uri.file(fullPath)]
-                        };
+        public constructor(opts: {
+                label: string;
+                type: DelphineTreeItemType;
+                collapsibleState: vscode.TreeItemCollapsibleState;
+                fileUri?: vscode.Uri;
+                project?: ResolvedProject;
+                unit?: ResolvedUnit;
+                description?: string;
+                tooltip?: string;
+                contextValue?: string;
+                command?: vscode.Command;
+        }) {
+                super(opts.label, opts.collapsibleState);
+
+                this.type = opts.type;
+                this.fileUri = opts.fileUri;
+                this.project = opts.project;
+                this.unit = opts.unit;
+
+                this.description = opts.description;
+                this.tooltip = opts.tooltip;
+                this.contextValue = opts.contextValue ?? opts.type;
+                this.command = opts.command;
+
+                if (opts.fileUri) {
+                        this.resourceUri = opts.fileUri;
                 }
         }
 }
 
 export class DelphineTreeProvider implements vscode.TreeDataProvider<DelphineTreeItem> {
-        private _onDidChangeTreeData = new vscode.EventEmitter<DelphineTreeItem | undefined | null | void>();
-        readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+        private readonly _onDidChangeTreeData = new vscode.EventEmitter<DelphineTreeItem | undefined | void>();
+        public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-        constructor(private workspaceRoot: string | undefined) {}
-
-        refresh() {
+        public refresh(): void {
                 this._onDidChangeTreeData.fire();
         }
 
-        getTreeItem(element: DelphineTreeItem): vscode.TreeItem {
+        public getTreeItem(element: DelphineTreeItem): vscode.TreeItem {
                 return element;
         }
 
-        getChildren(element?: DelphineTreeItem): Thenable<DelphineTreeItem[]> {
-                if (!this.workspaceRoot) {
-                        return Promise.resolve([]);
-                }
-
+        public getChildren(element?: DelphineTreeItem): Thenable<DelphineTreeItem[]> {
                 if (!element) {
-                        return Promise.resolve([new DelphineTreeItem('project', this.workspaceRoot, path.basename(this.workspaceRoot), vscode.TreeItemCollapsibleState.Expanded)]);
+                        return Promise.resolve(this.getRootItems());
                 }
 
-                if (element.type === 'project') {
-                        return Promise.resolve(this.findApps(element.fullPath));
-                }
+                switch (element.type) {
+                        case 'project':
+                                return Promise.resolve(this.getProjectChildren(element.project));
 
-                if (element.type === 'app') {
-                        return Promise.resolve([new DelphineTreeItem('formsFolder', element.fullPath, 'Forms', vscode.TreeItemCollapsibleState.Expanded), new DelphineTreeItem('framesFolder', element.fullPath, 'Frames', vscode.TreeItemCollapsibleState.Expanded)]);
-                }
+                        case 'formsFolder':
+                                return Promise.resolve(this.getFormItems(element.project));
 
-                if (element.type === 'formsFolder') {
-                        return Promise.resolve(this.findForms(element.fullPath));
-                }
+                        case 'framesFolder':
+                                return Promise.resolve(this.getFrameItems(element.project));
+                        case 'form':
+                        case 'frame':
+                                return Promise.resolve(element.unit && element.project ? this.getUnitFileItems(element.unit, element.project) : []);
 
-                if (element.type === 'framesFolder') {
-                        return Promise.resolve(this.findFrames(element.fullPath));
-                }
-
-                if (element.type === 'form') {
-                        return Promise.resolve(this.findFormFiles(element.fullPath, element.label as string));
-                }
-
-                if (element.type === 'frame') {
-                        return Promise.resolve(this.findFrameFiles(element.fullPath, element.label as string));
+                        case 'pluginsFolder':
+                        case 'applicationFile':
+                                return Promise.resolve([]);
                 }
 
                 return Promise.resolve([]);
         }
 
-        private findApps(projectRoot: string): DelphineTreeItem[] {
-                const result: DelphineTreeItem[] = [];
-                const appsRoot = path.join(projectRoot, 'src', 'apps');
-
-                if (!fs.existsSync(appsRoot)) {
-                        return result;
-                }
-
-                const entries = fs.readdirSync(appsRoot, { withFileTypes: true });
-                for (const entry of entries) {
-                        if (!entry.isDirectory()) continue;
-
-                        const full = path.join(appsRoot, entry.name);
-                        result.push(new DelphineTreeItem('app', full, entry.name, vscode.TreeItemCollapsibleState.Collapsed));
-                }
-
-                result.sort((a, b) => String(a.label).localeCompare(String(b.label)));
-                return result;
-        }
-
-        private findForms(appRoot: string): DelphineTreeItem[] {
-                const result: DelphineTreeItem[] = [];
-                const root = path.join(appRoot, 'forms');
-                const visited = new Set<string>();
-
-                this.scan(root, '.form', 'form', result, visited);
-                result.sort((a, b) => String(a.label).localeCompare(String(b.label)));
-                return result;
-        }
-
-        private findFrames(appRoot: string): DelphineTreeItem[] {
-                const result: DelphineTreeItem[] = [];
-                const root = path.join(appRoot, 'frames');
-                const visited = new Set<string>();
-
-                this.scan(root, '.frame', 'frame', result, visited);
-                result.sort((a, b) => String(a.label).localeCompare(String(b.label)));
-                return result;
-        }
-
-        private findFormFiles(formDir: string, formName: string): DelphineTreeItem[] {
-                const result: DelphineTreeItem[] = [];
-                const fileNames = [`${formName}.html`, `${formName}.ts`, `${formName}.css`, `${formName}.json`];
-
-                for (const fileName of fileNames) {
-                        const full = path.join(formDir, fileName);
-                        if (fs.existsSync(full)) {
-                                result.push(new DelphineTreeItem('formFile', full, fileName, vscode.TreeItemCollapsibleState.None, formName));
-                        }
-                }
-
-                return result;
-        }
-
-        private findFrameFiles(frameDir: string, frameName: string): DelphineTreeItem[] {
-                const result: DelphineTreeItem[] = [];
-                const fileNames = [`${frameName}.html`, `${frameName}.ts`, `${frameName}.css`, `${frameName}.json`];
-
-                for (const fileName of fileNames) {
-                        const full = path.join(frameDir, fileName);
-                        if (fs.existsSync(full)) {
-                                result.push(new DelphineTreeItem('frameFile', full, fileName, vscode.TreeItemCollapsibleState.None, frameName));
-                        }
-                }
-
-                return result;
-        }
-
-        private scan(dir: string, suffix: string, type: NodeType, result: DelphineTreeItem[], visited: Set<string>) {
-                if (!fs.existsSync(dir)) return;
-
-                const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-                for (const entry of entries) {
-                        const full = path.join(dir, entry.name);
-
-                        if (entry.isDirectory()) {
-                                if (entry.name.endsWith(suffix)) {
-                                        if (!visited.has(full)) {
-                                                visited.add(full);
-
-                                                const name = entry.name.substring(0, entry.name.length - suffix.length);
-
-                                                result.push(new DelphineTreeItem(type, full, name, vscode.TreeItemCollapsibleState.Collapsed));
-                                        }
-                                } else {
-                                        this.scan(full, suffix, type, result, visited);
+        private getUnitFileItems(unit: ResolvedUnit, project: ResolvedProject): DelphineTreeItem[] {
+                return [
+                        new DelphineTreeItem({
+                                label: `${unit.name}.dform`,
+                                type: 'dformFile',
+                                project,
+                                unit,
+                                fileUri: unit.sourceUri,
+                                collapsibleState: vscode.TreeItemCollapsibleState.None,
+                                tooltip: unit.sourceUri.fsPath,
+                                contextValue: 'dformFile',
+                                command: {
+                                        command: 'vscode.open',
+                                        title: 'Open dform source',
+                                        arguments: [unit.sourceUri]
                                 }
-                        }
+                        }),
+                        new DelphineTreeItem({
+                                label: `${unit.name}.ts`,
+                                type: 'tsFile',
+                                project,
+                                unit,
+                                fileUri: unit.codeUri,
+                                collapsibleState: vscode.TreeItemCollapsibleState.None,
+                                tooltip: unit.codeUri.fsPath,
+                                contextValue: 'tsFile',
+                                command: {
+                                        command: 'vscode.open',
+                                        title: 'Open TypeScript code',
+                                        arguments: [unit.codeUri]
+                                }
+                        })
+                ];
+        }
+
+        private getRootItems(): DelphineTreeItem[] {
+                const project = resolveProject();
+
+                if (!project) {
+                        return [
+                                new DelphineTreeItem({
+                                        label: 'No Delphine project found',
+                                        type: 'project',
+                                        collapsibleState: vscode.TreeItemCollapsibleState.None,
+                                        description: 'Open a folder containing src/application.ts',
+                                        tooltip: 'Delphine expects a project containing src/application.ts',
+                                        contextValue: 'empty'
+                                })
+                        ];
+                }
+
+                const projectName = path.basename(project.rootDir.fsPath);
+
+                return [
+                        new DelphineTreeItem({
+                                label: projectName,
+                                type: 'project',
+                                project,
+                                fileUri: project.rootDir,
+                                collapsibleState: vscode.TreeItemCollapsibleState.Expanded,
+                                tooltip: project.rootDir.fsPath,
+                                contextValue: 'project'
+                        })
+                ];
+        }
+
+        private getProjectChildren(project: ResolvedProject | undefined): DelphineTreeItem[] {
+                if (!project) {
+                        return [];
+                }
+
+                const items: DelphineTreeItem[] = [];
+
+                items.push(
+                        new DelphineTreeItem({
+                                label: 'application.ts',
+                                type: 'applicationFile',
+                                project,
+                                fileUri: project.applicationTsUri,
+                                collapsibleState: vscode.TreeItemCollapsibleState.None,
+                                tooltip: project.applicationTsUri.fsPath,
+                                contextValue: 'applicationFile',
+                                command: {
+                                        command: 'vscode.open',
+                                        title: 'Open application.ts',
+                                        arguments: [project.applicationTsUri]
+                                }
+                        })
+                );
+
+                items.push(
+                        new DelphineTreeItem({
+                                label: 'forms',
+                                type: 'formsFolder',
+                                project,
+                                fileUri: project.formsDir,
+                                collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                                tooltip: project.formsDir.fsPath,
+                                contextValue: 'formsFolder'
+                        })
+                );
+
+                items.push(
+                        new DelphineTreeItem({
+                                label: 'frames',
+                                type: 'framesFolder',
+                                project,
+                                fileUri: project.framesDir,
+                                collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                                tooltip: project.framesDir.fsPath,
+                                contextValue: 'framesFolder'
+                        })
+                );
+
+                items.push(
+                        new DelphineTreeItem({
+                                label: 'plugins',
+                                type: 'pluginsFolder',
+                                project,
+                                fileUri: project.pluginsDir,
+                                collapsibleState: vscode.TreeItemCollapsibleState.None,
+                                tooltip: project.pluginsDir.fsPath,
+                                contextValue: 'pluginsFolder',
+                                command: {
+                                        command: 'vscode.openFolder',
+                                        title: 'Open plugins folder',
+                                        arguments: [project.pluginsDir, false]
+                                }
+                        })
+                );
+
+                return items;
+        }
+
+        private getFormItems(project: ResolvedProject | undefined): DelphineTreeItem[] {
+                if (!project) {
+                        return [];
+                }
+
+                return listForms(project).map((unit: ResolvedUnit) => {
+                        return new DelphineTreeItem({
+                                label: unit.name,
+                                type: 'form',
+                                project,
+                                unit,
+                                fileUri: unit.sourceUri,
+                                collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                                description: 'form',
+                                tooltip: this.buildUnitTooltip(unit),
+                                contextValue: 'form',
+                                command: {
+                                        command: 'delphine.openEditor',
+                                        title: 'Open Delphine Editor',
+                                        arguments: [unit.sourceUri]
+                                }
+                        });
+                });
+        }
+
+        private getFrameItems(project: ResolvedProject | undefined): DelphineTreeItem[] {
+                if (!project) {
+                        return [];
+                }
+
+                return listFrames(project).map((unit: ResolvedUnit) => {
+                        return new DelphineTreeItem({
+                                label: unit.name,
+                                type: 'frame',
+                                project,
+                                unit,
+                                fileUri: unit.sourceUri,
+                                collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
+                                description: 'frame',
+                                tooltip: this.buildUnitTooltip(unit),
+                                contextValue: 'frame',
+                                command: {
+                                        command: 'delphine.openEditor',
+                                        title: 'Open Delphine Editor',
+                                        arguments: [unit.sourceUri]
+                                }
+                        });
+                });
+        }
+
+        private buildUnitTooltip(unit: ResolvedUnit): string {
+                return [`${unit.kind}: ${unit.name}`, '', `.dform: ${unit.sourceUri.fsPath}`, `.ts: ${unit.codeUri.fsPath}`].join('\n');
+        }
+}
+
+/**
+ * Returns true if the given directory exists.
+ */
+export function directoryExists(uri: vscode.Uri): boolean {
+        try {
+                return fs.statSync(uri.fsPath).isDirectory();
+        } catch {
+                return false;
+        }
+}
+
+/**
+ * Returns the default Delphine root candidates from the current workspace.
+ */
+export function findDelphineProjectRoots(): vscode.Uri[] {
+        const folders = vscode.workspace.workspaceFolders ?? [];
+        const results: vscode.Uri[] = [];
+
+        for (const folder of folders) {
+                const applicationTs = vscode.Uri.joinPath(folder.uri, 'src', 'application.ts');
+                if (fs.existsSync(applicationTs.fsPath)) {
+                        results.push(folder.uri);
                 }
         }
+
+        return results;
 }

@@ -1,19 +1,7 @@
 import * as vscode from 'vscode';
 import * as crypto from 'crypto';
-import { parse } from 'parse5';
-import * as prettier from 'prettier';
-//import { splitHtmlForGrapes } from '../SplitHtml';
-import { loadFormHtml, loadFormCss } from '../loadForm';
-
-/*
-import type {
-        Document as DefaultTreeDocument,
-        Element as DefaultTreeElement,
-        Node as DefaultTreeNode,
-        //ParentNode as DefaultTreeParentNode,
-        TextNode as DefaultTreeTextNode
-} from 'parse5/dist/tree-adapters/default';
- */
+import { loadDoc } from '../loadForm';
+import { mergeFormSource, splitFormSource } from '../dformSource';
 
 /****************************************************************************************************************** */
 /**
@@ -94,34 +82,28 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                                         if (msg.rev && msg.rev <= lastRev) return;
                                         lastRev = msg.rev ?? lastRev + 1;
 
-                                        //const prettyHtml = await formatHtml(msg.html ?? "");
-                                        //const prettyCss  = await formatCss(msg.css ?? "");
-                                        // Actually zaza.js is hard coded here. Should be modified TODO
-                                        /*
-                                        const prettyDoc = await formatHtml(
-                                                `<!DOCTYPE html> 
-<html lang="en-US"> <head> <meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cat Scratch Editor</title><style>` +
-                                                        msg.css +
-                                                        `</style></head>` +
-                                                        msg.html +
-                                                        `</html>`
-                                        );
-                                        */
-                                        console.log('[Delphine/ext] contentChanged html =');
+                                        console.log('================ SAVED TEMPLATE BEGIN ================');
                                         console.log(msg.html);
+                                        console.log('================ SAVED TEMPLATE END ==================');
+                                        const existing = splitFormSource(document.getText());
 
-                                        await this.updateTextDocument(document, msg.html ?? ''); // !!!! Pas coule !!!!
-                                        //!!!!!!!!! Il faut mettre a jour aussi le CSS
+                                        const parts = {
+                                                metadataAttributes: existing.metadataAttributes ?? {},
+                                                template: msg.html ?? '',
+                                                style: msg.css ?? ''
+                                        };
+                                        const d = await mergeFormSource(parts);
+                                        console.log('================ SAVED DFORM BEGIN ===================');
+                                        console.log(d);
+                                        console.log('================ SAVED DFORM END =====================');
+                                        await this.updateTextDocument(document, d ?? '');
+
+                                        //await this.updateTextDocument(document, msg.html ?? ''); // !!!! Pas coule !!!!
                                         return;
 
                                 case 'bootEditor:ready':
                                         updateWebviewFromFile(document);
                                         return;
-                                /*
-                                case 'bootEditor:loaded':
-                                        updateWebview();
-                                        return;
-                                        */
                         }
                 });
 
@@ -144,18 +126,20 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
 
                         const fullText = doc.getText();
                         console.log('[Delphine/ext] fullText =', fullText);
+                        const d = splitFormSource(fullText);
                         void webviewPanel.webview.postMessage({
-                                html: fullText,
+                                html: d.template,
                                 type: 'doc:update',
-                                css: '' // IL FAUDRAIT LE CSS ICI !!!!!!!!!!!!!!! // TODO
+                                css: d.style
                         });
                 };
 
                 const updateWebviewFromFile = async (doc: vscode.TextDocument) => {
                         console.log(`[Delphine/ext] post doc:update panel=${panelId}`);
 
-                        const bodyInnerHtml = await loadFormHtml(doc.uri);
-                        const cssText = await loadFormCss(doc.uri);
+                        const docParts = await loadDoc(doc.uri);
+                        const bodyInnerHtml = docParts?.template;
+                        const cssText = docParts?.style;
 
                         console.log('[Delphine/ext] bodyInnerHtml =', bodyInnerHtml);
 
@@ -166,85 +150,23 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                         });
                 };
 
-                // PROVISOIREMENT !!!!!!!!!!!!!!!!
-                /*
-                const updateWebviewFromFile = async (doc: vscode.TextDocument) => {
-                        console.log(`[Delphine/ext] post doc:update panel=${panelId}`);
-
-                        const bodyInnerHtml = '<div><button>HELLO</button></div>';
-                        const cssText = 'button { color: red; }';
-
-                        console.log('[Delphine/ext] bodyInnerHtml =', bodyInnerHtml);
-
-                        await webviewPanel.webview.postMessage({
-                                type: 'doc:update',
-                                html: bodyInnerHtml,
-                                css: cssText
-                        });
-                };
-                */
-
                 const changeSubscription = vscode.workspace.onDidChangeTextDocument((e) => {
-                        if (e.document.uri.toString() === document.uri.toString()) {
-                                void updateWebviewFromDocument(e.document);
+                        if (e.document.uri.toString() !== document.uri.toString()) {
+                                return;
                         }
-                });
-                const saveSubscription = vscode.workspace.onDidSaveTextDocument((doc) => {
-                        if (doc.uri.toString() === document.uri.toString()) {
-                                void updateWebviewFromFile(doc);
+
+                        if (this.isApplyingFromWebview) {
+                                return;
                         }
+
+                        void updateWebviewFromDocument(e.document);
                 });
 
                 webviewPanel.onDidDispose(() => changeSubscription.dispose());
 
-                // Receive messages from the webview.
-                /*
-                webviewPanel.webview.onDidReceiveMessage((msg) => {
-                        if (!msg || typeof msg.type !== 'string') return;
-
-                        // Example: the webview wants to replace the whole document.
-                        if (msg.type === 'doc:replace' && typeof msg.text === 'string') {
-                                this.replaceDocument(document, msg.text);
-                        }
-                });
-                */
-                // Initial content.
-                // updateWebview(); // Not necessary
-                //console.log('[VSCODE] vsc:ready -> bootEditor');
-                //void webviewPanel.webview.postMessage({
-                //type: 'vsc:ready'
-                //});
-
                 // ******************************************************************* Functions *********************************************
 
                 // Keep it small and deterministic
-                /*
-                async function formatHtml(html: string): Promise<string> {
-                        try {
-                                // Comments in English (as you prefer)
-                                // Use the HTML parser; Prettier will also format embedded <style> blocks if present,
-                                // but since you export CSS separately, we keep it as plain HTML here.
-                                return await prettier.format(html, {
-                                        parser: 'html',
-
-                                        // Indentation style
-                                        tabWidth: 8,
-                                        useTabs: false,
-
-                                        // Layout
-                                        printWidth: 120,
-                                        htmlWhitespaceSensitivity: 'css',
-                                        proseWrap: 'preserve',
-
-                                        // Consistency
-                                        singleQuote: false
-                                });
-                        } catch (e) {
-                                console.warn('Prettier HTML failed, keeping raw HTML:', e);
-                                return html;
-                        }
-                }
-                        */
         }
 
         private buildHtml(webview: vscode.Webview, document: vscode.TextDocument): string {
@@ -255,16 +177,6 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 const bootUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'webview', 'bootEditor.js'));
                 const bridgeUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'webview', 'bootBridge.js'));
 
-                /*
-                const csp = [
-                        `default-src 'none'`,
-                        `img-src ${webview.cspSource} https: data:`,
-                        `style-src ${webview.cspSource} 'unsafe-inline' https://cdnjs.cloudflare.com`,
-                        `font-src ${webview.cspSource} https: data:`,
-                        `connect-src ${webview.cspSource} https:`,
-                        `script-src 'nonce-${nonce}' ${webview.cspSource}`
-                ].join('; ');
-                */
                 const csp = [
                         `default-src 'none'`,
                         `img-src ${webview.cspSource} https: data:`,
@@ -308,20 +220,3 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
 function escapeHtml(s: string): string {
         return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
-
-/*
-const nonce = crypto.randomBytes(16).toString('base64url');
-const txt = document.getText();
-
-const { bodyInnerHtml, bodyAttrs, cssText } = splitHtmlForGrapes(txt);
-const escaped = escapeHtml(bodyInnerHtml);
-
-const grapesCssUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'grapes.min.css'));
-const grapesJsUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'grapes.min.js'));
-const bootUri = webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, 'media', 'webview', 'bootEditor.js'));
-
-// IMPORTANT: allow loading scripts/styles from this webview only
-const csp = [`default-src 'none'`, `img-src ${webview.cspSource} https: data:`, `style-src ${webview.cspSource} 'unsafe-inline'`, `font-src ${webview.cspSource} https: data:`, `connect-src ${webview.cspSource} https:`, `script-src 'nonce-${nonce}' ${webview.cspSource}`].join(
-        '; '
-);
-*/

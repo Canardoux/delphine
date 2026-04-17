@@ -28,7 +28,7 @@ export async function runApp(input?: unknown): Promise<void> {
                 return;
         }
 
-        const projectPath = resolveProjectRootFromPath(app.appDir.fsPath);
+        const projectPath = resolveProjectRootFromPath(app.rootDir.fsPath);
         if (!projectPath) {
                 void vscode.window.showErrorMessage('Unable to find Vite project root');
                 return;
@@ -190,7 +190,7 @@ export async function previewOnViteInBrowser(uri: vscode.Uri | undefined): Promi
                 return;
         }
 
-        const projectPath = resolveProjectRootFromPath(unit.unitDir.fsPath);
+        const projectPath = resolveProjectRootFromPath(unit.appDir.fsPath);
         if (!projectPath) {
                 void vscode.window.showErrorMessage('Unable to find Vite project root');
                 return;
@@ -209,7 +209,7 @@ export async function previewOnViteInVsCode(context: vscode.ExtensionContext, ur
                 return;
         }
 
-        const projectPath = resolveProjectRootFromPath(unit.unitDir.fsPath);
+        const projectPath = resolveProjectRootFromPath(unit.appDir.fsPath);
         if (!projectPath) {
                 void vscode.window.showErrorMessage('Unable to find Vite project root');
                 return;
@@ -252,7 +252,7 @@ export async function getPreviewUrlForUnit(uri: vscode.Uri | undefined): Promise
                 throw new Error('No Delphine Form/Frame selected');
         }
 
-        const projectPath = resolveProjectRootFromPath(unit.unitDir.fsPath);
+        const projectPath = resolveProjectRootFromPath(unit.appDir.fsPath);
         if (!projectPath) {
                 throw new Error('Unable to find Vite project root');
         }

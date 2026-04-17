@@ -188,7 +188,6 @@ export class BuildComponentTree {
                         const frame = getApplication()?.getClass(maybeFrame);
                         const schema = frame?.getSchema();
                         child.elem.innerHTML = schema?.component;
-                        //form = child as any as ICompositeControl;
                 }
 
                 // Done in the constructor //parent.children.push(child);

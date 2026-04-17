@@ -328,27 +328,59 @@ export class TApplication implements IApplication {
                 }
         }
 
+        extractTemplateFromDform(source: string): string {
+                const match = source.match(/<template[^>]*>([\s\S]*?)<\/template>/i);
+                return match ? (match[1] ? match[1] : '') : '';
+        }
+
+        extractStyleFromDform(source: string): string {
+                const match = source.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+                return match ? (match[1] ?? '') : '';
+        }
+
+        applyDformStyle(formName: string, cssText: string): void {
+                const styleId = `delphine-style-${formName}`;
+
+                let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+                if (!styleEl) {
+                        styleEl = document.createElement('style');
+                        styleEl.id = styleId;
+                        document.head.appendChild(styleEl);
+                }
+
+                styleEl.textContent = cssText;
+        }
+
         protected async createFormByName(formName: string): Promise<TForm> {
-                const basePath = `/src/apps/${this.appName}/forms/${formName}.form`;
+                const basePath = `/src/forms/${formName}`;
 
-                const module = await import(/* @vite-ignore */ `${basePath}/${formName}.ts`);
+                const module = await import(/* @vite-ignore */ `${basePath}.ts`);
 
-                const response = await fetch(`${basePath}/${formName}.html`);
-                const html = await response.text();
+                const response = await fetch(`${basePath}.dform`);
+                if (!response.ok) {
+                        throw new Error(`Cannot load ${basePath}.dform`);
+                }
+
+                const dformText = await response.text();
+
+                const html = this.extractTemplateFromDform(dformText);
+                const css = this.extractStyleFromDform(dformText);
 
                 const FormClass = module.default ?? module[formName];
                 const form = new FormClass(formName);
 
-                form.create(html); // 🔥 IMPORTANT
+                this.applyDformStyle(formName, css);
+                form.create(html);
                 this.registerForm(form);
 
                 return form;
         }
 
+        /*
         protected async loadFormModule(formName: string): Promise<any> {
                 debugger;
                 const modulePath = `/src/apps/${this.appName}/forms/${formName}.form/${formName}.ts`;
-                return import(/* @vite-ignore */ modulePath);
+                return import(/ * @vite-ignore * / modulePath);
         }
 
         protected async loadFormHtml(formName: string): Promise<string> {
@@ -362,4 +394,5 @@ export class TApplication implements IApplication {
 
                 return await response.text();
         }
+        */
 }

@@ -2,21 +2,34 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
-export type ResolvedApp = {
+export type ResolvedProject = {
         name: string;
-        appDir: vscode.Uri;
-        appJsonUri: vscode.Uri;
+        rootDir: vscode.Uri;
+        appDir: vscode.Uri; // compatibility alias
+        srcDir: vscode.Uri;
         formsDir: vscode.Uri;
+        framesDir: vscode.Uri;
+        pluginsDir: vscode.Uri;
+        applicationTsUri: vscode.Uri;
 };
 
-export type ResolvedForm = {
-        appName: string;
+export type ResolvedApp = ResolvedProject;
+
+export type ResolvedUnit = {
         name: string;
+        appName: string;
         appDir: vscode.Uri;
-        formDir: vscode.Uri;
-        htmlUri: vscode.Uri;
-        cssUri: vscode.Uri;
+
+        unitKind: 'form' | 'frame';
+
+        dformUri: vscode.Uri;
         tsUri: vscode.Uri;
+        unitDir: vscode.Uri;
+
+        // Compatibility aliases
+        kind: 'form' | 'frame';
+        sourceUri: vscode.Uri;
+        codeUri: vscode.Uri;
 };
 
 export function normalizeToFileUri(input?: unknown): vscode.Uri | undefined {
@@ -31,20 +44,32 @@ export function normalizeToFileUri(input?: unknown): vscode.Uri | undefined {
         if (typeof input === 'object') {
                 const obj = input as Record<string, unknown>;
 
-                if (obj['htmlUri'] instanceof vscode.Uri) {
-                        return obj['htmlUri'];
-                }
-
-                if (obj['fileUri'] instanceof vscode.Uri) {
-                        return obj['fileUri'];
-                }
-
-                if (obj['appUri'] instanceof vscode.Uri) {
-                        return obj['appUri'];
-                }
-
                 if (obj['uri'] instanceof vscode.Uri) {
                         return obj['uri'];
+                }
+
+                if (obj['dformUri'] instanceof vscode.Uri) {
+                        return obj['dformUri'];
+                }
+
+                if (obj['tsUri'] instanceof vscode.Uri) {
+                        return obj['tsUri'];
+                }
+
+                if (obj['sourceUri'] instanceof vscode.Uri) {
+                        return obj['sourceUri'];
+                }
+
+                if (obj['codeUri'] instanceof vscode.Uri) {
+                        return obj['codeUri'];
+                }
+
+                if (obj['appDir'] instanceof vscode.Uri) {
+                        return obj['appDir'];
+                }
+
+                if (obj['rootDir'] instanceof vscode.Uri) {
+                        return obj['rootDir'];
                 }
         }
 
@@ -54,16 +79,11 @@ export function normalizeToFileUri(input?: unknown): vscode.Uri | undefined {
 export function resolveProjectRootFromPath(startPath: string): string | undefined {
         let current = fs.statSync(startPath).isDirectory() ? startPath : path.dirname(startPath);
 
-        while (true) {
-                const viteConfigTs = path.join(current, 'vite.config.ts');
-                const viteConfigJs = path.join(current, 'vite.config.js');
+        for (;;) {
                 const packageJson = path.join(current, 'package.json');
+                const srcDir = path.join(current, 'src');
 
-                if (fs.existsSync(viteConfigTs) || fs.existsSync(viteConfigJs)) {
-                        return current;
-                }
-
-                if (fs.existsSync(packageJson)) {
+                if (fs.existsSync(packageJson) && fs.existsSync(srcDir)) {
                         return current;
                 }
 
@@ -82,175 +102,170 @@ export function resolveProjectRoot(input?: unknown): string | undefined {
                 return undefined;
         }
 
-        const fsPath = uri.fsPath;
-        if (!fsPath) {
+        return resolveProjectRootFromPath(uri.fsPath);
+}
+
+export function resolveProject(input?: unknown): ResolvedProject | undefined {
+        const uri = normalizeToFileUri(input) ?? vscode.window.activeTextEditor?.document.uri ?? vscode.workspace.workspaceFolders?.[0]?.uri;
+
+        if (!uri || uri.scheme !== 'file') {
                 return undefined;
         }
 
-        return resolveProjectRootFromPath(fsPath);
+        const projectRoot = resolveProjectRoot(uri);
+        if (!projectRoot) {
+                return undefined;
+        }
+
+        const srcDir = path.join(projectRoot, 'src');
+        const formsDir = path.join(srcDir, 'forms');
+        const framesDir = path.join(srcDir, 'frames');
+        const pluginsDir = path.join(srcDir, 'plugins');
+        const applicationTsPath = path.join(srcDir, 'application.ts');
+
+        return {
+                name: path.basename(projectRoot),
+                rootDir: vscode.Uri.file(projectRoot),
+                appDir: vscode.Uri.file(projectRoot),
+                srcDir: vscode.Uri.file(srcDir),
+                formsDir: vscode.Uri.file(formsDir),
+                framesDir: vscode.Uri.file(framesDir),
+                pluginsDir: vscode.Uri.file(pluginsDir),
+                applicationTsUri: vscode.Uri.file(applicationTsPath)
+        };
 }
 
 export function resolveApp(input?: unknown): ResolvedApp | undefined {
-        const uri = normalizeToFileUri(input) ?? vscode.window.activeTextEditor?.document.uri;
+        return resolveProject(input);
+}
+
+export function resolveUnit(uri: vscode.Uri | undefined): ResolvedUnit | undefined {
         if (!uri || uri.scheme !== 'file') {
                 return undefined;
         }
 
-        const fsPath = uri.fsPath;
-        if (!fsPath) {
-                return undefined;
-        }
-
-        let current = fs.existsSync(fsPath) && fs.statSync(fsPath).isDirectory() ? fsPath : path.dirname(fsPath);
-
-        while (true) {
-                const appJsonPath = path.join(current, 'app.json');
-                if (fs.existsSync(appJsonPath)) {
-                        const appName = path.basename(current);
-                        return {
-                                name: appName,
-                                appDir: vscode.Uri.file(current),
-                                appJsonUri: vscode.Uri.file(appJsonPath),
-                                formsDir: vscode.Uri.file(path.join(current, 'forms'))
-                        };
-                }
-
-                const parent = path.dirname(current);
-                if (parent === current) {
-                        return undefined;
-                }
-
-                current = parent;
-        }
-}
-
-/*
-export function resolveForm(input?: unknown): ResolvedForm | undefined {
-        const uri = normalizeToFileUri(input) ?? vscode.window.activeTextEditor?.document.uri;
-        if (!uri || uri.scheme !== 'file') {
+        const project = resolveProject(uri);
+        if (!project) {
                 return undefined;
         }
 
         const fsPath = uri.fsPath;
-        if (!fsPath) {
-                return undefined;
+        const fileName = path.basename(fsPath);
+        const dirName = path.dirname(fsPath);
+
+        const formsDir = project.formsDir.fsPath;
+        const framesDir = project.framesDir.fsPath;
+
+        const ext = path.extname(fileName).toLowerCase();
+        const baseName = path.basename(fileName, ext);
+
+        if (dirName === formsDir && (ext === '.dform' || ext === '.ts')) {
+                const dformUri = vscode.Uri.file(path.join(formsDir, `${baseName}.dform`));
+                const tsUri = vscode.Uri.file(path.join(formsDir, `${baseName}.ts`));
+
+                return {
+                        name: baseName,
+                        appName: project.name,
+                        appDir: project.rootDir,
+                        unitKind: 'form',
+                        dformUri,
+                        tsUri,
+                        unitDir: vscode.Uri.file(formsDir),
+
+                        kind: 'form',
+                        sourceUri: dformUri,
+                        codeUri: tsUri
+                };
         }
 
-        const dir = fs.existsSync(fsPath) && fs.statSync(fsPath).isDirectory() ? fsPath : path.dirname(fsPath);
+        if (dirName === framesDir && (ext === '.dform' || ext === '.ts')) {
+                const dformUri = vscode.Uri.file(path.join(framesDir, `${baseName}.dform`));
+                const tsUri = vscode.Uri.file(path.join(framesDir, `${baseName}.ts`));
 
-        const formDirName = path.basename(dir);
-        if (!formDirName.endsWith('.form')) {
-                return undefined;
-        }
+                return {
+                        name: baseName,
+                        appName: project.name,
+                        appDir: project.rootDir,
+                        unitKind: 'frame',
+                        dformUri,
+                        tsUri,
+                        unitDir: vscode.Uri.file(framesDir),
 
-        const app = resolveApp(vscode.Uri.file(dir));
-        if (!app) {
-                return undefined;
-        }
-
-        const formName = formDirName.slice(0, -'.form'.length);
-
-        return {
-                appName: app.name,
-                name: formName,
-                appDir: app.appDir,
-                formDir: vscode.Uri.file(dir),
-                htmlUri: vscode.Uri.file(path.join(dir, `${formName}.html`)),
-                cssUri: vscode.Uri.file(path.join(dir, `${formName}.css`)),
-                tsUri: vscode.Uri.file(path.join(dir, `${formName}.ts`))
-        };
-}
-        */
-
-export function resolveUnit(uri: vscode.Uri | undefined):
-        | {
-                  unitDir: vscode.Uri;
-                  name: string;
-                  appName: string;
-                  isFrame: boolean;
-                  htmlUri: vscode.Uri;
-                  cssUri: vscode.Uri;
-                  tsUri: vscode.Uri;
-          }
-        | undefined {
-        if (!uri) return undefined;
-
-        const fsPath = uri.fsPath;
-        const dir = fs.existsSync(fsPath) && fs.statSync(fsPath).isDirectory() ? fsPath : path.dirname(fsPath);
-
-        let current = dir;
-
-        while (true) {
-                const base = path.basename(current);
-
-                if (base.endsWith('.form') || base.endsWith('.frame')) {
-                        const name = base.replace('.form', '').replace('.frame', '');
-                        const app = resolveApp(vscode.Uri.file(current));
-                        if (!app) return undefined;
-
-                        return {
-                                unitDir: vscode.Uri.file(current),
-                                name,
-                                appName: app.name,
-                                isFrame: base.endsWith('.frame'),
-                                htmlUri: vscode.Uri.file(path.join(dir, `${name}.html`)),
-                                cssUri: vscode.Uri.file(path.join(dir, `${name}.css`)),
-                                tsUri: vscode.Uri.file(path.join(dir, `${name}.ts`))
-                        };
-                }
-
-                const parent = path.dirname(current);
-                if (parent === current) break;
-                current = parent;
+                        kind: 'frame',
+                        sourceUri: dformUri,
+                        codeUri: tsUri
+                };
         }
 
         return undefined;
 }
-/*
 
-export function resolveFormSiblingUri(input: unknown, ext: 'html' | 'ts' | 'css'): vscode.Uri | undefined {
-        const form = resolveForm(input);
-        if (!form) {
-                return undefined;
-        }
-
-        switch (ext) {
-                case 'html':
-                        return form.htmlUri;
-                case 'ts':
-                        return form.tsUri;
-                case 'css':
-                        return form.cssUri;
-        }
-}
-        */
-
-export function resolveUnitSiblingUri(input: unknown, ext: 'html' | 'ts' | 'css'): vscode.Uri | undefined {
+export function resolveDformUri(input?: unknown): vscode.Uri | undefined {
         const unit = resolveUnit(normalizeToFileUri(input));
-        if (!unit) {
-                return undefined;
-        }
-
-        const dir = unit.unitDir.fsPath;
-
-        switch (ext) {
-                case 'html':
-                        return vscode.Uri.file(path.join(dir, `${unit.name}.html`));
-                case 'ts':
-                        return vscode.Uri.file(path.join(dir, `${unit.name}.ts`));
-                case 'css':
-                        return vscode.Uri.file(path.join(dir, `${unit.name}.css`));
-        }
-}
-
-export function resolveHtmlUri(input?: unknown): vscode.Uri | undefined {
-        return resolveUnitSiblingUri(input, 'html');
+        return unit?.dformUri;
 }
 
 export function resolveTsUri(input?: unknown): vscode.Uri | undefined {
-        return resolveUnitSiblingUri(input, 'ts');
+        const unit = resolveUnit(normalizeToFileUri(input));
+        return unit?.tsUri;
 }
 
-export function resolveCssUri(input?: unknown): vscode.Uri | undefined {
-        return resolveUnitSiblingUri(input, 'css');
+export function listForms(project: ResolvedProject): ResolvedUnit[] {
+        const formsDir = project.formsDir.fsPath;
+        if (!fs.existsSync(formsDir)) {
+                return [];
+        }
+
+        return fs
+                .readdirSync(formsDir)
+                .filter((name) => name.toLowerCase().endsWith('.dform'))
+                .map((name) => {
+                        const baseName = path.basename(name, '.dform');
+                        const dformUri = vscode.Uri.file(path.join(formsDir, `${baseName}.dform`));
+                        const tsUri = vscode.Uri.file(path.join(formsDir, `${baseName}.ts`));
+
+                        return {
+                                name: baseName,
+                                appName: project.name,
+                                appDir: project.rootDir,
+                                unitKind: 'form',
+                                dformUri,
+                                tsUri,
+                                unitDir: project.formsDir,
+
+                                kind: 'form',
+                                sourceUri: dformUri,
+                                codeUri: tsUri
+                        };
+                });
+}
+
+export function listFrames(project: ResolvedProject): ResolvedUnit[] {
+        const framesDir = project.framesDir.fsPath;
+        if (!fs.existsSync(framesDir)) {
+                return [];
+        }
+
+        return fs
+                .readdirSync(framesDir)
+                .filter((name) => name.toLowerCase().endsWith('.dform'))
+                .map((name) => {
+                        const baseName = path.basename(name, '.dform');
+                        const dformUri = vscode.Uri.file(path.join(framesDir, `${baseName}.dform`));
+                        const tsUri = vscode.Uri.file(path.join(framesDir, `${baseName}.ts`));
+
+                        return {
+                                name: baseName,
+                                appName: project.name,
+                                appDir: project.rootDir,
+                                unitKind: 'frame',
+                                dformUri,
+                                tsUri,
+                                unitDir: project.framesDir,
+
+                                kind: 'frame',
+                                sourceUri: dformUri,
+                                codeUri: tsUri
+                        };
+                });
 }

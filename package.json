@@ -18,10 +18,37 @@
         "main": "./out/extension/extension.js",
         "activationEvents": [
                 "onCommand:delphine.preview",
+                "onCommand:delphine.previewBrowser",
                 "onCommand:delphine.openEditor",
+                "onCommand:delphine.openSource",
+                "onCommand:delphine.runApp",
+                "onCommand:delphine.newProject",
+                "onCommand:delphine.newForm",
+                "onCommand:delphine.newFrame",
+                "onCommand:delphine.newApp",
                 "onCustomEditor:delphine.customEditor"
         ],
         "contributes": {
+                "languages": [
+                        {
+                                "id": "delphine-dform",
+                                "aliases": [
+                                        "Delphine Form",
+                                        "dform"
+                                ],
+                                "extensions": [
+                                        ".dform"
+                                ],
+                                "configuration": "./language-configuration.json"
+                        }
+                ],
+                "grammars": [
+                        {
+                                "language": "delphine-dform",
+                                "scopeName": "source.delphine-dform",
+                                "path": "./syntaxes/delphine-dform.tmLanguage.json"
+                        }
+                ],
                 "commands": [
                         {
                                 "command": "delphine.newProject",
@@ -36,13 +63,8 @@
                                 "icon": "$(new-file)"
                         },
                         {
-                                "command": "delphine.openHtmlSource",
-                                "title": "Open HTML Source",
-                                "category": "Delphine"
-                        },
-                        {
-                                "command": "delphine.openTypeScript",
-                                "title": "Open TypeScript",
+                                "command": "delphine.openSource",
+                                "title": "Open Form/Frame Source",
                                 "category": "Delphine"
                         },
                         {
@@ -88,7 +110,7 @@
                                 "displayName": "Delphine Custom Editor",
                                 "selector": [
                                         {
-                                                "filenamePattern": "*.html"
+                                                "filenamePattern": "*.dform"
                                         }
                                 ],
                                 "priority": "option"
@@ -97,19 +119,24 @@
                 "menus": {
                         "editor/title": [
                                 {
-                                        "when": "resourceLangId == html || resourceLangId == typescript || resourceLangId == css",
+                                        "when": "resourceExtname == .dform",
                                         "command": "delphine.openEditor",
                                         "group": "navigation@1"
                                 },
                                 {
-                                        "when": "resourceLangId == html || resourceLangId == typescript || resourceLangId == css",
+                                        "when": "resourceExtname == .dform",
                                         "command": "delphine.preview",
                                         "group": "navigation@2"
                                 },
                                 {
-                                        "when": "resourceLangId == html || resourceLangId == typescript || resourceLangId == css",
+                                        "when": "resourceExtname == .dform",
                                         "command": "delphine.previewBrowser",
                                         "group": "navigation@3"
+                                },
+                                {
+                                        "when": "resourceFilename == application.ts",
+                                        "command": "delphine.runApp",
+                                        "group": "navigation@4"
                                 }
                         ],
                         "webview/context": [
@@ -133,6 +160,11 @@
                                         "command": "delphine.newFrame",
                                         "when": "view == delphineTree",
                                         "group": "navigation@3"
+                                },
+                                {
+                                        "command": "delphine.runApp",
+                                        "when": "view == delphineTree",
+                                        "group": "navigation@4"
                                 }
                         ],
                         "view/item/context": [
@@ -148,33 +180,38 @@
                                 },
                                 {
                                         "command": "delphine.newForm",
-                                        "when": "view == delphineTree && (viewItem == app || viewItem == formsFolder || viewItem == form || viewItem == formFile)",
+                                        "when": "view == delphineTree && (viewItem == project || viewItem == formsFolder)",
                                         "group": "create@2"
                                 },
                                 {
                                         "command": "delphine.newFrame",
-                                        "when": "view == delphineTree && (viewItem == app || viewItem == framesFolder || viewItem == frame || viewItem == frameFile)",
+                                        "when": "view == delphineTree && (viewItem == project || viewItem == framesFolder)",
                                         "group": "create@3"
                                 },
                                 {
                                         "command": "delphine.openEditor",
-                                        "when": "view == delphineTree && (viewItem == form || viewItem == formFile || viewItem == frame || viewItem == frameFile)",
+                                        "when": "view == delphineTree && (viewItem == form || viewItem == frame || viewItem == dformFile || viewItem == tsFile)",
                                         "group": "open@1"
                                 },
                                 {
-                                        "command": "delphine.preview",
-                                        "when": "view == delphineTree && (viewItem == form || viewItem == formFile || viewItem == frame || viewItem == frameFile)",
+                                        "command": "delphine.openSource",
+                                        "when": "view == delphineTree && (viewItem == form || viewItem == frame || viewItem == dformFile || viewItem == tsFile)",
                                         "group": "open@2"
                                 },
                                 {
-                                        "command": "delphine.previewBrowser",
-                                        "when": "view == delphineTree && (viewItem == form || viewItem == formFile || viewItem == frame || viewItem == frameFile)",
+                                        "command": "delphine.preview",
+                                        "when": "view == delphineTree && (viewItem == form || viewItem == frame || viewItem == dformFile || viewItem == tsFile)",
                                         "group": "open@3"
                                 },
                                 {
+                                        "command": "delphine.previewBrowser",
+                                        "when": "view == delphineTree && (viewItem == form || viewItem == frame || viewItem == dformFile || viewItem == tsFile)",
+                                        "group": "open@4"
+                                },
+                                {
                                         "command": "delphine.runApp",
-                                        "when": "view == delphineTree && (viewItem == app || viewItem == formsFolder || viewItem == form || viewItem == formFile || viewItem == frame || viewItem == frameFile)",
-                                        "group": "navigation@2"
+                                        "when": "view == delphineTree && (viewItem == project || viewItem == applicationFile || viewItem == formsFolder || viewItem == form || viewItem == dformFile || viewItem == tsFile)",
+                                        "group": "navigation@1"
                                 }
                         ]
                 },
