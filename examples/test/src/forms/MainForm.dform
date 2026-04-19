@@ -27,15 +27,24 @@
 
 #buttonx {
         color: rgb(255, 0, 0);
-        width: 100px;
+        width: 180px;
         height: 100px;
+}
+
+#iqo9k {
+        margin-top: 0px;
+        margin-right: 0px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+        width: 82px;
+        height: 113px;
 }
 
 #mypanel {
         color: rgb(1, 1, 1);
         background-color: rgb(222, 232, 18);
-        width: 300px;
-        height: 300px;
+        width: 360px;
+        height: 146px;
 }
 
 body {
@@ -63,7 +72,7 @@ body {
         data-delphine-onshown="onMyShown"
         data-delphine-onclick="mainForm_onclick"
 >
-        Hello from AutoRunDelphiMode : MainForm TFormz
+        Hello from AutoRunDelphiMode : MainForm
         <div id="i7jm">
                 <input
                         type="checkbox"
@@ -153,14 +162,17 @@ body {
                         data-delphine-caption="sub-button1"
                         data-delphine-name="sub-button1"
                         data-delphine-onclick="subButton1_onclick"
+                        id="igqcr"
                 >
                         Click Me!
                 </button>
+                <button data-delphine-component="TButton" data-delphine-name="button" id="iqo9k">La plume</button>
                 <button
                         data-delphine-component="TButton"
                         data-delphine-caption="sub-button2"
                         data-delphine-name="sub-button2"
                         data-delphine-onclick="subButton1_onclick"
+                        id="i8hlw"
                 >
                         Click Me!
                 </button>

@@ -125,6 +125,7 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
                         isContainer: false,
                         instanceName: 'button',
                         tagName: 'button',
+                        resizable: true,
 
                         props: this.propSpecsToSchemaProps()
                 };
@@ -162,11 +163,7 @@ export class TMetaPanel extends TMetaContainer {
 
         protected constructor(superClass: TMetaContainer, name: string) {
                 super(superClass, name);
-                // et vous changez juste le nom :
         }
-        //getMetaclass(): TMetaPanel {
-        //return TMetaPanel.metaclass;
-        //}
 
         create(name: string, form: IForm, parent: TControl): TPanel {
                 return new TPanel(name, form, parent);
@@ -179,18 +176,21 @@ export class TMetaPanel extends TMetaContainer {
                 ];
         }
 
-        schema: ComponentSchema = {
-                name: this.typeName,
-                label: 'TPanel',
-                category: 'Standard Control',
-                icon: undefined,
-                component: TMetaPanel.metaclass,
-                isContainer: true,
-                instanceName: 'panel',
-                tagName: 'div',
+        getSchema(): ComponentSchema {
+                return {
+                        name: this.typeName,
+                        label: 'TPanel',
+                        category: 'Standard Control',
+                        icon: undefined,
+                        component: TMetaPanel.metaclass,
+                        isContainer: true,
+                        instanceName: 'panel',
+                        tagName: 'div',
+                        resizable: true,
 
-                props: this.propSpecsToSchemaProps()
-        };
+                        props: this.propSpecsToSchemaProps()
+                };
+        }
 }
 
 /*

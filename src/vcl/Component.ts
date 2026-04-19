@@ -91,7 +91,8 @@ export class TMetaComponent extends TMetaObject {
                         component: this,
                         props: this.propSpecsToSchemaProps(),
                         instanceName: 'component',
-                        tagName: 'div'
+                        tagName: 'div',
+                        resizable: false
                 };
         }
 

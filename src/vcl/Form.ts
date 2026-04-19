@@ -65,6 +65,7 @@ export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, 
                         isContainer: true,
                         instanceName: 'form',
                         tagName: 'div',
+                        resizable: false,
 
                         props: this.propSpecsToSchemaProps()
                 };

@@ -1,11 +1,11 @@
 {
         "mainForm": "MainForm",
         "forms": ["MainForm", "Riri"],
-        "plugins": [
+        "frames": [
                 {
-                        "id": "hello-frame",
-                        "type": "frame",
-                        "factory": "./frames/hello-frame/index.ts"
+                        "className": "HelloFrame",
+                        "url": "/src/frames/HelloFrame.dform",
+                        "tagName": "hello-frame"
                 }
         ]
 }

@@ -8,8 +8,8 @@ export default class Application extends TApplication {
 
         override async initialize(): Promise<void> {
                 debugger;
-
-                this.typeRegistry?.register(MetaHelloFrame.metaclass);
+                super.initialize();
+                // Done from app.json // this.typeRegistry?.register(MetaHelloFrame.metaclass);
                 this.mainForm = (await this.createFormByName('MainForm')) as MainForm;
                 this.riri = (await this.createFormByName('Riri')) as RiriForm;
         }

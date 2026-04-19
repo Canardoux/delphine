@@ -149,6 +149,23 @@ export class BuildComponentTree {
                 this.applyPropsFromSource(comp, dataAttrs, comp.getMetaclass() as TMetaControl);
         }
 
+        private applyLoadedUnitStyle(unitName: string, cssText: string): void {
+                if (!cssText.trim()) {
+                        return;
+                }
+
+                const styleId = `delphine-unit-style-${unitName}`;
+
+                let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+                if (!styleEl) {
+                        styleEl = document.createElement('style');
+                        styleEl.id = styleId;
+                        document.head.appendChild(styleEl);
+                }
+
+                styleEl.textContent = cssText;
+        }
+
         buildComponentTree(el: Element, form: IForm, parent: TControl): TControl | null {
                 const name = el.getAttribute('data-delphine-name');
                 const type = el.getAttribute('data-delphine-component');
@@ -185,9 +202,16 @@ export class BuildComponentTree {
                 const maybeFrame = el.getAttribute('data-delphine-frame');
 
                 if (maybeFrame && maybeFrame != '') {
-                        const frame = getApplication()?.getClass(maybeFrame);
-                        const schema = frame?.getSchema();
-                        child.elem.innerHTML = schema?.component;
+                        //const frame = getApplication()?.getClass(maybeFrame);
+                        //const schema = frame?.getSchema();
+                        //child.elem.innerHTML = schema?.component;
+                        const app = getApplication();
+
+                        const loaded = app?.getLoadedUnit(maybeFrame);
+                        child.elem.innerHTML = loaded?.template ?? '';
+                        if (loaded?.style) {
+                                this.applyLoadedUnitStyle(maybeFrame, loaded.style);
+                        }
                 }
 
                 // Done in the constructor //parent.children.push(child);

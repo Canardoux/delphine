@@ -24,16 +24,18 @@ import { TForm } from './Form';
 import { TTypeRegistry } from './TypeRegistry';
 import { registerBuiltins } from './RegisterVcl';
 import { getApplication, setApplication } from './IApplication';
-import type { IApplication } from './IApplication';
+import type { IApplication, TLoadedUnit } from './IApplication';
 import type { IControl, IMetaControl } from './IControl';
 import { TMetaControl } from './Control';
 import type { IMetaComponent } from './IComponent';
+import { parseDformSource } from './dformSource';
 
 //export TheApplication : TApplication | null = null;
 
 export type TApplicationConfig = {
         mainForm?: string;
         forms?: string[];
+        frames?: any[];
 };
 
 export class TMetaApplication extends TMetaclass {
@@ -60,6 +62,42 @@ export class TApplication implements IApplication {
         //return TMetaApplication.metaclass;
         //}
         private forms: Map<string, TForm> = new Map<string, TForm>();
+        private loadedUnits = new Map<string, TLoadedUnit>();
+
+        private async loadDformUnit(basePath: string, unitName: string): Promise<TLoadedUnit> {
+                const formPath = `${basePath}/${unitName}.dform`;
+                const srcPath = `${basePath}/${unitName}.ts`;
+                const mod = await import(srcPath);
+
+                if (!mod.delphineMeta) {
+                        throw new Error(`Missing delphineMeta export in ${srcPath}`);
+                }
+                const response = await fetch(formPath);
+                if (!response.ok) {
+                        throw new Error(`Cannot load ${formPath}`);
+                }
+
+                const source = await response.text();
+                const parts = parseDformSource(source);
+
+                const loaded: TLoadedUnit = {
+                        name: unitName,
+                        template: parts.template,
+                        style: parts.style,
+                        metaclass: mod.delphineMeta as IMetaControl
+                        //metaclass: metaclass
+                };
+
+                return loaded;
+        }
+
+        registerLoadedUnit(name: string, unit: TLoadedUnit): void {
+                this.loadedUnits.set(name, unit);
+        }
+
+        getLoadedUnit(name: string): TLoadedUnit | undefined {
+                return this.loadedUnits.get(name);
+        }
 
         constructor(appName: string, appConfig: TApplicationConfig) {
                 debugger;
@@ -295,6 +333,12 @@ export class TApplication implements IApplication {
         // This method can be overriden in a user TApplication
         async initialize(): Promise<void> {
                 debugger;
+                const frames = this.appConfig.frames ?? [];
+                for (const frame of frames) {
+                        const loaded = await this.loadDformUnit(`/src/frames`, frame.className);
+                        this.registerLoadedUnit(frame.tagName, loaded);
+                        this.typeRegistry?.register(loaded.metaclass as TMetaControl);
+                }
                 const formNames = this.appConfig.forms ?? [];
 
                 for (const formName of formNames) {

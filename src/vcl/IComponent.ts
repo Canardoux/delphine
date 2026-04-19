@@ -58,6 +58,14 @@ export type ComponentSchema = {
         label: string;
         category: string;
         icon?: string;
+        resizable:
+                | boolean
+                | {
+                          tl: number;
+                          tr: number;
+                          bl: number;
+                          br: number;
+                  };
 
         // Optional default HTML representation
         defaultProps?: Record<string, any>;

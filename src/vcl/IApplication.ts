@@ -24,12 +24,20 @@ import type { IControl, IMetaControl } from './IControl';
 import type { IForm } from './IForm';
 import type { IMetaComponent } from './IComponent';
 
+export type TLoadedUnit = {
+        name: string;
+        template: string;
+        style: string;
+        metaclass: IMetaControl;
+};
+
 export interface IApplication {
         run(): void;
         initialize(): Promise<void>;
         showForm(form: IForm): void;
 
         getClass(type: string): IMetaComponent | undefined;
+        getLoadedUnit(name: string): TLoadedUnit | undefined;
 }
 
 //export const TheApplication: IApplication | null = null;

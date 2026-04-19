@@ -59,6 +59,7 @@ export class TMetaFrame<T extends TFrame> extends TMetaCompositeControl implemen
                         isContainer: true,
                         instanceName: 'frame',
                         tagName: 'div',
+                        resizable: false,
 
                         props: this.propSpecsToSchemaProps()
                 };
@@ -119,6 +120,7 @@ export class TMetaHostFrame<T extends THostFrame> extends TMetaContainer {
                         isContainer: true,
                         instanceName: 'frame',
                         tagName: 'div',
+                        resizable: false,
 
                         props: this.propSpecsToSchemaProps()
                 };

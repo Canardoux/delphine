@@ -13,9 +13,7 @@
                 "baseUrl": ".",
                 "paths": {
                         "@vcl": ["src/vcl/index.ts"],
-                        "@vcl/*": ["src/vcl/*"],
-                        "@drt": ["src/drt/index.ts"],
-                        "@drt/*": ["src/drt/*"]
+                        "@vcl/*": ["src/vcl/*"]
                 }
         },
         "extends": "./tsconfig.json",

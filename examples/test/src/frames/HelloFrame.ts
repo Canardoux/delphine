@@ -1,21 +1,24 @@
 // createHelloVuePlugin.ts
 // -----------------------
 
-import { defineVuePlugin } from '@vcl/VuePlugin';
-import type { PropSchema, ComponentSchema } from '@vcl/IComponent';
+//import { defineVuePlugin } from '@vcl/VuePlugin';
+import type { ComponentSchema } from '@vcl/IComponent';
 import { TFrame, TMetaFrame } from '@vcl/Frame';
-import type { IForm } from '@vcl/IForm';
+//import type { IForm } from '@vcl/IForm';
 import { TForm } from '@vcl/Form';
 import { TButton, TControl } from '@vcl';
 import type { PropSpec } from '@vcl/Component';
-import dformSource from './HelloFrame.dform?raw';
+//import dformSource from './HelloFrame.dform?raw';
+//import dformSource from './HelloFrame.dform?raw';
 
-function extractTemplateFromDform(source: string): string {
-        const match = source.match(/<template[^>]*>([\s\S]*?)<\/template>/i);
-        return match ? (match[1] ?? '') : '';
-}
+//import { parseDformSource } from '@vcl/dformSource';
 
-const template = extractTemplateFromDform(dformSource);
+//function extractTemplateFromDform(source: string): string {
+//       const match = source.match(/<template[^>]*>([\s\S]*?)<\/template>/i);
+//       return match ? (match[1] ?? '') : '';
+//}
+
+//const template = extractTemplateFromDform(dformSource);
 
 export class HelloFrame extends TFrame {
         changeMessage_onclick(_ev: Event | null, _sender: TControl) {
@@ -34,13 +37,19 @@ export class MetaHelloFrame extends TMetaFrame<TFrame> {
         static metaclass = new MetaHelloFrame(TMetaFrame.metaclass, 'hello-frame');
         schema: ComponentSchema = {
                 name: 'hello-frame',
-                component: template,
+                component: null,
                 label: 'Hello Frame',
                 category: 'Frame',
                 icon: undefined,
                 isContainer: true,
                 instanceName: 'helloFrame',
                 tagName: 'div',
+                resizable: {
+                        tl: 1,
+                        tr: 1,
+                        bl: 1,
+                        br: 1
+                },
                 props: {
                         message: { kind: 'string', default: 'Hello depuis Delphine' },
                         count: { kind: 'number', default: 0 },
@@ -86,3 +95,4 @@ export class MetaHelloFrame extends TMetaFrame<TFrame> {
                 return this.schema;
         }
 }
+export const delphineMeta = MetaHelloFrame.metaclass;

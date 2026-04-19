@@ -27,6 +27,7 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
                 model: {
                         defaults: {
                                 tagName: schema.tagName,
+                                resizable: schema.resizable ?? false,
                                 draggable: true,
                                 droppable: schema.isContainer ?? false,
                                 attributes: {

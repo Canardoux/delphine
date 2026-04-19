@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { resolveDformUri } from './projectModel.js';
-import { parseDformSource, extractDformTemplate, extractDformStyle, type DformParts } from './dformSource.js';
+import { parseDformSource, extractDformTemplate, extractDformStyle, type DformParts } from './dformSource';
 
 export async function readTextFile(uri: vscode.Uri): Promise<string> {
         const data = await vscode.workspace.fs.readFile(uri);
