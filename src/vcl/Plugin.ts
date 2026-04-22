@@ -21,7 +21,7 @@
 import { TForm } from './Form';
 import type { IForm } from './IForm';
 import { TControl, TMetaControl } from './Control';
-import type { PropSpec } from './Component';
+import type { PropSpec } from './IComponent';
 import type { IControl } from './IControl';
 import type { UIPluginFactory, IMetaPluginHost, UIPluginInstance } from './IPlugin';
 import { TCompositeControl, TMetaCompositeControl } from './CompositeControl';

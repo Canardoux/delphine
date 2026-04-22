@@ -10,20 +10,22 @@ import { newDelphineProject } from './delphine/NewDelphineProject';
 import { newApp } from './delphine/NewApp';
 import { normalizeToFileUri, resolveApp } from './projectModel';
 import { resolveUnit } from './projectModel';
+import { loadDoc } from './loadForm';
+import { parseDformSource } from './dformSource'; // ou le bon chemin chez vous
 
 let activeRuntimePreviewUri: vscode.Uri | undefined;
-function createRuntimePreviewPanel(context: vscode.ExtensionContext, url: string, sourceUri: vscode.Uri): void {
+async function createRuntimePreviewPanel(context: vscode.ExtensionContext, url: string, sourceUri: vscode.Uri): Promise<void> {
+        console.log('[Delphine] createRuntimePreviewPanel called', url, sourceUri.toString());
         activeRuntimePreviewUri = sourceUri;
 
         const panel = vscode.window.createWebviewPanel('delphineRuntimePreview', 'Delphine Runtime Preview', vscode.ViewColumn.Beside, {
                 enableScripts: true
         });
 
-        panel.onDidDispose(() => {
-                activeRuntimePreviewUri = undefined;
-        });
+        let refreshTimer: NodeJS.Timeout | undefined;
 
-        panel.webview.html = `<!DOCTYPE html>
+        function buildWebviewHtml(currentUrl: string): string {
+                return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
@@ -31,7 +33,8 @@ function createRuntimePreviewPanel(context: vscode.ExtensionContext, url: string
 <meta http-equiv="Content-Security-Policy"
 content="default-src 'none';
          frame-src http://localhost:* http://127.0.0.1:*;
-         style-src 'unsafe-inline';">
+         style-src 'unsafe-inline';
+         script-src 'unsafe-inline';">
 
 <style>
 html, body {
@@ -51,9 +54,115 @@ iframe {
 </head>
 
 <body>
-<iframe src="${url}"></iframe>
+<iframe id="runtime-preview-frame" src="${currentUrl}"></iframe>
+
+<script>
+
+(function () {
+
+        window.addEventListener('message', (event) => {
+
+                const msg = event.data;
+
+                if (!msg) {
+
+                        return;
+
+                }
+
+                const frame = document.getElementById('runtime-preview-frame');
+
+                if (!(frame instanceof HTMLIFrameElement) || !frame.contentWindow) {
+
+                        return;
+
+                }
+
+                if (msg.type === 'runtimePreview:doc:update') {
+
+                        frame.contentWindow.postMessage(
+
+                                {
+
+                                        type: 'doc:update',
+
+                                        html: msg.html,
+
+                                        css: msg.css
+
+                                },
+
+                                '*'
+
+                        );
+
+                }
+
+        });
+
+})();
+
+</script>
 </body>
 </html>`;
+        }
+
+        panel.webview.html = buildWebviewHtml(url);
+
+        const docChangeDisposable = vscode.workspace.onDidChangeTextDocument((ev) => {
+                console.log('[Delphine] onDidChangeTextDocument (extension.ts)', ev.document.uri.toString());
+
+                if (ev.document.uri.toString() !== sourceUri.toString()) {
+                        return;
+                }
+
+                if (refreshTimer) {
+                        clearTimeout(refreshTimer);
+                }
+
+                refreshTimer = setTimeout(() => {
+                        refreshTimer = undefined;
+
+                        console.log('[Delphine] runtime preview refresh for', sourceUri.toString());
+
+                        const fullText = ev.document.getText();
+                        const parts = parseDformSource(fullText);
+
+                        panel.webview.postMessage({
+                                type: 'runtimePreview:doc:update',
+                                html: parts.template ?? '',
+                                css: parts.style ?? ''
+                        });
+                }, 250);
+        });
+
+        panel.onDidDispose(() => {
+                activeRuntimePreviewUri = undefined;
+
+                if (refreshTimer) {
+                        clearTimeout(refreshTimer);
+                        refreshTimer = undefined;
+                }
+
+                saveDisposable.dispose();
+                docChangeDisposable.dispose();
+        });
+
+        const saveDisposable = vscode.workspace.onDidSaveTextDocument(async (doc) => {
+                if (doc.uri.toString() !== sourceUri.toString()) {
+                        return;
+                }
+
+                console.log('[Delphine] runtime preview refresh on save for', sourceUri.toString());
+
+                const loaded = await loadDoc(sourceUri);
+
+                panel.webview.postMessage({
+                        type: 'runtimePreview:doc:update',
+                        html: loaded?.template ?? '',
+                        css: loaded?.style ?? ''
+                });
+        });
 }
 
 export function activate(context: vscode.ExtensionContext): void {

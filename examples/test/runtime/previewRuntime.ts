@@ -7,6 +7,17 @@ const appName = params.get('app') ?? 'MainApp';
 if (!unitName) {
         throw new Error('Missing unit name');
 }
+
+type LoadedUnit = {
+        module: any;
+        html: string;
+        css: string;
+};
+
+let app: TApplication | undefined;
+let currentUnit: any;
+let currentLoadedUnit: LoadedUnit | undefined;
+
 function extractTemplateFromDform(source: string): string {
         const match = source.match(/<template[^>]*>([\s\S]*?)<\/template>/i);
         return match ? (match[1] ?? '') : '';
@@ -16,6 +27,7 @@ function extractStyleFromDform(source: string): string {
         const match = source.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
         return match ? (match[1] ?? '') : '';
 }
+
 function applyPreviewStyle(unitName: string, cssText: string): void {
         const styleId = `delphine-preview-style-${unitName}`;
 
@@ -29,24 +41,18 @@ function applyPreviewStyle(unitName: string, cssText: string): void {
         styleEl.textContent = cssText;
 }
 
-async function tryLoadUnit(unitName: string): Promise<{
-        module: any;
-        html: string;
-        css: string;
-        kind: 'form' | 'frame';
-}> {
-        const candidateBasePaths: Array<{
-                basePath: string;
-                kind: 'form' | 'frame';
-        }> = [
-                { basePath: `/src/forms/${unitName}`, kind: 'form' },
-                { basePath: `/src/frames/${unitName}`, kind: 'frame' }
-        ];
+function clearPreviewDom(): void {
+        document.querySelectorAll('[data-delphine-form-host]').forEach((el) => {
+                el.remove();
+        });
+}
+
+async function tryLoadUnit(unitName: string): Promise<LoadedUnit> {
+        const candidateBasePaths = [`/src/forms/${unitName}`, `/src/frames/${unitName}`];
 
         let lastError: unknown;
 
-        for (const candidate of candidateBasePaths) {
-                const { basePath, kind } = candidate;
+        for (const basePath of candidateBasePaths) {
                 try {
                         const module = await import(/* @vite-ignore */ `${basePath}.ts`);
 
@@ -60,7 +66,7 @@ async function tryLoadUnit(unitName: string): Promise<{
                         const html = extractTemplateFromDform(dformText);
                         const css = extractStyleFromDform(dformText);
 
-                        return { module, html, css, kind };
+                        return { module, html, css };
                 } catch (error) {
                         lastError = error;
                 }
@@ -69,36 +75,116 @@ async function tryLoadUnit(unitName: string): Promise<{
         throw lastError ?? new Error(`Unable to load unit ${unitName}`);
 }
 
-async function main(): Promise<void> {
-        const app = new TApplication(appName, { mainForm: unitName! });
-
-        const { module, html, css, kind } = await tryLoadUnit(unitName!);
-
-        const UnitClass = module.default ?? module[unitName!];
-        if (!UnitClass) {
-                throw new Error(`Unable to resolve class ${unitName!}`);
+function mountUnitRoot(host: HTMLElement, unit: any): void {
+        if (unit?.elem instanceof HTMLElement) {
+                if (unit.elem.parentElement !== host) {
+                        host.appendChild(unit.elem);
+                }
         }
+}
 
-        applyPreviewStyle(unitName!, css);
-
-        const unit = new UnitClass(unitName);
-        unit.create(html);
-
-        if (kind === 'form') {
-                app.mainForm = unit;
-                unit.show();
+function disposeCurrentUnit(): void {
+        if (!currentUnit) {
                 return;
         }
 
-        document.body.innerHTML = '';
-
-        const frameRoot = unit.elem as HTMLElement | undefined;
-        if (!frameRoot) {
-                throw new Error(`Preview frame ${unitName!} has no root element`);
+        try {
+                if (typeof currentUnit.hide === 'function') {
+                        currentUnit.hide();
+                }
+        } catch (e) {
+                console.warn('[previewRuntime] hide() failed:', e);
         }
 
-        frameRoot.hidden = false;
-        document.body.appendChild(frameRoot);
+        try {
+                if (typeof currentUnit.destroy === 'function') {
+                        currentUnit.destroy();
+                }
+        } catch (e) {
+                console.warn('[previewRuntime] destroy() failed:', e);
+        }
+
+        currentUnit = undefined;
+}
+function renderLoadedUnit(loaded: LoadedUnit): void {
+        clearPreviewDom();
+
+        disposeCurrentUnit();
+
+        if (app?.mainForm) {
+                try {
+                        app.mainForm.destroy?.();
+                } catch {}
+        }
+
+        app = new TApplication(appName, { mainForm: unitName });
+
+        const UnitClass = loaded.module.default ?? loaded.module[unitName];
+        const unit = new UnitClass(unitName);
+
+        unit.create(loaded.html);
+        app.mainForm = unit;
+        unit.show();
+
+        currentUnit = unit;
+        currentLoadedUnit = loaded;
+
+        applyPreviewStyle(unitName, loaded.css);
+
+        requestAnimationFrame(() => {
+                document.body.offsetHeight;
+        });
+}
+
+function installLiveUpdateListener(): void {
+        window.addEventListener('message', (event) => {
+                const msg = event.data;
+                console.log('[previewRuntime] message received raw =', msg);
+
+                if (!msg || msg.type !== 'doc:update') {
+                        return;
+                }
+
+                console.log('[previewRuntime] doc:update received', {
+                        htmlLength: msg.html?.length ?? 0,
+                        cssLength: msg.css?.length ?? 0,
+                        hasCurrentLoadedUnit: !!currentLoadedUnit,
+                        hasApp: !!app,
+                        hasCurrentUnit: !!currentUnit
+                });
+
+                if (typeof msg.html !== 'string' || typeof msg.css !== 'string') {
+                        console.warn('[previewRuntime] invalid doc:update payload', msg);
+                        return;
+                }
+
+                if (!currentLoadedUnit) {
+                        console.warn('[previewRuntime] doc:update ignored: currentLoadedUnit is undefined');
+                        return;
+                }
+
+                const updated: LoadedUnit = {
+                        ...currentLoadedUnit,
+                        html: msg.html,
+                        css: msg.css
+                };
+
+                console.log('[previewRuntime] before renderLoadedUnit(updated)');
+
+                try {
+                        renderLoadedUnit(updated);
+                        console.log('[previewRuntime] after renderLoadedUnit(updated)');
+                } catch (e) {
+                        console.error('[previewRuntime] doc:update render failed:', e);
+                }
+        });
+}
+
+async function main(): Promise<void> {
+        installLiveUpdateListener();
+
+        const loaded = await tryLoadUnit(unitName);
+        renderLoadedUnit(loaded);
 }
 
 void main().catch((e) => {

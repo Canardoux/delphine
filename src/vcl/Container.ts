@@ -22,7 +22,7 @@
 import type { IForm } from './IForm';
 import type { TMetaclass } from './Oops';
 import { TControl, TMetaControl } from './Control';
-import type { PropSpec, PropKind } from './Component';
+import type { PropSpec } from './IComponent';
 
 // This clas does not do anything except overrides allowsChildren()
 export class TContainer extends TControl {

@@ -25,7 +25,7 @@ import { TMetaclass, TObject, TMetaObject } from './Oops';
 import type { IForm } from './IForm';
 import type { IControl, IMetaControl } from './IControl';
 import { TComponent, TMetaComponent } from './Component';
-import type { PropSpec } from './Component';
+import type { PropSpec } from './IComponent';
 import { findMethod, dumpObject } from './Oops';
 
 export class TColor {

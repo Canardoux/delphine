@@ -31,6 +31,9 @@ export abstract class TMetaclass {
                 this.superClass = superClass;
                 this.typeName = typeName;
         }
+        getPropSpecs(): any[] {
+                return [];
+        }
 }
 
 export class TObject {

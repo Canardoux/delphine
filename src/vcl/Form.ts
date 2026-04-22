@@ -20,7 +20,7 @@
 
 import { TComponent } from './Component';
 import { TMetaContainer, TContainer } from './Container';
-import type { PropSpec, TMetaComponent } from './Component';
+import type { PropSpec } from './IComponent';
 import type { IForm } from './IForm';
 import type { IMetaControl, IControl } from './IControl';
 import { getApplication } from './IApplication';

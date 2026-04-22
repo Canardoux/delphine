@@ -4,7 +4,21 @@ import path from 'node:path';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
-        plugins: [vue(), svelte()],
+        plugins: [
+                vue(),
+                svelte(),
+                {
+                        name: 'dform-reload',
+
+                        handleHotUpdate({ file, server }) {
+                                if (file.endsWith('.dform')) {
+                                        console.log('[vite] dform changed → full reload');
+
+                                        server.ws.send({ type: 'full-reload' });
+                                }
+                        }
+                }
+        ],
 
         resolve: {
                 alias: {

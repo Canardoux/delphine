@@ -24,15 +24,7 @@ import { TMetaclass, TObject, TMetaObject } from './Oops';
 import type { IForm } from './IForm';
 //import type { IControl, IMetaControl } from './IControl';
 //import { TControl } from './Base';
-import type { IComponent, IMetaComponent, ComponentSchema, PropSchema } from './IComponent';
-
-export type PropSpec<T, V = unknown> = {
-        name: string;
-        kind: PropKind;
-        default: unknown;
-        retrieve: (obj: T) => V;
-        apply: (obj: T, value: V) => void;
-};
+import type { IComponent, IMetaComponent, ComponentSchema, PropSchema, TGrapesPropBinding, PropSpec } from './IComponent';
 
 export type ComponentProps = Record<string, unknown>;
 export type PropKind = 'string' | 'number' | 'boolean' | 'color' | 'handler';
@@ -113,6 +105,15 @@ export class TMetaComponent extends TMetaObject {
                         //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
                         //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
                 ];
+        }
+
+        getPropSpecs(): PropSpec<any>[] {
+                const inherited = this.superClass?.getPropSpecs?.() ?? [];
+                //let inherited: PropSpec<any>[] = [];
+
+                const own = this.defProps() ?? [];
+
+                return [...inherited, ...own];
         }
 
         propSpecsToSchemaProps(): PropSchema {

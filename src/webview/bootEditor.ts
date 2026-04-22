@@ -1,4 +1,3 @@
-import grapesjs from 'grapesjs';
 import { TTypeRegistry } from '../vcl/TypeRegistry.js';
 import { registerBuiltins } from '../vcl/RegisterVcl.js';
 import { registerDelphineComponentsFromRegistry } from './delphineGrapesBridge.js';
@@ -101,7 +100,10 @@ function normalizeCssDeclarationBlock(block: string): string {
                         }
 
                         const property = part.slice(0, colonIndex).trim().toLowerCase();
-                        const value = part.slice(colonIndex + 1).trim().replace(/\s+/g, ' ');
+                        const value = part
+                                .slice(colonIndex + 1)
+                                .trim()
+                                .replace(/\s+/g, ' ');
                         return `${property}: ${value}`;
                 })
                 .join('; ');
@@ -211,6 +213,9 @@ function postContentChanged(editor: any) {
         const html = normalizeEditorHtml(rawHtml);
         const css = normalizeEditorCss(editor.getCss());
 
+        console.log(`[boot ${bootInstanceId}] postContentChanged html.length=${html.length} css.length=${css.length}`);
+        console.log(`[boot ${bootInstanceId}] sameHtml=${html === lastSentHtml} sameCss=${css === lastSentCss}`);
+
         if (html === lastSentHtml && css === lastSentCss) {
                 return;
         }
@@ -265,7 +270,50 @@ function grapesJSEditor(grapes: any): void {
                 });
         }
 
+        function getSelectedComponentKey(editor: any): { id?: string; name?: string } | null {
+                const selected = editor.getSelected?.();
+                if (!selected) {
+                        return null;
+                }
+
+                const attrs = selected.getAttributes?.() ?? {};
+                const id = attrs.id;
+                const name = attrs['data-delphine-name'];
+
+                if (!id && !name) {
+                        return null;
+                }
+
+                return { id, name };
+        }
+
+        function findComponentByKey(editor: any, key: { id?: string; name?: string } | null): any | null {
+                if (!key) {
+                        return null;
+                }
+
+                const wrapper = editor.getWrapper?.();
+                if (!wrapper) {
+                        return null;
+                }
+
+                const all = wrapper.find?.('*') ?? [];
+                for (const comp of all) {
+                        const attrs = comp.getAttributes?.() ?? {};
+                        if (key.name && attrs['data-delphine-name'] === key.name) {
+                                return comp;
+                        }
+                        if (key.id && attrs.id === key.id) {
+                                return comp;
+                        }
+                }
+
+                return null;
+        }
+
         function loadDocument(html: string, css: string): void {
+                const selectedKey = getSelectedComponentKey(editor);
+
                 beginRemoteApply();
 
                 try {
@@ -276,8 +324,15 @@ function grapesJSEditor(grapes: any): void {
                         editor.setStyle(css || '');
                         applyDelphineBodyTraits();
 
-                        lastSentHtml = normalizeEditorHtml(html || '');
-                        lastSentCss = normalizeEditorCss(css || '');
+                        lastSentHtml = html || '';
+                        lastSentCss = css || '';
+
+                        const restoredSelection = findComponentByKey(editor, selectedKey);
+                        if (restoredSelection) {
+                                editor.select(restoredSelection);
+                        } else {
+                                editor.select(null);
+                        }
 
                         console.log(`[boot ${bootInstanceId}] doc updated from VSCode, html length = ${html.length}, css length = ${css.length}`);
                 } finally {
@@ -286,7 +341,6 @@ function grapesJSEditor(grapes: any): void {
                         });
                 }
         }
-
         messageHandler = async (payload: DelphineInboundMessage) => {
                 switch (payload.type) {
                         case 'doc:update': {

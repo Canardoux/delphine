@@ -24,6 +24,39 @@ import type { IControl } from './IControl';
 import type { PropKind } from './Component';
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
+export type TGrapesTraitType = 'text' | 'checkbox' | 'number' | 'select';
+export type TGrapesPropBinding = {
+        traitType?: TGrapesTraitType;
+
+        label?: string;
+
+        /**
+
+         * Convert the Delphine prop value into a GrapesJS trait value.
+
+         */
+
+        toTraitValue?: (value: unknown) => unknown;
+
+        /**
+
+         * Apply the trait value to the GrapesJS component model / DOM.
+
+         * This is editor-side only.
+
+         */
+
+        applyToModel?: (model: any, value: unknown) => void;
+};
+
+export type PropSpec<T, V = unknown> = {
+        name: string;
+        kind: PropKind;
+        default: unknown;
+        retrieve: (obj: T) => V;
+        apply: (obj: T, value: V) => void;
+        grapes?: TGrapesPropBinding;
+};
 
 export interface IComponent {
         isAForm(): boolean;
@@ -36,6 +69,8 @@ export interface IMetaComponent {
         isAForm(): boolean;
         isACompositeControl(): boolean;
         getSchema(): ComponentSchema;
+        getPropSpecs?(): PropSpec<any>[];
+        defProps(): PropSpec<any>[];
 }
 
 export type PropSchema = Record<

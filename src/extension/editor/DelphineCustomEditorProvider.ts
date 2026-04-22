@@ -42,7 +42,10 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
         ): Promise<boolean> {
                 console.log('[Delphine/ext] replacing full document with =');
                 console.log(html);
-                if (html === document.getText()) return false; // ✅ évite de salir le doc pour rien
+                if (html === document.getText()) {
+                        console.log('[Delphine/ext] skipped applyEdit because document text is identical');
+                        return false;
+                } // ✅ évite de salir le doc pour rien
                 this.isApplyingFromWebview = true;
 
                 try {
@@ -52,6 +55,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                         edit.replace(document.uri, fullRange, html);
 
                         const ok = await vscode.workspace.applyEdit(edit);
+                        console.log(`[Delphine/ext] applyEdit ok=${ok}`);
                         return ok;
                 } finally {
                         // Release on next tick to avoid races with onDidChangeTextDocument handlers
@@ -79,6 +83,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                                         return;
 
                                 case 'contentChanged':
+                                        console.log(`[Delphine/ext] contentChanged received rev=${msg.rev} html.length=${(msg.html ?? '').length} css.length=${(msg.css ?? '').length}`);
                                         if (msg.rev && msg.rev <= lastRev) return;
                                         lastRev = msg.rev ?? lastRev + 1;
 
@@ -151,6 +156,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 };
 
                 const changeSubscription = vscode.workspace.onDidChangeTextDocument((e) => {
+                        console.log('[Delphine] onDidChangeTextDocument (DelphineCustomEditor.ts) ', e.document.uri.toString());
                         if (e.document.uri.toString() !== document.uri.toString()) {
                                 return;
                         }

@@ -7,7 +7,7 @@ import { TFrame, TMetaFrame } from '@vcl/Frame';
 //import type { IForm } from '@vcl/IForm';
 import { TForm } from '@vcl/Form';
 import { TButton, TControl } from '@vcl';
-import type { PropSpec } from '@vcl/Component';
+import type { PropSpec } from '@vcl/IComponent';
 //import dformSource from './HelloFrame.dform?raw';
 //import dformSource from './HelloFrame.dform?raw';
 

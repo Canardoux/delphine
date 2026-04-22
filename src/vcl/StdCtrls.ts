@@ -20,7 +20,7 @@
 
 import { TControl, TMetaControl } from './Control';
 import { TMetaContainer, TContainer } from './Container';
-import type { PropSpec } from './Component';
+import type { PropSpec } from './IComponent';
 import type { ComponentSchema } from './IComponent';
 import type { IForm } from './IForm';
 import type { IControl } from './IControl';
@@ -98,10 +98,19 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
                                 name: 'caption',
                                 kind: 'string',
                                 default: 'Caption',
-                                retrieve: (o) => {
+                                retrieve: (o: T) => {
                                         return o.caption;
                                 },
-                                apply: (o, v) => (o.caption = String(v))
+                                apply: (o, v) => (o.caption = String(v)),
+                                grapes: {
+                                        traitType: 'text',
+
+                                        label: 'Caption',
+
+                                        applyToModel: (model: any, value) => {
+                                                model.components(String(value ?? 'GLOUPS'));
+                                        }
+                                }
                         },
                         {
                                 name: 'enabled',
@@ -110,7 +119,26 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
                                 retrieve: (o) => {
                                         return o.enabled;
                                 },
-                                apply: (o, v) => (o.enabled = Boolean(v))
+                                apply: (o, v) => (o.enabled = Boolean(v)),
+
+                                grapes: {
+                                        traitType: 'checkbox',
+
+                                        label: 'Enabled',
+
+                                        applyToModel: (model, value) => {
+                                                /*
+                                                const attrs = { ...(model.getAttributes?.() ?? {}) };
+
+                                                if (Boolean(value)) {
+                                                        delete attrs.disabled;
+                                                } else {
+                                                        attrs.disabled = 'disabled';
+                                                }
+                                                model.setAttributes(attrs);
+                                                */
+                                        }
+                                }
                         }
                 ];
         }

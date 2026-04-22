@@ -1,5 +1,6 @@
 import type { UnknownRecord } from './Oops';
-import type { PropSpec, PropKind } from './Component';
+import type { PropKind } from './Component';
+import type { PropSpec } from './IComponent';
 
 import type { IForm } from './IForm';
 import { getApplication } from './IApplication';

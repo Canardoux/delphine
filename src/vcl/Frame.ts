@@ -22,7 +22,7 @@
 import { TControl, THandler } from './Control';
 import { TComponent } from './Component';
 import { TMetaContainer, TContainer } from './Container';
-import type { PropSpec, TMetaComponent } from './Component';
+import type { PropSpec } from './IComponent';
 import { TComponentRegistry } from './ComponentRegistry';
 import { TTypeRegistry } from './TypeRegistry';
 import type { IForm } from './IForm';
