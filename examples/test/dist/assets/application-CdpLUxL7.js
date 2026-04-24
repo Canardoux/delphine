@@ -1,1 +1,0 @@
-import{T as i}from"./Application-orTEwwl0.js";class r extends i{async initialize(){debugger;super.initialize(),this.mainForm=await this.createFormByName("MainForm"),this.riri=await this.createFormByName("Riri")}run(){this.mainForm.show()}}export{r as default};

@@ -329,30 +329,26 @@ export class TApplication implements IApplication {
                 this.mainForm?.show();
         }
 
-        // By default, we create a TForm for every Forms declared in app.json.
-        // This method can be overriden in a user TApplication
-        async initialize(): Promise<void> {
-                debugger;
+        async registerRuntimeTypes() {
                 const frames = this.appConfig.frames ?? [];
                 for (const frame of frames) {
                         const loaded = await this.loadDformUnit(`/src/frames`, frame.className);
                         this.registerLoadedUnit(frame.tagName, loaded);
                         this.typeRegistry?.register(loaded.metaclass as TMetaControl);
                 }
+        }
+        async createAutoForms() {
                 const formNames = this.appConfig.forms ?? [];
 
                 for (const formName of formNames) {
                         const form = await this.createFormByName(formName);
                         //this.registerForm(form);
                 }
-
-                if (this.appConfig.mainForm) {
-                        const main = this.getFormByName(this.appConfig.mainForm);
-                        if (main) {
-                                this.mainForm = main;
-                        }
-                }
         }
+
+        // By default, we create a TForm for every Forms declared in app.json.
+        // This method can be overriden in a user TApplication
+        async initialize(): Promise<void> {}
 
         /*
         protected autoStart(): void {

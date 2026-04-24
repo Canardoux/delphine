@@ -11,6 +11,53 @@ export function registerDelphineComponentsFromRegistry(editor: Editor, typeRegis
                 registerComponentType(editor, meta, schema);
                 registerBlock(editor, schema);
         }
+
+        customizeOptionsPanel(editor);
+}
+
+function customizeOptionsPanel(editor: Editor): void {
+        // Remove buttons we do not want
+        editor.Panels.removeButton('options', 'fullscreen');
+
+        // Replace default preview/view-code if present
+        editor.Panels.removeButton('options', 'preview');
+        editor.Panels.removeButton('options', 'export-template');
+
+        // Add our own buttons
+        editor.Panels.addButton('options', [
+                {
+                        id: 'delphine-save',
+                        label: '💾',
+                        command: 'delphine:save',
+                        attributes: { title: 'Save (Ctrl+S)' }
+                },
+
+                {
+                        id: 'delphine-preview',
+                        label: '👁',
+                        command: 'delphine:preview',
+                        attributes: { title: 'Open Delphine Preview' }
+                },
+
+                {
+                        id: 'delphine-view-source',
+                        label: '&lt;/&gt;',
+                        command: 'delphine:view-source',
+                        attributes: { title: 'Open MainForm.dform source' }
+                },
+                {
+                        id: 'undo',
+                        className: 'fa fa-undo',
+                        command: 'core:undo',
+                        attributes: { title: 'Undo (Ctrl+Z)' }
+                },
+                {
+                        id: 'redo',
+                        className: 'fa fa-repeat',
+                        command: 'core:redo',
+                        attributes: { title: 'Redo (Ctrl+Shift+Z)' }
+                }
+        ]);
 }
 
 function buildTraitsFromSchema(schema: ComponentSchema) {

@@ -74,6 +74,21 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                         console.log('[Delphine/ext] message reçu =', msg);
                         console.log(`[VSCode] ${msg.type} <- from bootEditor`);
                         switch (msg.type) {
+                                case 'delphine:save':
+                                        await document.save();
+
+                                        return;
+
+                                case 'delphine:preview':
+                                        await vscode.commands.executeCommand('delphine.preview', document.uri);
+
+                                        return;
+
+                                case 'delphine:view-source':
+                                        await vscode.commands.executeCommand('delphine.openSource', document.uri);
+
+                                        return;
+
                                 case 'alert':
                                         vscode.window.showErrorMessage(msg.text);
                                         return;

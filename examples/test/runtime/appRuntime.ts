@@ -28,6 +28,8 @@ async function main(): Promise<void> {
                 app = new TApplication(appName, appConfig);
         }
 
+        await app.registerRuntimeTypes();
+        await app.createAutoForms();
         await app.initialize();
         app.start();
 }

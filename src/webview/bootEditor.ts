@@ -140,6 +140,21 @@ function normalizeEditorCss(rawCss: string): string {
         return normalizedRules.join('\n');
 }
 
+function installKeyboardShortcuts(): void {
+        window.addEventListener('keydown', (event) => {
+                const isSave = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's';
+                if (!isSave) {
+                        return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                log('shortcut Ctrl/Cmd+S');
+                postToVsCode({ type: 'delphine:save' });
+        });
+}
+
 function installDirectHostReceiver(): void {
         const w = window as DelphineWindow;
 
@@ -233,12 +248,37 @@ function postContentChanged(editor: any) {
         });
 }
 
+function registerDelphineCommands(editor: any): void {
+        editor.Commands.add('delphine:save', {
+                run() {
+                        log('command delphine:save');
+                        postToVsCode({ type: 'delphine:save' });
+                }
+        });
+
+        editor.Commands.add('delphine:preview', {
+                run() {
+                        log('command delphine:preview');
+                        postToVsCode({ type: 'delphine:preview' });
+                }
+        });
+
+        editor.Commands.add('delphine:view-source', {
+                run() {
+                        log('command delphine:view-source');
+                        postToVsCode({ type: 'delphine:view-source' });
+                }
+        });
+}
+
 function grapesJSEditor(grapes: any): void {
         const editor = grapes.init({
                 container: '#gjs',
                 height: '100vh',
                 storageManager: false
         });
+
+        registerDelphineCommands(editor);
 
         let dirtyTimer: number | undefined;
 
@@ -321,6 +361,15 @@ function grapesJSEditor(grapes: any): void {
                         editor.CssComposer.clear();
 
                         editor.setComponents(html || '');
+
+                        editor.UndoManager.stop();
+
+                        editor.setComponents(html);
+                        editor.setStyle(css);
+
+                        editor.UndoManager.start();
+                        editor.UndoManager.clear();
+
                         editor.setStyle(css || '');
                         applyDelphineBodyTraits();
 
@@ -387,6 +436,7 @@ async function main(): Promise<void> {
                 log('GrapesJS ready');
                 log('bootEditor:ready -> VSCode');
                 installDirectHostReceiver();
+                installKeyboardShortcuts();
                 postToVsCode({ type: 'bootEditor:ready' });
         } catch (e) {
                 console.error(`[boot ${bootInstanceId}] FAIL`, e);

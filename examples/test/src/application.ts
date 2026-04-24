@@ -4,15 +4,14 @@ import { TApplication } from '@vcl';
 import { MetaHelloFrame } from './frames/HelloFrame';
 
 export default class Application extends TApplication {
-        public riri!: RiriForm;
+        //public riri!: RiriForm;
 
         override async initialize(): Promise<void> {
                 debugger;
-                super.initialize();
-                // Done from app.json // this.typeRegistry?.register(MetaHelloFrame.metaclass);
-                this.mainForm = (await this.createFormByName('MainForm')) as MainForm;
-                this.riri = (await this.createFormByName('Riri')) as RiriForm;
         }
+        // Done from app.json // this.typeRegistry?.register(MetaHelloFrame.metaclass);
+        //this.mainForm = (await this.createFormByName('MainForm')) as MainForm;
+        //this.riri = (await this.createFormByName('Riri')) as RiriForm;
 
         override run(): void {
                 this.mainForm!.show();

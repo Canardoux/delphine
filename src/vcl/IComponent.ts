@@ -115,4 +115,7 @@ export type ComponentSchema = {
         defaultHtml?: string;
         allowedChildren?: boolean;
         isContainer?: boolean;
+        removable?: boolean;
+        draggable?: boolean;
+        copyable?: boolean;
 };

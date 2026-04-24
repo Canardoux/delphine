@@ -29,7 +29,6 @@
         color: rgb(255, 0, 0);
         width: 180px;
         height: 100px;
-        background-color: rgb(188, 216, 184);
 }
 
 #iqo9k {
@@ -42,14 +41,14 @@
 }
 
 #MainForm {
-        background-color: rgb(164, 159, 191);
+        background-color: rgb(207, 196, 196);
 }
 
 #mypanel {
         color: rgb(1, 1, 1);
         background-color: rgb(222, 232, 18);
-        width: 565px;
-        height: 128px;
+        width: 360px;
+        height: 146px;
 }
 
 body {
@@ -89,7 +88,7 @@ body {
                         data-delphine-checked="true"
                         data-delphine-caption="VraimentJe suis d'accord"
                 />
-                <label for="scales" id="ie8v">Écailles!</label>
+                <label for="scales">Écailles</label>
         </div>
         <div id="itf51">
                 <input
@@ -101,32 +100,29 @@ body {
                         data-delphine-checked="false"
                         data-delphine-caption="Vraiment!"
                 />
-                <label for="horns" id="iexc5">Cornes@</label>
+                <label for="horns">Cornes</label>
         </div>
         <div data-delphine-component="TPanel" id="mypanel1" data-delphine-name="myPanel1">
                 <button
                         data-delphine-component="TButton"
-                        data-delphine-caption=""
-                        data-delphine-enabled="false"
                         id="button-a"
+                        data-delphine-caption="Riri"
                         data-delphine-name="button-a"
                         data-delphine-onclick="buttona_onclick"
-                ></button>
-                <button
+                >
+                        Riri
+                </button><button
                         data-delphine-component="TButton"
-                        data-delphine-caption="@PUSH RIRI!!@!"
-                        data-delphine-enabled="true"
                         id="button-b"
+                        data-delphine-caption="push Riri"
                         data-delphine-name="button-b"
                         data-delphine-onclick="buttonb_onclick"
                 >
-                        @PUSH RIRI!!@!
+                        push Riri
                 </button>
         </div>
         <button
                 data-delphine-component="TButton"
-                data-delphine-caption=""
-                data-delphine-enabled="false"
                 id="button1"
                 data-delphine-name="button1"
                 data-delphine-props='{
@@ -135,17 +131,22 @@ body {
             "caption": "Delphine button1 caption",
             "name": "button1"
           }'
-                disabled="disabled"
-        ></button>
+                data-delphine-caption="Button Caption"
+        >
+                Button Caption
+        </button>
         <button
                 data-delphine-component="TButton"
-                data-delphine-caption=""
-                data-delphine-enabled="false"
                 id="buttonx"
+                data-delphine-caption="Delphine buttonx caption"
                 data-delphine-name="buttonx"
-                disabled="disabled"
-        ></button>
-        <h1 id="igfu">Mon titreABCDEFGHIJKMN</h1>
+        >
+                Delphine buttonx caption
+        </button>
+        <h1 id="igfu">
+                Mon titreABC
+                <br />
+        </h1>
         <div
                 data-delphine-component="THostFrame"
                 id="myframeplugin"
@@ -154,7 +155,6 @@ body {
                 data-delphine-props='{
             "message": "Hello depuis Delphine",
             "count": 3,
-            "enabled": true
           }'
                 data-delphine-frame="hello-frame"
                 data-delphine-onframeevent="myframe_onFrameEvent"
@@ -164,30 +164,28 @@ body {
         <div data-delphine-component="TPanel" id="mypanel" data-delphine-name="myPanel">
                 <button
                         data-delphine-component="TButton"
-                        data-delphine-caption=""
-                        data-delphine-enabled="false"
+                        data-delphine-caption="sub-button1"
                         data-delphine-name="sub-button1"
                         data-delphine-onclick="subButton1_onclick"
                         id="igqcr"
-                        disabled="disabled"
-                ></button>
+                >
+                        sub-button1
+                </button>
                 <button
                         data-delphine-component="TButton"
-                        data-delphine-caption=""
-                        data-delphine-enabled="false"
                         data-delphine-name="button"
                         id="iqo9k"
-                        disabled="disabled"
+                        data-delphine-caption=""
                 ></button>
                 <button
                         data-delphine-component="TButton"
-                        data-delphine-caption=""
-                        data-delphine-enabled="false"
+                        data-delphine-caption="sub-button2"
                         data-delphine-name="sub-button2"
                         data-delphine-onclick="subButton1_onclick"
                         id="i8hlw"
-                        disabled="disabled"
-                ></button>
+                >
+                        sub-button2
+                </button>
         </div>
 </div>
 </template>
