@@ -85,6 +85,37 @@ function buildTraitsFromSchema(schema: ComponentSchema) {
         return traits;
 }
 
+function readPropFromAttrs(attrs: Record<string, any>, spec: PropSpec<any>): unknown {
+        const attrName = `data-delphine-${spec.name}`;
+        const raw = attrs[attrName];
+
+        switch (spec.kind) {
+                case 'boolean': {
+                        if (raw === undefined || raw === null || raw === '') {
+                                return spec.default ?? false;
+                        }
+
+                        return raw === true || raw === 'true' || raw === '1' || raw === 'on' || raw === 'yes';
+                }
+
+                case 'number': {
+                        if (raw === undefined || raw === null || raw === '') {
+                                return spec.default;
+                        }
+
+                        return Number(raw);
+                }
+
+                default: {
+                        if (raw === undefined || raw === null) {
+                                return spec.default;
+                        }
+
+                        return raw;
+                }
+        }
+}
+
 function registerComponentType(editor: Editor, meta: IMetaComponent, schema: ComponentSchema): void {
         const typeId = `delphine-${schema.name}`;
         const propSpecs = meta.getPropSpecs?.() ?? [];
@@ -120,31 +151,13 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
                                 const attrs = model.getAttributes?.() ?? {};
 
                                 // 1) Hydrate model props from DOM attributes
+                                // 1) Hydrate model props from DOM attributes or defaults
                                 for (const spec of propSpecs) {
-                                        const attrName = `data-delphine-${spec.name}`;
-                                        const raw = attrs[attrName];
+                                        const value = readPropFromAttrs(attrs, spec);
 
-                                        if (raw === undefined) {
-                                                continue;
+                                        if (value !== undefined) {
+                                                model.set(spec.name, value, { silent: true });
                                         }
-
-                                        let value: unknown = raw;
-
-                                        switch (spec.kind) {
-                                                case 'boolean':
-                                                        value = raw !== 'false' && raw !== '0' && raw !== '' && raw !== false;
-                                                        break;
-
-                                                case 'number':
-                                                        value = Number(raw);
-                                                        break;
-
-                                                default:
-                                                        value = raw;
-                                                        break;
-                                        }
-
-                                        model.set(spec.name, value, { silent: true });
                                 }
 
                                 // 2) Listen trait/model changes
@@ -196,6 +209,7 @@ function registerBlock(editor: Editor, schema: ComponentSchema): void {
                 }
         });
 }
+/*
 
 function buildTraits(propSpecs: PropSpec<any>[]): any[] {
         const traits: any[] = [];
@@ -217,7 +231,9 @@ function buildTraits(propSpecs: PropSpec<any>[]): any[] {
 
         return traits;
 }
+        */
 
+/*
 function buildDefaultAttributes(schema: ComponentSchema, propSpecs: PropSpec<any>[]): Record<string, string> {
         const attrs: Record<string, string> = {
                 'data-delphine-component': schema.name
@@ -232,6 +248,7 @@ function buildDefaultAttributes(schema: ComponentSchema, propSpecs: PropSpec<any
 
         return attrs;
 }
+        */
 
 function mapPropKindToTraitType(kind: PropSpec<any>['kind']): string {
         switch (kind) {
@@ -246,10 +263,11 @@ function mapPropKindToTraitType(kind: PropSpec<any>['kind']): string {
 
 function applyDefaultTraitToModel(model: any, spec: PropSpec<any>, value: unknown): void {
         if (spec.name === 'caption') {
-                model.components(String(value ?? ''));
+                model.components(String(value ?? 'Caption'));
                 return;
         }
 
+        /*
         if (spec.kind === 'boolean') {
                 const attrs = { ...(model.getAttributes?.() ?? {}) };
 
@@ -263,22 +281,28 @@ function applyDefaultTraitToModel(model: any, spec: PropSpec<any>, value: unknow
 
                 model.setAttributes(attrs);
         }
+                */
 }
 
 function syncModelValueToAttributes(model: any, spec: PropSpec<any>, value: unknown): void {
+        const attrName = `data-delphine-${spec.name}`;
         const attrs = { ...(model.getAttributes?.() ?? {}) };
-        attrs[`data-delphine-${spec.name}`] = stringifyPropValue(value);
+
+        if (spec.kind === 'boolean') {
+                const boolValue = value === true || value === 'true' || value === 1 || value === '1' || value === 'on' || value === 'yes';
+
+                const defaultValue = spec.default ?? false;
+
+                if (boolValue === defaultValue) {
+                        delete attrs[attrName];
+                } else {
+                        attrs[attrName] = String(boolValue);
+                }
+
+                model.setAttributes(attrs);
+                return;
+        }
+
+        attrs[attrName] = String(value ?? '');
         model.setAttributes(attrs);
-}
-
-function stringifyPropValue(value: unknown): string {
-        if (typeof value === 'boolean') {
-                return value ? 'true' : 'false';
-        }
-
-        if (value === null || value === undefined) {
-                return '';
-        }
-
-        return String(value);
 }

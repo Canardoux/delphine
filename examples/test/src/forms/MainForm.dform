@@ -76,7 +76,22 @@ body {
         data-delphine-onshown="onMyShown"
         data-delphine-onclick="mainForm_onclick"
 >
-        Hello from AutoRunDelphiMode : MainForm
+        <label
+                data-delphine-component="TCheckBox"
+                data-delphine-name="chk3"
+                data-delphine-checked="true"
+                data-delphine-caption="CheckBox without input"
+        >
+                zozo
+                <input type="checkbox" data-delphine-part="input" />
+                <span>Écailles</span>
+                Toto
+        </label>
+        <span data-delphine-component="TCheckBox" data-delphine-name="chk1">
+                <input type="checkbox" id="chk1-input" />
+                <label for="chk1-input" id="iq0oi">Caption</label>
+                TITI
+        </span>
         <div id="i7jm">
                 <input
                         type="checkbox"
@@ -102,7 +117,7 @@ body {
                 />
                 <label for="horns">Cornes</label>
         </div>
-        <div data-delphine-component="TPanel" id="mypanel1" data-delphine-name="myPanel1">
+        <div data-delphine-component="TPanel" id="mypanel1" data-delphine-name="myPanel1" data-delphine-onclick="">
                 <button
                         data-delphine-component="TButton"
                         id="button-a"
@@ -111,7 +126,8 @@ body {
                         data-delphine-onclick="buttona_onclick"
                 >
                         Riri
-                </button><button
+                </button>
+                <button
                         data-delphine-component="TButton"
                         id="button-b"
                         data-delphine-caption="push Riri"
@@ -119,6 +135,15 @@ body {
                         data-delphine-onclick="buttonb_onclick"
                 >
                         push Riri
+                </button>
+                <button
+                        data-delphine-component="TButton"
+                        data-delphine-name="button"
+                        data-delphine-onclick=""
+                        data-delphine-caption="Caption"
+                        id="iim1z"
+                >
+                        Caption
                 </button>
         </div>
         <button
@@ -132,6 +157,7 @@ body {
             "name": "button1"
           }'
                 data-delphine-caption="Button Caption"
+                data-delphine-onclick=""
         >
                 Button Caption
         </button>
@@ -140,6 +166,7 @@ body {
                 id="buttonx"
                 data-delphine-caption="Delphine buttonx caption"
                 data-delphine-name="buttonx"
+                data-delphine-onclick=""
         >
                 Delphine buttonx caption
         </button>
@@ -158,10 +185,11 @@ body {
           }'
                 data-delphine-frame="hello-frame"
                 data-delphine-onframeevent="myframe_onFrameEvent"
+                data-delphine-onclick=""
         >
                 MY-FRAME-PLUGIN
         </div>
-        <div data-delphine-component="TPanel" id="mypanel" data-delphine-name="myPanel">
+        <div data-delphine-component="TPanel" id="mypanel" data-delphine-name="myPanel" data-delphine-onclick="">
                 <button
                         data-delphine-component="TButton"
                         data-delphine-caption="sub-button1"
@@ -176,6 +204,7 @@ body {
                         data-delphine-name="button"
                         id="iqo9k"
                         data-delphine-caption=""
+                        data-delphine-onclick=""
                 ></button>
                 <button
                         data-delphine-component="TButton"

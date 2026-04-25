@@ -18,7 +18,7 @@ export class BuildComponentTree {
 
         static singeleton: BuildComponentTree = new BuildComponentTree();
 
-        private convert(raw: string, kind: PropKind) {
+        private convert(raw: string, kind: PropKind, defaultValue: unknown) {
                 if (typeof raw === 'string') {
                         switch (kind) {
                                 case 'string':
@@ -26,7 +26,10 @@ export class BuildComponentTree {
                                 case 'number':
                                         return Number(raw);
                                 case 'boolean':
-                                        return raw === 'true' || raw === '1' || raw === '';
+                                        if (raw === null || raw === '') {
+                                                return defaultValue ?? false;
+                                        }
+                                        return raw === 'true' || raw === '1' || raw === 'on' || raw === 'yes';
                                 case 'color':
                                         return new TColor(raw); // ou parse en TColor si vous avez
                                 case 'handler':
@@ -117,7 +120,7 @@ export class BuildComponentTree {
                         if (!spec) continue; // Not a declared prop -> ignore
                         const v: string = rawValue as string;
                         // Note: data-delphine-xxx gives strings; data-delphine-props can give any JSON type.
-                        const value = this.convert(v, spec.kind);
+                        const value = this.convert(v, spec.kind, spec.default);
 
                         //out[name] = value; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                         //comp.setHtmlProp(name, value); // for convenience, setHtmlProp can be used by the component itself to react to prop changes.
