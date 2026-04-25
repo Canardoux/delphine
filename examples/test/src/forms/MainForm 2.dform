@@ -79,16 +79,19 @@ body {
         <label
                 data-delphine-component="TCheckBox"
                 data-delphine-name="chk3"
+                data-delphine-checked="true"
                 data-delphine-caption="Riri"
-                data-delphine-onclick=""
-                checked="checked"
-                
         >
-                Ririx
+                zozo
                 <input type="checkbox" data-delphine-part="input" />
+                <span data-delphine-part="caption">Écailles</span>
                 Toto
-
         </label>
+        <span data-delphine-component="TCheckBox" data-delphine-name="chk1">
+                <input type="checkbox" data-delphine-part="input" id="chk1-input" />
+                <label for="chk1-input" data-delphine-part="caption" id="iq0oi">Caption</label>
+                TITI
+        </span>
         <div data-delphine-component="TPanel" id="mypanel1" data-delphine-name="myPanel1" data-delphine-onclick="">
                 <button
                         data-delphine-component="TButton"
@@ -119,17 +122,16 @@ body {
                 </label>
                 <button
                         data-delphine-component="TButton"
-                        data-delphine-name="buttonZ"
-                        id="xyz"
-                        data-delphine-onclick="label_onclick"
+                        data-delphine-name="button"
+                        data-delphine-onclick=""
                         data-delphine-caption="Caption"
                 >
                         Caption
                 </button>
                 <label
-                        data-delphine-component="Tlabel"
+                        data-delphine-component="TLAbel"
                         data-delphine-name="label"
-                        data-delphine-onclick="label_onclick"
+                        data-delphine-onclick=""
                         data-delphine-caption="Caption"
                         id="ipz0o"
                 >
@@ -146,17 +148,17 @@ body {
             "caption": "Delphine button1 caption",
             "name": "button1"
           }'
-                data-delphine-caption="Button1 Caption"
-                data-delphine-onclick="button1_onclick"
+                data-delphine-caption="Button Caption"
+                data-delphine-onclick=""
         >
-                Button1 Caption
+                Button Caption
         </button>
         <button
                 data-delphine-component="TButton"
                 id="buttonx"
                 data-delphine-caption="Delphine buttonx caption"
                 data-delphine-name="buttonx"
-                data-delphine-onclick="label_onclick"
+                data-delphine-onclick=""
         >
                 Delphine buttonx caption
         </button>

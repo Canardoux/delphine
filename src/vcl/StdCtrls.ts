@@ -25,6 +25,7 @@ import type { ComponentSchema } from './IComponent';
 import type { IForm } from './IForm';
 import type { IControl } from './IControl';
 import type { TMetaclass } from './Oops';
+import { TCompositeControl, TMetaCompositeControl } from './CompositeControl';
 //import { TForm } from './Form';
 
 export class TButton extends TControl {
@@ -164,26 +165,9 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
 // --------------------------------------
 
 export class TPanel extends TContainer {
-        //getMetaclass(): TMetaPanel {
-        //return TMetaPanel.metaclass;
-        //}
-
-        //protected get pprops(): PanelProps {
-        //return this.props as PanelProps;
-        //}
         constructor(name: string, form: IForm, parent: TControl) {
                 super(TMetaPanel.metaclass, name, form, parent);
         }
-
-        /*
-        syncDomFromProps() {
-                const el = this.htmlElement;
-                if (!el) return;
-
-                super.syncDomFromProps();
-        }
-                */
-        //toto = 12;
 }
 
 export class TMetaPanel extends TMetaContainer {
@@ -221,110 +205,313 @@ export class TMetaPanel extends TMetaContainer {
         }
 }
 
-/*
-export class TSimpleDCC extends TControl {
-        //getMetaclass() {
-        //return TMetaSimpleDCC.metaclass;
-        //}
+export class TLabel extends TControl {
+        htmlButton(): HTMLButtonElement {
+                return this.htmlElement! as HTMLButtonElement;
+        }
+
+        get caption(): string {
+                return (this.props.caption as string) ?? 'Caption';
+        }
+        set caption(caption: string) {
+                this.props.caption = caption;
+                const el = this.htmlElement;
+                if (!el) return;
+                el.textContent = this.caption;
+        }
+
+        get enabled(): boolean {
+                return (this.props.enabled as boolean) ?? true;
+        }
+        set enabled(enabled) {
+                this.props.enabled = enabled;
+                this.htmlButton().disabled = !enabled;
+        }
 
         constructor(name: string, form: IForm, parent: TControl) {
-                super(TMetaSimpleDCC.metaclass, name, form, parent);
+                super(TMetaLabel.metaclass, name, form, parent);
         }
-
-        / *
-        protected get dccprops(): SimpleDCCProps {
-                return this.props as SimpleDCCProps;
-        }
-                * /
 }
 
-export class TMetaSimpleDCC extends TMetaControl {
-        static readonly metaclass: TMetaSimpleDCC = new TMetaSimpleDCC(TMetaControl.metaclass, 'TSimpleDCC');
+export class TMetaLabel<T extends TLabel> extends TMetaControl {
+        static metaclass = new TMetaLabel(TMetaControl.metaclass, 'TLabel');
 
         protected constructor(superClass: TMetaControl, name: string) {
                 super(superClass, name);
-                // et vous changez juste le nom :
         }
-        //getMetaclass(): TMetaSimpleDCC {
-        //return TMetaSimpleDCC.metaclass;
-        //}
 
         create(name: string, form: IForm, parent: TControl) {
-                return new TSimpleDCC(name, form, parent);
+                return new TLabel(name, form, parent) as T;
         }
 
         defProps(): PropSpec<any>[] {
                 return [
-                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
-                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
+                        {
+                                name: 'caption',
+                                kind: 'string',
+                                default: 'Caption',
+                                retrieve: (o: T) => {
+                                        return o.caption;
+                                },
+                                apply: (o, v) => (o.caption = String(v)),
+                                grapes: {
+                                        traitType: 'text',
+                                        label: 'Caption',
+                                        applyToModel: (model: any, value) => {
+                                                model.components(String(value ?? 'GLOUPS'));
+                                        }
+                                }
+                        },
+                        {
+                                name: 'enabled',
+                                kind: 'boolean',
+                                default: true,
+                                retrieve: (o) => {
+                                        return o.enabled;
+                                },
+                                apply: (o, v) => (o.enabled = Boolean(v)),
+
+                                grapes: {
+                                        traitType: 'checkbox',
+                                        label: 'Enabled',
+                                        applyToModel: (model, value) => {
+                                                const attrs = { ...(model.getAttributes?.() ?? {}) };
+
+                                                if (Boolean(value)) {
+                                                        delete attrs.disabled;
+                                                } else {
+                                                        attrs.disabled = 'disabled';
+                                                }
+                                                model.setAttributes(attrs);
+                                        }
+                                }
+                        }
                 ];
         }
 
-        schema: ComponentSchema = {
-                name: this.typeName,
-                label: 'TSimpleDCC',
-                category: 'Standard Control',
-                icon: undefined,
-                component: TMetaSimpleDCC.metaclass,
-                props: this.propSpecsToSchemaProps()
-        };
+        getSchema(): ComponentSchema {
+                return {
+                        name: this.typeName,
+                        label: 'TLabel',
+                        category: 'Standard Control',
+                        icon: undefined,
+                        component: this,
+                        isContainer: false,
+                        instanceName: 'label',
+                        tagName: 'label',
+                        resizable: false,
+
+                        props: this.propSpecsToSchemaProps()
+                };
+        }
 }
 
-/ *
-export type CompositeDCCProps = ComponentProps & {
-        //caption?: string;
-        //enabled?: boolean;
-        //color?: TColor; // ou TColor, etc.
-};
-* /
+export class TCheckBox extends TContainer {
+        htmlInput(): HTMLInputElement {
+                return this.htmlElement!.querySelector('[data-delphine-part="chkBox"]') as HTMLInputElement;
+        }
 
-// Note: this class does not do anything. Perhaps that DCC can herit directly from TContainer or TPanel
-// TContainer or TPanel ? Actually this is not clear. Those two class do not do anything useful abof TComponent
-export class TCompositeDCC extends TContainer {
-        //getMetaclass() {
-        //return TMetaCompositeDCC.metaclass;
-        //}
+        get caption(): string {
+                return (this.props.caption as string) ?? 'Caption';
+        }
+        captionElement(): HTMLSpanElement {
+                return this.htmlElement!.querySelector('[data-delphine-part="caption"]') as HTMLSpanElement;
+        }
+
+        set caption(caption: string) {
+                this.props.caption = caption;
+
+                const el = this.captionElement();
+                if (!el) return;
+
+                el.textContent = caption;
+        }
+
+        get enabled(): boolean {
+                return (this.props.enabled as boolean) ?? true;
+        }
+        set enabled(enabled) {
+                this.props.enabled = enabled;
+                this.htmlInput().disabled = !enabled;
+        }
+        get checked(): boolean {
+                return this.htmlInput().checked;
+        }
+
+        set checked(checked: boolean) {
+                this.props.checked = checked;
+
+                const input = this.htmlInput();
+                if (!input) return;
+
+                input.checked = checked;
+        }
 
         constructor(name: string, form: IForm, parent: TControl) {
-                super(TMetaCompositeDCC.metaclass, name, form, parent);
+                super(TMetaCheckBox.metaclass, name, form, parent);
         }
-        / *
-        protected get dccprops(): CompositeDCCProps {
-                return this.props as CompositeDCCProps;
-        }
-                * /
 }
-        
 
-export class TMetaCompositeDCC extends TMetaContainer {
-        static readonly metaclass: TMetaCompositeDCC = new TMetaCompositeDCC(TMetaContainer.metaclass, 'TCompositDCC');
+export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
+        static metaclass = new TMetaCheckBox(TMetaContainer.metaclass, 'TCheckBox');
 
         protected constructor(superClass: TMetaContainer, name: string) {
                 super(superClass, name);
-                // et vous changez juste le nom :
         }
-        //getMetaclass(): TMetaCompositeDCC {
-        //return TMetaCompositeDCC.metaclass;
-        //}
 
         create(name: string, form: IForm, parent: TControl) {
-                return new TCompositeDCC(name, form, parent);
+                return new TCheckBox(name, form, parent) as T;
         }
 
         defProps(): PropSpec<any>[] {
                 return [
-                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
-                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
+                        {
+                                name: 'caption',
+                                kind: 'string',
+                                default: 'Caption',
+                                retrieve: (o: T) => {
+                                        return o.caption;
+                                },
+                                apply: (o, v) => (o.caption = String(v)),
+                                grapes: {
+                                        traitType: 'text',
+                                        label: 'Caption',
+                                        applyToModel: (model: any, value) => {
+                                                model.components(String(value ?? 'GLOUPS'));
+                                        }
+                                }
+                        },
+                        {
+                                name: 'enabled',
+                                kind: 'boolean',
+                                default: true,
+                                retrieve: (o) => {
+                                        return o.enabled;
+                                },
+                                apply: (o, v) => (o.enabled = Boolean(v)),
+
+                                grapes: {
+                                        traitType: 'checkbox',
+                                        label: 'Enabled',
+                                        applyToModel: (model, value) => {
+                                                const attrs = { ...(model.getAttributes?.() ?? {}) };
+
+                                                if (Boolean(value)) {
+                                                        delete attrs.disabled;
+                                                } else {
+                                                        attrs.disabled = 'disabled';
+                                                }
+                                                model.setAttributes(attrs);
+                                        }
+                                }
+                        },
+                        {
+                                name: 'checked',
+                                kind: 'boolean',
+                                default: true,
+                                retrieve: (o) => {
+                                        return o.checked;
+                                },
+                                apply: (o, v) => (o.checked = Boolean(v)),
+
+                                grapes: {
+                                        traitType: 'checkbox',
+                                        label: 'Checked',
+                                        applyToModel: (model, value) => {
+                                                const attrs = { ...(model.getAttributes?.() ?? {}) };
+
+                                                if (Boolean(value)) {
+                                                        attrs.checked = 'checked';
+                                                } else {
+                                                        delete attrs.checked;
+                                                }
+                                                model.setAttributes(attrs);
+                                        }
+                                }
+                        }
                 ];
         }
 
-        schema: ComponentSchema = {
-                name: this.typeName,
-                label: 'TCompositeDCC',
-                category: 'Standard Control',
-                icon: undefined,
-                component: TMetaCompositeDCC.metaclass,
-                props: this.propSpecsToSchemaProps()
-        };
+        getSchema(): ComponentSchema {
+                return {
+                        name: this.typeName,
+                        label: 'TCheckBox',
+                        category: 'Standard Control',
+                        icon: undefined,
+                        component: this,
+                        isContainer: false,
+                        instanceName: 'checkBox',
+                        tagName: 'span',
+                        resizable: true,
+                        draggable: true,
+
+                        droppable: false,
+                        selectable: true,
+                        components: [
+                                {
+                                        name: 'chkBox',
+                                        //category: null,
+
+                                        label: 'CheckBox',
+
+                                        tagName: 'input',
+
+                                        component: null,
+
+                                        instanceName: 'chkBox',
+
+                                        props: {},
+
+                                        //attributes: {
+                                        //        type: 'checkbox',
+
+                                        //        'data-delphine-part': 'chkBox'
+                                        //},
+
+                                        selectable: false,
+
+                                        draggable: false,
+
+                                        droppable: false,
+
+                                        resizable: false
+                                },
+
+                                {
+                                        name: 'caption',
+                                        //category: null,
+
+                                        label: 'Caption',
+
+                                        tagName: 'span',
+
+                                        component: null,
+
+                                        instanceName: 'caption',
+
+                                        props: {},
+
+                                        //attributes: {
+                                        //        'data-delphine-part': 'caption'
+                                        //},
+
+                                        selectable: false,
+
+                                        draggable: false,
+
+                                        droppable: false,
+
+                                        resizable: false
+
+                                        //components: ['Caption']
+                                }
+                        ],
+
+                        //attributes: {
+                        //'data-delphine-component': 'TCheckBox'
+                        //},
+
+                        props: this.propSpecsToSchemaProps()
+                };
+        }
 }
-*/

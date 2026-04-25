@@ -20,7 +20,7 @@
 
 // import { TMetaPluginHost } from '@vcl';
 import { TTypeRegistry } from './TypeRegistry';
-import { TMetaButton, TMetaPanel } from './StdCtrls';
+import { TMetaButton, TMetaPanel, TMetaLabel, TMetaCheckBox } from './StdCtrls';
 import { TMetaForm } from './Form';
 import { TMetaPluginHost } from './Plugin';
 import { TMetaFrame, TMetaHostFrame } from './Frame';
@@ -32,6 +32,8 @@ export function registerBuiltins(types: TTypeRegistry) {
         types.register(TMetaPanel.metaclass);
         types.register(TMetaHostFrame.metaclass);
         types.register(TMetaFrame.metaclass);
+        types.register(TMetaLabel.metaclass);
+        types.register(TMetaCheckBox.metaclass);
 }
 
 /*

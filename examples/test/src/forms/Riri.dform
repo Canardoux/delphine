@@ -1,18 +1,48 @@
+<delphine></delphine>
+
+<style>
+* {
+        box-sizing: border-box;
+}
+
+body {
+        margin: 0;
+}
+</style>
+
 <template>
-        <div
-                data-delphine-props='{
+<div
+        data-delphine-component="TForm"
+        data-delphine-props='{
     "onclick": "riri_onclick",
     "name": "Riri"
   }'
-                id="ir9k"
-                data-delphine-component="TForm"
-                data-delphine-name="Riri"
-                data-delphine-oncreate="onMyCreate"
-                data-delphine-onshown="onMyShown"
-        >
-                Hello from AutoRunDelphiMode : Riri
+        id="ir9k"
+        data-delphine-name="Riri"
+        data-delphine-oncreate="onMyCreate"
+        data-delphine-onshown="onMyShown"
+        data-delphine-onclick=""
+>
+        Hello from AutoRunDelphiMode : Riri
 
-                <button data-delphine-component="TButton" data-delphine-caption="MainForm" data-delphine-name="button1" data-delphine-onclick="button1_onclick">MainForm!</button>
-                <button data-delphine-component="TButton" data-delphine-caption="POP to MainForm" data-delphine-name="button2" data-delphine-onclick="button2_onclick">POP!</button>
-        </div>
+        <button
+                data-delphine-component="TButton"
+                data-delphine-caption="MainForm"
+                data-delphine-name="button1"
+                data-delphine-onclick="button1_onclick"
+        >
+                MainForm
+        </button>
+        <button
+                data-delphine-component="TButton"
+                data-delphine-caption="POP to MainForm"
+                data-delphine-name="button2"
+                data-delphine-onclick="button2_onclick"
+        >
+                POP to MainForm
+        </button>
+</div>
+<button data-delphine-component="TButton" data-delphine-name="button" data-delphine-onclick="" data-delphine-caption="Caption">
+        Caption
+</button>
 </template>

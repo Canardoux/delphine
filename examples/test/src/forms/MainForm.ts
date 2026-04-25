@@ -1,4 +1,4 @@
-import { TForm, TControl, TButton, TColor, TApplication, TPanel, TPluginHost } from '@vcl';
+import { TForm, TControl, TButton, TColor, TApplication, TPanel, TPluginHost, TCheckBox } from '@vcl';
 import { getApplication } from '@vcl/IApplication';
 
 //import './MainForm.css';
@@ -16,6 +16,13 @@ export default class MainForm extends TForm {
                 console.log('Button1 clicked!!!!');
                 const app = getApplication() as TApplication;
                 app.createAndShow('Riri');
+        }
+
+        label_onclick(_ev: Event | null, _sender: TControl) {
+                const btn = this.componentRegistry.get<TCheckBox>('chk3');
+                btn!.checked = !btn?.checked;
+                btn!.caption = 'es-tu vraiment sur ?';
+                btn!.color = new TColor('rgb(255,0,255)');
         }
 
         buttonb_onclick(_ev: Event | null, _sender: TControl) {
