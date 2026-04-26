@@ -25,6 +25,11 @@ export default class MainForm extends TForm {
                 btn!.color = new TColor('rgb(255,0,255)');
         }
 
+        chk_onclick(_ev: Event | null, _sender: TControl) {
+                const btn = this.componentRegistry.get<TCheckBox>('chk3');
+                btn!.caption = btn?.checked ? 'Checked' : 'unchecked';
+        }
+
         buttonb_onclick(_ev: Event | null, _sender: TControl) {
                 const btn = this.componentRegistry.get<TButton>('button-b');
                 if (!btn) {

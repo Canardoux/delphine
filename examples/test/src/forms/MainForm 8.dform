@@ -81,10 +81,9 @@ body {
                 data-delphine-name="chk3"
                 data-delphine-checked="true"
                 data-delphine-caption="Ririx"
-                data-delphine-onclick="chk_onclick"
         >
                 <input type="checkbox" data-delphine-part="chkBox" />
-                <span data-delphine-part="caption">CheckBox label</span>
+                Momo
         </label>
         
 

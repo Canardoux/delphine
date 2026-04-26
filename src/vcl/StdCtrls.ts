@@ -313,7 +313,23 @@ export class TCheckBox extends TContainer {
 
         get caption(): string {
                 return (this.props.caption as string) ?? 'Caption';
+                //return this.props.caption() ?? 'Caption';
         }
+        //captionElement(): HTMLSpanElement {
+        //        return this.htmlElement!.querySelector('[data-delphine-part="caption"]') as HTMLSpanElement;
+        //}
+
+        /*
+        set caption(caption: string) {
+                this.props.caption = caption;
+
+                const el = this.elem;
+                if (!el) return;
+
+                //el.textContent = caption;
+        }
+                */
+
         captionElement(): HTMLSpanElement {
                 return this.htmlElement!.querySelector('[data-delphine-part="caption"]') as HTMLSpanElement;
         }
@@ -381,6 +397,7 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                         }
                                 }
                         },
+
                         {
                                 name: 'enabled',
                                 kind: 'boolean',
@@ -405,6 +422,7 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                         }
                                 }
                         },
+
                         {
                                 name: 'checked',
                                 kind: 'boolean',

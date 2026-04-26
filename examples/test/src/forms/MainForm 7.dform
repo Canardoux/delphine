@@ -76,18 +76,19 @@ body {
         data-delphine-onshown="onMyShown"
         data-delphine-onclick="mainForm_onclick"
 >
-       <label
+        <label
                 data-delphine-component="TCheckBox"
                 data-delphine-name="chk3"
-                data-delphine-checked="true"
-                data-delphine-caption="Ririx"
-                data-delphine-onclick="chk_onclick"
+                data-delphine-caption="Riri"
+                data-delphine-onclick=""
+                checked="checked"
+                
         >
+                Ririx
                 <input type="checkbox" data-delphine-part="chkBox" />
-                <span data-delphine-part="caption">CheckBox label</span>
-        </label>
-        
+                Toto
 
+        </label>
         <div data-delphine-component="TPanel" id="mypanel1" data-delphine-name="myPanel1" data-delphine-onclick="">
                 <button
                         data-delphine-component="TButton"
