@@ -154,6 +154,31 @@ function schemaToBlockContent(schema: ComponentSchema): any {
         };
 }
 
+function buildTraitsFromPropSpecs(propSpecs: PropSpec<any>[]) {
+        const traits: any[] = [];
+
+        for (const spec of propSpecs) {
+                if (spec.kind === 'handler') {
+                        traits.push({
+                                type: 'text',
+                                name: spec.name,
+                                label: spec.grapes?.label ?? spec.name,
+                                changeProp: true
+                        });
+                        continue;
+                }
+
+                traits.push({
+                        type: spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind),
+                        name: spec.name,
+                        label: spec.grapes?.label ?? spec.name,
+                        changeProp: true
+                });
+        }
+
+        return traits;
+}
+
 function registerComponentType(editor: Editor, meta: IMetaComponent, schema: ComponentSchema): void {
         const typeId = `delphine-${schema.name}`;
         const propSpecs = meta.getPropSpecs?.() ?? [];
@@ -184,7 +209,7 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
                                 draggable: schema.draggable ?? true,
                                 droppable: schema.droppable ?? schema.isContainer ?? false,
 
-                                traits: buildTraitsFromSchema(schema)
+                                traits: buildTraitsFromPropSpecs(propSpecs)
                         },
 
                         init(this: any) {

@@ -152,7 +152,7 @@ body {
                 <label
                         data-delphine-component="TCheckBox"
                         data-delphine-name="checkBox"
-                        data-delphine-onclick=""
+                        data-delphine-onclick="chk_onclick"
                         data-delphine-caption="Caption"
                 >
                         <input type="checkbox" data-delphine-part="chkBox" checked="checked" />
