@@ -91,7 +91,8 @@ export type ComponentSchema = {
 
         // GrapesJS / designer
         label: string;
-        category?: string;
+        //type?: string;
+        category: string;
         icon?: string;
         resizable:
                 | boolean
@@ -101,9 +102,19 @@ export type ComponentSchema = {
                           bl: number;
                           br: number;
                   };
+
         droppable?: boolean;
         selectable?: boolean;
+        editable?: boolean;
+        hoverable?: boolean;
+        layerable?: boolean;
+        removable?: boolean;
+        draggable?: boolean;
+        copyable?: boolean;
+
         components?: ComponentSchema[];
+        textContent?: string;
+        attributes?: object;
 
         // Optional default HTML representation
         defaultProps?: Record<string, any>;
@@ -118,7 +129,4 @@ export type ComponentSchema = {
         defaultHtml?: string;
         allowedChildren?: boolean;
         isContainer?: boolean;
-        removable?: boolean;
-        draggable?: boolean;
-        copyable?: boolean;
 };

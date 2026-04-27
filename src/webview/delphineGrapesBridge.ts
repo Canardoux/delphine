@@ -115,6 +115,44 @@ function readPropFromAttrs(attrs: Record<string, any>, spec: PropSpec<any>): unk
                 }
         }
 }
+function schemaToGrapesContent(schema: ComponentSchema): any {
+        const isDelphineComponent = !!schema.component;
+
+        return {
+                type: isDelphineComponent ? `delphine-${schema.name}` : 'default',
+
+                tagName: schema.tagName ?? 'div',
+
+                attributes: {
+                        ...(schema.attributes ?? {}),
+                        ...(isDelphineComponent ? { 'data-delphine-component': schema.name } : {})
+                },
+
+                selectable: schema.selectable ?? isDelphineComponent,
+                draggable: schema.draggable ?? isDelphineComponent,
+                droppable: schema.droppable ?? schema.isContainer ?? false,
+                copyable: schema.copyable ?? isDelphineComponent,
+                removable: schema.removable ?? isDelphineComponent,
+                editable: schema.editable ?? false,
+                hoverable: schema.hoverable ?? isDelphineComponent,
+                layerable: schema.layerable ?? isDelphineComponent,
+                resizable: schema.resizable ?? false,
+
+                components: schema.components?.map(schemaToGrapesContent) ?? []
+        };
+}
+function schemaToBlockContent(schema: ComponentSchema): any {
+        return {
+                type: `delphine-${schema.name}`,
+
+                attributes: {
+                        'data-delphine-component': schema.name,
+                        'data-delphine-name': schema.instanceName
+                },
+
+                components: schema.components?.map(schemaToBlockContent) ?? []
+        };
+}
 
 function registerComponentType(editor: Editor, meta: IMetaComponent, schema: ComponentSchema): void {
         const typeId = `delphine-${schema.name}`;
@@ -123,29 +161,32 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
         editor.DomComponents.addType(typeId, {
                 isComponent(el) {
                         if (!(el instanceof HTMLElement)) return false;
+
                         const componentName = el.getAttribute('data-delphine-component');
                         if (componentName === schema.name) {
-                                return { type: typeId };
+                                const delphineName = el.getAttribute('data-delphine-name');
+                                return { name: `${delphineName}(${componentName})`, type: typeId };
                         }
                         return false;
                 },
 
                 model: {
                         defaults: {
+                                name: schema.label ?? schema.name,
                                 tagName: schema.tagName,
 
-                                resizable: schema.resizable ?? false,
-
-                                draggable: true,
-
-                                droppable: schema.isContainer ?? false,
-
                                 attributes: {
+                                        ...(schema.attributes ?? {}),
                                         'data-delphine-component': schema.name
                                 },
 
+                                resizable: schema.resizable ?? false,
+                                draggable: schema.draggable ?? true,
+                                droppable: schema.droppable ?? schema.isContainer ?? false,
+
                                 traits: buildTraitsFromSchema(schema)
                         },
+
                         init(this: any) {
                                 const model = this;
                                 const attrs = model.getAttributes?.() ?? {};
@@ -196,17 +237,43 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
         });
 }
 
+function escapeHtml(value: string): string {
+        return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function schemaToHtml(schema: ComponentSchema, isRoot = false): string {
+        const tag = schema.tagName ?? 'div';
+
+        const attrs: Record<string, string> = {
+                ...(schema.attributes ?? {})
+        };
+
+        if (schema.component) {
+                attrs['data-delphine-component'] = schema.name;
+        }
+
+        if (isRoot) {
+                attrs['data-delphine-name'] = schema.instanceName ?? schema.name;
+        }
+
+        const attrText = Object.entries(attrs)
+                .map(([key, value]) => ` ${key}="${escapeHtml(String(value))}"`)
+                .join('');
+
+        const children = schema.components?.map((child) => schemaToHtml(child, false)).join('') ?? escapeHtml(schema.textContent ?? '');
+
+        if (tag === 'input') {
+                return `<input${attrText}>`;
+        }
+
+        return `<${tag}${attrText}>${children}</${tag}>`;
+}
+
 function registerBlock(editor: Editor, schema: ComponentSchema): void {
-        editor.BlockManager.add(`block-${schema.name}`, {
+        editor.BlockManager.add(`delphine-block-${schema.name}`, {
                 label: schema.label,
                 category: schema.category,
-                content: {
-                        type: `delphine-${schema.name}`,
-                        attributes: {
-                                'data-delphine-component': schema.name,
-                                'data-delphine-name': schema.instanceName
-                        }
-                }
+                content: schemaToHtml(schema, true)
         });
 }
 /*

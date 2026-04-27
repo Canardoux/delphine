@@ -156,6 +156,10 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
                         tagName: 'button',
                         resizable: true,
 
+                        //draggable: true,
+                        droppable: false,
+                        //copyable: true,
+
                         props: this.propSpecsToSchemaProps()
                 };
         }
@@ -199,6 +203,13 @@ export class TMetaPanel extends TMetaContainer {
                         instanceName: 'panel',
                         tagName: 'div',
                         resizable: true,
+
+                        //hoverable: true,
+                        //layerable: true,
+                        //removable: true,
+                        //draggable: true,
+                        droppable: true,
+                        //copyable: true,
 
                         props: this.propSpecsToSchemaProps()
                 };
@@ -300,6 +311,7 @@ export class TMetaLabel<T extends TLabel> extends TMetaControl {
                         instanceName: 'label',
                         tagName: 'label',
                         resizable: false,
+                        droppable: false,
 
                         props: this.propSpecsToSchemaProps()
                 };
@@ -315,6 +327,7 @@ export class TCheckBox extends TContainer {
                 return (this.props.caption as string) ?? 'Caption';
                 //return this.props.caption() ?? 'Caption';
         }
+
         //captionElement(): HTMLSpanElement {
         //        return this.htmlElement!.querySelector('[data-delphine-part="caption"]') as HTMLSpanElement;
         //}
@@ -379,6 +392,16 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                 return new TCheckBox(name, form, parent) as T;
         }
 
+        private findPart(model: any, partName: string): any | undefined {
+                const components = model.components?.();
+                if (!components) return undefined;
+
+                return components.models.find((child: any) => {
+                        const attrs = child.getAttributes?.() ?? {};
+                        return attrs['data-delphine-part'] === partName;
+                });
+        }
+
         defProps(): PropSpec<any>[] {
                 return [
                         {
@@ -392,8 +415,19 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                 grapes: {
                                         traitType: 'text',
                                         label: 'Caption',
+                                        // applyToModel: (model: any, value) => {
+                                        //model.components(String(value ?? 'GLOUPS'));
+                                        //}
                                         applyToModel: (model: any, value) => {
-                                                model.components(String(value ?? 'GLOUPS'));
+                                                const captionPart = this.findPart(model, 'caption');
+
+                                                if (captionPart) {
+                                                        captionPart.components(String(value ?? ''));
+                                                }
+
+                                                const attrs = { ...(model.getAttributes?.() ?? {}) };
+                                                attrs['data-delphine-caption'] = String(value ?? '');
+                                                model.setAttributes(attrs);
                                         }
                                 }
                         },
@@ -410,6 +444,7 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                 grapes: {
                                         traitType: 'checkbox',
                                         label: 'Enabled',
+                                        /*
                                         applyToModel: (model, value) => {
                                                 const attrs = { ...(model.getAttributes?.() ?? {}) };
 
@@ -419,6 +454,24 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                                         attrs.disabled = 'disabled';
                                                 }
                                                 model.setAttributes(attrs);
+                                        }*/
+                                        applyToModel: (model, value) => {
+                                                const inputPart = this.findPart(model, 'chkBox');
+                                                if (!inputPart) return;
+
+                                                const attrs = { ...(inputPart.getAttributes?.() ?? {}) };
+
+                                                if (Boolean(value)) {
+                                                        delete attrs.disabled;
+                                                } else {
+                                                        attrs.disabled = 'disabled';
+                                                }
+
+                                                inputPart.setAttributes(attrs);
+
+                                                const rootAttrs = { ...(model.getAttributes?.() ?? {}) };
+                                                rootAttrs['data-delphine-enabled'] = String(Boolean(value));
+                                                model.setAttributes(rootAttrs);
                                         }
                                 }
                         },
@@ -435,6 +488,7 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                 grapes: {
                                         traitType: 'checkbox',
                                         label: 'Checked',
+                                        /*
                                         applyToModel: (model, value) => {
                                                 const attrs = { ...(model.getAttributes?.() ?? {}) };
 
@@ -444,6 +498,25 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                                         delete attrs.checked;
                                                 }
                                                 model.setAttributes(attrs);
+                                        }
+                                                */
+                                        applyToModel: (model, value) => {
+                                                const inputPart = this.findPart(model, 'chkBox');
+                                                if (!inputPart) return;
+
+                                                const attrs = { ...(inputPart.getAttributes?.() ?? {}) };
+
+                                                if (Boolean(value)) {
+                                                        attrs.checked = 'checked';
+                                                } else {
+                                                        delete attrs.checked;
+                                                }
+
+                                                inputPart.setAttributes(attrs);
+
+                                                const rootAttrs = { ...(model.getAttributes?.() ?? {}) };
+                                                rootAttrs['data-delphine-checked'] = String(Boolean(value));
+                                                model.setAttributes(rootAttrs);
                                         }
                                 }
                         }
@@ -459,20 +532,55 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                         component: this,
                         isContainer: false,
                         instanceName: 'checkBox',
-                        tagName: 'span',
-                        resizable: true,
-                        draggable: true,
+                        tagName: 'label',
+                        resizable: false,
+                        //type: 'Delphine-TCheckBox',
+                        //draggable: true,
 
+                        //selectable: true,
+                        //draggable: true,
                         droppable: false,
-                        selectable: true,
+                        //copyable: true,
+                        //removable: true,
+                        //editable: false,
+                        //hoverable: true,
+                        //layerable: true,
+
+                        attributes: {
+                                'data-delphine-component': this.typeName,
+
+                                'data-delphine-name': this.typeName
+                        },
+                        //droppable: false,
+                        //selectable: true,
                         components: [
                                 {
                                         name: 'chkBox',
+
+                                        tagName: 'input',
+
+                                        attributes: {
+                                                type: 'checkbox',
+
+                                                'data-delphine-part': 'chkBox'
+                                        },
+
+                                        layerable: false,
+
+                                        selectable: false,
+
+                                        draggable: false,
+
+                                        droppable: false,
+
+                                        //name: 'chkBox',
                                         //category: null,
+                                        //type: 'default',
+                                        category: 'null',
 
                                         label: 'CheckBox',
 
-                                        tagName: 'input',
+                                        //tagName: 'input',
 
                                         component: null,
 
@@ -481,47 +589,108 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                         props: {},
 
                                         //attributes: {
-                                        //        type: 'checkbox',
-
-                                        //        'data-delphine-part': 'chkBox'
+                                        //       type: 'checkbox',
+                                        //       'data-delphine-part': 'chkBox'
                                         //},
 
-                                        selectable: false,
+                                        //selectable: false,
 
-                                        draggable: false,
+                                        //draggable: false,
 
-                                        droppable: false,
+                                        //droppable: false,
+
+                                        //resizable: false,
+
+                                        //name: 'chkBox',
+                                        //tagName: 'input',
+                                        //attributes: {
+                                        //type: 'checkbox',
+                                        //data-delphine-part': 'chkBox'
+                                        //},
+
+                                        //selectable: false,
+                                        //draggable: false,
+                                        //droppable: false,
+                                        //copyable: false,
+                                        //removable: false,
+                                        //editable: false,
+                                        //hoverable: false,
+                                        //layerable: false,
 
                                         resizable: false
                                 },
 
                                 {
                                         name: 'caption',
-                                        //category: null,
-
-                                        label: 'Caption',
 
                                         tagName: 'span',
 
                                         component: null,
 
-                                        instanceName: 'caption',
+                                        attributes: {
+                                                'data-delphine-part': 'caption'
+                                        },
+                                        textContent: 'Caption',
 
-                                        props: {},
+                                        //components: null
+                                        /*[
+                                                {
+                                                        type: 'textnode',
+                                                        content: 'Caption'
+                                                }
+                                        ],*/
 
-                                        //attributes: {
-                                        //        'data-delphine-part': 'caption'
-                                        //},
+                                        layerable: false,
 
                                         selectable: false,
 
                                         draggable: false,
 
                                         droppable: false,
+                                        //name: 'caption',
+                                        //category: null,
+
+                                        label: 'Caption',
+                                        category: 'null',
+                                        //type: 'default',
+
+                                        //tagName: 'span',
+
+                                        //component: null,
+
+                                        instanceName: 'caption',
+
+                                        props: {},
+                                        //attributes: {
+                                        //'data-delphine-part': 'caption'
+                                        //},
+                                        //components: ['Caption'],
+                                        //selectable: false,
+
+                                        //draggable: false,
+
+                                        //droppable: false,
+
+                                        //resizable: false,
+                                        //name: 'chkBox',
+                                        //tagName: 'input',
+                                        //attributes: {
+                                        //        type: 'checkbox',
+                                        //        'data-delphine-part': 'chkBox'
+                                        //},
+
+                                        //selectable: false,
+                                        //draggable: false,
+                                        //droppable: false,
+                                        //copyable: false,
+                                        //removable: false,
+                                        //editable: false,
+                                        //hoverable: false,
+                                        //layerable: false,
 
                                         resizable: false
 
-                                        //components: ['Caption']
+                                        //components: []
                                 }
                         ],
 

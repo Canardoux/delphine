@@ -38,6 +38,7 @@
         margin-left: 0px;
         width: 82px;
         height: 113px;
+        display: none;
 }
 
 #MainForm {
@@ -75,20 +76,43 @@ body {
         data-delphine-oncreate="onMyCreate"
         data-delphine-onshown="onMyShown"
         data-delphine-onclick="mainForm_onclick"
+        data-delphine-caption="Caption"
 >
-       <label
+        <label
                 data-delphine-component="TCheckBox"
                 data-delphine-name="chk3"
-                data-delphine-checked="true"
-                data-delphine-caption="Ririx"
+                data-delphine-caption="Ririxxx"
                 data-delphine-onclick="chk_onclick"
+                id="idhc"
+                data-delphine-checked="false"
         >
-                <input type="checkbox" data-delphine-part="chkBox" />
-                <span data-delphine-part="caption">CheckBox label</span>
+                <input
+                        data-delphine-component="TCheckBox"
+                        data-delphine-name="TCheckBox"
+                        type="checkbox"
+                        data-delphine-part="chkBox"
+                        id="zzz"
+                        data-delphine-onclick=""
+                        data-delphine-caption="Caption"
+                />
+                <span
+                        data-delphine-component="TCheckBox"
+                        data-delphine-name="TCheckBox"
+                        data-delphine-part="caption"
+                        id="ifg2"
+                        data-delphine-onclick=""
+                        data-delphine-caption="Caption"
+                >
+                        Ririxxx
+                </span>
         </label>
-        
-
-        <div data-delphine-component="TPanel" id="mypanel1" data-delphine-name="myPanel1" data-delphine-onclick="">
+        <div
+                data-delphine-component="TPanel"
+                id="mypanel1"
+                data-delphine-name="myPanel1"
+                data-delphine-onclick=""
+                data-delphine-caption="Caption"
+        >
                 <button
                         data-delphine-component="TButton"
                         id="button-a"
@@ -126,13 +150,13 @@ body {
                         Caption
                 </button>
                 <label
-                        data-delphine-component="Tlabel"
-                        data-delphine-name="label"
-                        data-delphine-onclick="label_onclick"
+                        data-delphine-component="TCheckBox"
+                        data-delphine-name="checkBox"
+                        data-delphine-onclick=""
                         data-delphine-caption="Caption"
-                        id="ipz0o"
                 >
-                        Caption
+                        <input type="checkbox" data-delphine-part="chkBox" checked="checked" />
+                        <span data-delphine-part="caption">Caption</span>
                 </label>
         </div>
         <button
@@ -159,10 +183,7 @@ body {
         >
                 Delphine buttonx caption
         </button>
-        <h1 id="igfu">
-                Mon titreABC
-                <br />
-        </h1>
+        <h1 id="igfu" data-delphine-onclick="" data-delphine-caption="Caption">Bonjour</h1>
         <div
                 data-delphine-component="THostFrame"
                 id="myframeplugin"
@@ -175,10 +196,17 @@ body {
                 data-delphine-frame="hello-frame"
                 data-delphine-onframeevent="myframe_onFrameEvent"
                 data-delphine-onclick=""
+                data-delphine-caption="Caption"
         >
                 MY-FRAME-PLUGIN
         </div>
-        <div data-delphine-component="TPanel" id="mypanel" data-delphine-name="myPanel" data-delphine-onclick="">
+        <div
+                data-delphine-component="TPanel"
+                id="mypanel"
+                data-delphine-name="myPanel"
+                data-delphine-onclick=""
+                data-delphine-caption="Caption"
+        >
                 <button
                         data-delphine-component="TButton"
                         data-delphine-caption="sub-button1"

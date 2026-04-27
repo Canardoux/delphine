@@ -67,8 +67,11 @@ export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, 
                         tagName: 'div',
                         resizable: false,
 
+                        //hoverable: true,
+                        //layerable: true,
                         //removable: false,
-                        //draggable: false,
+                        //draggable: true,
+                        droppable: true,
                         //copyable: false,
 
                         props: this.propSpecsToSchemaProps()
