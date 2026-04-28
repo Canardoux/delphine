@@ -89,6 +89,7 @@ type DelphineWindow = Window &
                 console.log(`[bridge ${bridgeInstanceId}] adding message listener`);
 
                 window.addEventListener('message', (event: MessageEvent) => {
+                        debugger;
                         const msg = event.data;
                         console.log(`[bridge ${bridgeInstanceId}] message received in parent`, msg);
 
@@ -109,6 +110,12 @@ type DelphineWindow = Window &
                                 vscode.postMessage(payload);
                                 return;
                         }
+
+                        if (msg.type === 'delphine:open-handler') {
+                                vscode.postMessage(msg);
+                                return;
+                        }
+
                         if (typeof msg?.type === 'string') {
                                 console.log(`[bridge ${bridgeInstanceId}] host -> child ${msg.type}`);
 

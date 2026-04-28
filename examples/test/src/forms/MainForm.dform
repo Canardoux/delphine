@@ -204,7 +204,7 @@ body {
                 data-delphine-component="TPanel"
                 id="mypanel"
                 data-delphine-name="myPanel"
-                data-delphine-onclick=""
+                data-delphine-onclick="myPanel_onclick"
                 data-delphine-caption="Caption"
         >
                 <button

@@ -1,6 +1,6 @@
 import { TTypeRegistry } from '../vcl/TypeRegistry.js';
 import { registerBuiltins } from '../vcl/RegisterVcl.js';
-import { registerDelphineComponentsFromRegistry } from './delphineGrapesBridge.js';
+import { registerDelphineComponentsFromRegistry, showDelphineTraitTab } from './delphineGrapesBridge.js';
 
 type DelphineInboundMessage =
         | {
@@ -11,6 +11,10 @@ type DelphineInboundMessage =
         | {
                   type: 'log';
                   text: string;
+          }
+        | {
+                  type: 'delphine:select-component';
+                  componentName: string;
           };
 
 type DelphineWindow = Window &
@@ -27,6 +31,7 @@ console.log(`[boot ${bootInstanceId}] parent===self? ${window.parent === window}
 console.log(`[boot ${bootInstanceId}] location = ${window.location.href}`);
 
 let messageHandler: ((payload: DelphineInboundMessage) => void) | undefined;
+let isSelectingFromHost = false;
 
 type DocUpdateMessage = {
         type: 'doc:update';
@@ -38,10 +43,22 @@ let lastSentHtml = '';
 let lastSentCss = '';
 let isApplyingRemoteDocument = false;
 
+/*
 function postToVsCode(payload: unknown): void {
         console.log(`[boot ${bootInstanceId}] postToVsCode payload =`, payload);
 
         window.postMessage(
+                {
+                        __delphineFromChild: true,
+                        payload
+                },
+                '*'
+        );
+}
+        */
+
+function postToVsCode(payload: any): void {
+        window.parent.postMessage(
                 {
                         __delphineFromChild: true,
                         payload
@@ -220,6 +237,7 @@ function canSendOutbound(): boolean {
 }
 
 function postContentChanged(editor: any) {
+        debugger;
         if (!canSendOutbound()) {
                 return;
         }
@@ -271,12 +289,25 @@ function registerDelphineCommands(editor: any): void {
         });
 }
 
+function cssEscape(value: string): string {
+        return String(value)
+                .replace(/\\/g, '\\\\') // backslash
+                .replace(/"/g, '\\"') // double quote
+                .replace(/'/g, "\\'") // single quote
+                .replace(/\[/g, '\\[')
+                .replace(/\]/g, '\\]')
+                .replace(/\./g, '\\.')
+                .replace(/:/g, '\\:')
+                .replace(/#/g, '\\#');
+}
+
 function grapesJSEditor(grapes: any): void {
         const editor = grapes.init({
                 container: '#gjs',
                 height: '100vh',
                 storageManager: false
         });
+        (globalThis as any).editor = editor;
 
         registerDelphineCommands(editor);
 
@@ -351,6 +382,22 @@ function grapesJSEditor(grapes: any): void {
                 return null;
         }
 
+        function selectComponentByName(editor: any, componentName: string): void {
+                if (!componentName) return;
+
+                const found = editor.getWrapper().find(`[data-delphine-name="${cssEscape(componentName)}"]`)[0];
+
+                if (!found) return;
+
+                isSelectingFromHost = true;
+
+                editor.select(found);
+
+                setTimeout(() => {
+                        isSelectingFromHost = false;
+                }, 0);
+        }
+
         function loadDocument(html: string, css: string): void {
                 const selectedKey = getSelectedComponentKey(editor);
 
@@ -390,7 +437,9 @@ function grapesJSEditor(grapes: any): void {
                         });
                 }
         }
+
         messageHandler = async (payload: DelphineInboundMessage) => {
+                debugger;
                 switch (payload.type) {
                         case 'doc:update': {
                                 const msg = payload as DocUpdateMessage;
@@ -400,8 +449,57 @@ function grapesJSEditor(grapes: any): void {
 
                         case 'log':
                                 break;
+
+                        case 'delphine:select-component':
+                                selectComponentByName(editor, payload.componentName);
+                                break;
                 }
         };
+
+        function openDefaultEventHandler(editor: any, model: any): void {
+                debugger;
+                if (!model) return;
+
+                const attrs = model.getAttributes?.() ?? {};
+
+                const componentName = attrs['data-delphine-name'];
+                const componentClass = attrs['data-delphine-component'];
+
+                if (!componentName || !componentClass) return;
+
+                const eventName = getDefaultEventName(componentClass);
+                const attrName = `data-delphine-${eventName}`;
+
+                let handlerName = attrs[attrName];
+
+                if (!handlerName || String(handlerName).trim() === '') {
+                        handlerName = `${componentName}_${eventName}`;
+
+                        model.setAttributes({
+                                ...attrs,
+                                [attrName]: handlerName
+                        });
+                }
+
+                postToVsCode({
+                        type: 'delphine:open-handler',
+                        componentName,
+                        eventName,
+                        handlerName
+                });
+        }
+
+        function getDefaultEventName(componentClass: string): string {
+                switch (componentClass) {
+                        case 'TButton':
+                        case 'TCheckBox':
+                        case 'TLabel':
+                        case 'TPanel':
+                        case 'TForm':
+                        default:
+                                return 'onclick';
+                }
+        }
 
         const typeRegistry = new TTypeRegistry();
         registerBuiltins(typeRegistry);
@@ -423,6 +521,63 @@ function grapesJSEditor(grapes: any): void {
         editor.on('style:update', () => {
                 markDirty(editor, 'style:update');
         });
+
+        /*
+        editor.on('component:selected', (model: any) => {
+                showDelphineTraitTab(editor, model, 'properties');
+        });
+        */
+        editor.on('component:selected', (model: any) => {
+                debugger;
+                showDelphineTraitTab(editor, model, 'properties');
+
+                const attrs = model.getAttributes?.() ?? {};
+
+                if (!isSelectingFromHost) {
+                        postToVsCode({
+                                type: 'delphine:designer-selection-changed',
+
+                                componentName: attrs['data-delphine-name'],
+
+                                componentClass: attrs['data-delphine-component']
+                        });
+                }
+        });
+
+        //editor.on('component:selected', (model: any) => {
+        // optionnel : garder sélection courante
+        //});
+
+        editor.on('load', () => {
+                const frame = editor.Canvas.getFrameEl();
+                const doc = frame?.contentDocument;
+
+                if (!doc) return;
+
+                doc.addEventListener(
+                        'dblclick',
+                        (event: MouseEvent) => {
+                                const target = event.target as HTMLElement | null;
+                                if (!target) return;
+
+                                const root = target.closest('[data-delphine-component]') as HTMLElement | null;
+                                if (!root) return;
+
+                                const model = editor.getSelected();
+
+                                if (model) {
+                                        openDefaultEventHandler(editor, model);
+                                }
+                        },
+                        true
+                );
+        });
+        /*
+
+        editor.on('component:dblclick', (model: any) => {
+                openDefaultEventHandler(editor, model);
+        });
+        */
 
         applyDelphineBodyTraits();
 }
@@ -464,5 +619,6 @@ if ((window as any).__delphineBootEditorStarted) {
                 void main();
         }
 }
+(window as any).showDelphineTraitTab = showDelphineTraitTab;
 
 export {};

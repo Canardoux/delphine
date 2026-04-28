@@ -15,6 +15,28 @@ export function registerDelphineComponentsFromRegistry(editor: Editor, typeRegis
         customizeOptionsPanel(editor);
 }
 
+export function showDelphineTraitTab(editor: any, model: any, tab: 'properties' | 'events') {
+        if (!model) {
+                console.warn('[Delphine] No component selected');
+                return;
+        }
+
+        const sets = model.get('delphineTraits');
+
+        if (!sets) {
+                console.warn('[Delphine] Selected component has no delphineTraits', model);
+                return;
+        }
+
+        model.set('traits', sets[tab]);
+        editor.TraitManager.select(model);
+        editor.TraitManager.render?.();
+
+        // Open Settings / Trait Manager panel
+
+        editor.Panels.getButton('views', 'open-tm')?.set('active', true);
+}
+
 function customizeOptionsPanel(editor: Editor): void {
         // Remove buttons we do not want
         editor.Panels.removeButton('options', 'fullscreen');
@@ -56,33 +78,30 @@ function customizeOptionsPanel(editor: Editor): void {
                         className: 'fa fa-repeat',
                         command: 'core:redo',
                         attributes: { title: 'Redo (Ctrl+Shift+Z)' }
+                },
+                {
+                        id: 'delphine-properties',
+
+                        label: 'Props',
+
+                        command: () => {
+                                const model = editor.getSelected();
+
+                                showDelphineTraitTab(editor, model, 'properties');
+                        }
+                },
+                {
+                        id: 'delphine-events',
+
+                        label: 'Events',
+
+                        command: () => {
+                                const model = editor.getSelected();
+
+                                showDelphineTraitTab(editor, model, 'events');
+                        }
                 }
         ]);
-}
-
-function buildTraitsFromSchema(schema: ComponentSchema) {
-        const traits: any[] = [];
-
-        for (const [propName, prop] of Object.entries(schema.props ?? {})) {
-                let traitType = 'text';
-
-                if (prop.kind === 'boolean') {
-                        traitType = 'checkbox';
-                } else if (prop.kind === 'number') {
-                        traitType = 'number';
-                }
-
-                traits.push({
-                        type: traitType,
-                        name: propName,
-
-                        label: propName,
-
-                        changeProp: true // 🔥 🔥 🔥 CRUCIAL
-                });
-        }
-
-        return traits;
 }
 
 function readPropFromAttrs(attrs: Record<string, any>, spec: PropSpec<any>): unknown {
@@ -115,58 +134,15 @@ function readPropFromAttrs(attrs: Record<string, any>, spec: PropSpec<any>): unk
                 }
         }
 }
-function schemaToGrapesContent(schema: ComponentSchema): any {
-        const isDelphineComponent = !!schema.component;
 
-        return {
-                type: isDelphineComponent ? `delphine-${schema.name}` : 'default',
-
-                tagName: schema.tagName ?? 'div',
-
-                attributes: {
-                        ...(schema.attributes ?? {}),
-                        ...(isDelphineComponent ? { 'data-delphine-component': schema.name } : {})
-                },
-
-                selectable: schema.selectable ?? isDelphineComponent,
-                draggable: schema.draggable ?? isDelphineComponent,
-                droppable: schema.droppable ?? schema.isContainer ?? false,
-                copyable: schema.copyable ?? isDelphineComponent,
-                removable: schema.removable ?? isDelphineComponent,
-                editable: schema.editable ?? false,
-                hoverable: schema.hoverable ?? isDelphineComponent,
-                layerable: schema.layerable ?? isDelphineComponent,
-                resizable: schema.resizable ?? false,
-
-                components: schema.components?.map(schemaToGrapesContent) ?? []
-        };
-}
-function schemaToBlockContent(schema: ComponentSchema): any {
-        return {
-                type: `delphine-${schema.name}`,
-
-                attributes: {
-                        'data-delphine-component': schema.name,
-                        'data-delphine-name': schema.instanceName
-                },
-
-                components: schema.components?.map(schemaToBlockContent) ?? []
-        };
-}
-
-function buildTraitsFromPropSpecs(propSpecs: PropSpec<any>[]) {
+function buildTraitsFromPropSpecs(propSpecs: PropSpec<any>[], kind: 'properties' | 'events' = 'properties') {
         const traits: any[] = [];
 
         for (const spec of propSpecs) {
-                if (spec.kind === 'handler') {
-                        traits.push({
-                                type: 'text',
-                                name: spec.name,
-                                label: spec.grapes?.label ?? spec.name,
-                                changeProp: true
-                        });
-                        continue;
-                }
+                const isEvent = spec.kind === 'handler';
+
+                if (kind === 'properties' && isEvent) continue;
+                if (kind === 'events' && !isEvent) continue;
 
                 traits.push({
                         type: spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind),
@@ -178,7 +154,6 @@ function buildTraitsFromPropSpecs(propSpecs: PropSpec<any>[]) {
 
         return traits;
 }
-
 function registerComponentType(editor: Editor, meta: IMetaComponent, schema: ComponentSchema): void {
         const typeId = `delphine-${schema.name}`;
         const propSpecs = meta.getPropSpecs?.() ?? [];
@@ -209,7 +184,14 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
                                 draggable: schema.draggable ?? true,
                                 droppable: schema.droppable ?? schema.isContainer ?? false,
 
-                                traits: buildTraitsFromPropSpecs(propSpecs)
+                                //traits: buildTraitsFromPropSpecs(propSpecs)
+                                traits: buildTraitsFromPropSpecs(propSpecs, 'properties'),
+
+                                delphineTraits: {
+                                        properties: buildTraitsFromPropSpecs(propSpecs, 'properties'),
+
+                                        events: buildTraitsFromPropSpecs(propSpecs, 'events')
+                                }
                         },
 
                         init(this: any) {
@@ -301,46 +283,6 @@ function registerBlock(editor: Editor, schema: ComponentSchema): void {
                 content: schemaToHtml(schema, true)
         });
 }
-/*
-
-function buildTraits(propSpecs: PropSpec<any>[]): any[] {
-        const traits: any[] = [];
-
-        for (const spec of propSpecs) {
-                if (spec.kind === 'handler') {
-                        continue;
-                }
-
-                const traitType = spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind);
-
-                traits.push({
-                        type: traitType,
-                        name: spec.name,
-                        label: spec.grapes?.label ?? spec.name,
-                        changeProp: true
-                });
-        }
-
-        return traits;
-}
-        */
-
-/*
-function buildDefaultAttributes(schema: ComponentSchema, propSpecs: PropSpec<any>[]): Record<string, string> {
-        const attrs: Record<string, string> = {
-                'data-delphine-component': schema.name
-        };
-
-        for (const spec of propSpecs) {
-                if (spec.default === undefined) continue;
-                if (spec.kind === 'handler') continue;
-
-                attrs[`data-delphine-${spec.name}`] = stringifyPropValue(spec.default);
-        }
-
-        return attrs;
-}
-        */
 
 function mapPropKindToTraitType(kind: PropSpec<any>['kind']): string {
         switch (kind) {
@@ -358,22 +300,6 @@ function applyDefaultTraitToModel(model: any, spec: PropSpec<any>, value: unknow
                 model.components(String(value ?? 'Caption'));
                 return;
         }
-
-        /*
-        if (spec.kind === 'boolean') {
-                const attrs = { ...(model.getAttributes?.() ?? {}) };
-
-                if (spec.name === 'enabled') {
-                        if (Boolean(value)) {
-                                delete attrs.disabled;
-                        } else {
-                                attrs.disabled = 'disabled';
-                        }
-                }
-
-                model.setAttributes(attrs);
-        }
-                */
 }
 
 function syncModelValueToAttributes(model: any, spec: PropSpec<any>, value: unknown): void {

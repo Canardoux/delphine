@@ -3,6 +3,232 @@ import * as crypto from 'crypto';
 import { loadDoc } from '../loadForm';
 import { mergeFormSource, splitFormSource } from '../dformSource';
 
+// ****************************** Interface from Delphine Designer to the Code Editor *****************************************
+
+/*
+function buildHandlerName(model: any, eventName: string): string {
+        const attrs = model.getAttributes?.() ?? {};
+        const compName = attrs['data-delphine-name'] ?? 'component';
+
+        return `${compName}_${eventName.toLowerCase()}`;
+}
+
+export function openOrCreateHandler(editor: any, model: any, eventName: string) {
+        if (!model) return;
+
+        const attrs = model.getAttributes?.() ?? {};
+        const attrName = `data-delphine-${eventName}`;
+
+        let handlerName = attrs[attrName];
+
+        // 1️⃣ si pas défini → générer
+        if (!handlerName || handlerName.trim() === '') {
+                handlerName = buildHandlerName(model, eventName);
+
+                model.setAttributes({
+                        ...attrs,
+                        [attrName]: handlerName
+                });
+        }
+
+        // 2️⃣ récupérer le code actuel
+        const code = getCurrentCode(); // ⚠️ à brancher chez vous
+
+        // 3️⃣ chercher handler
+        const pos = findHandlerPosition(code, handlerName);
+
+        let newCode = code;
+        let targetPos = pos;
+
+        // 4️⃣ si absent → créer
+        if (pos === null) {
+                newCode = createHandler(code, handlerName);
+                targetPos = newCode.length;
+        }
+
+        // 5️⃣ envoyer au code editor
+        updateCode(newCode); // ⚠️ à brancher
+        revealPosition(targetPos); // ⚠️ à brancher
+}
+        
+
+function findHandlerPosition(code: string, handlerName: string): number | null {
+        const regex = new RegExp(`function\\s+${handlerName}\\s*\\(`);
+        const match = code.match(regex);
+
+        return match ? (match.index ?? null) : null;
+}
+
+
+function createHandler(code: string, handlerName: string): string {
+        return code + `\n\nexport function ${handlerName}(sender: TObject): void {\n` + `        // TODO: ${handlerName}\n` + `}\n`;
+}
+        */
+
+function getCompanionTypescriptUri(dformUri: vscode.Uri): vscode.Uri {
+        const fsPath = dformUri.fsPath;
+
+        if (fsPath.endsWith('.dform')) {
+                return vscode.Uri.file(fsPath.replace(/\.dform$/i, '.ts'));
+        }
+
+        return vscode.Uri.file(fsPath + '.ts');
+}
+
+function sanitizeIdentifier(value: string): string {
+        return String(value ?? '')
+                .trim()
+                .replace(/[^a-zA-Z0-9_$]/g, '_')
+                .replace(/^[^a-zA-Z_$]/, '_');
+}
+
+function findHandlerPosition(code: string, handlerName: string): number | null {
+        const escaped = handlerName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        const patterns = [new RegExp(`export\\s+function\\s+${escaped}\\s*\\(`), new RegExp(`function\\s+${escaped}\\s*\\(`), new RegExp(`${escaped}\\s*\\(`)];
+
+        for (const regex of patterns) {
+                const match = regex.exec(code);
+                if (match?.index !== undefined) {
+                        return match.index;
+                }
+        }
+
+        return null;
+}
+
+function getDelphineClassName(dformText: string): string | null {
+        const match = dformText.match(/<delphine\b[^>]*\bclass=["']([^"']+)["']/i);
+        return match?.[1] ?? null;
+}
+
+function findClassEndPosition(code: string, className: string): number | null {
+        const classPos = code.indexOf(`class ${className}`);
+        if (classPos < 0) return null;
+
+        const openBrace = code.indexOf('{', classPos);
+        if (openBrace < 0) return null;
+
+        let depth = 0;
+
+        for (let i = openBrace; i < code.length; i++) {
+                const ch = code[i];
+
+                if (ch === '{') depth++;
+                if (ch === '}') depth--;
+
+                if (depth === 0) {
+                        return i;
+                }
+        }
+
+        return null;
+}
+
+function findHandlerBodyPosition(code: string, handlerName: string): number | null {
+        const fnPos = findHandlerPosition(code, handlerName);
+        if (fnPos === null) return null;
+
+        const bracePos = code.indexOf('{', fnPos);
+        if (bracePos < 0) return fnPos;
+
+        return bracePos + 1;
+}
+
+function createHandler(handlerName: string): string {
+        return `\n\n        ${handlerName}(_ev: Event | null, _sender: TControl) {\n` + `                // TODO: handle ${handlerName}\n` + `        }\n`;
+}
+
+function createExportedHandler(handlerName: string): string {
+        return `\n\nexport function ${handlerName}(_ev: Event | null, _sender: TControl): void {\n` + `        // TODO: handle ${handlerName}\n` + `}\n`;
+}
+
+async function handleOpenHandler(msg: any, dformDocument: vscode.TextDocument) {
+        debugger;
+        const tsUri = getCompanionTypescriptUri(dformDocument.uri);
+
+        const tsDocument = await vscode.workspace.openTextDocument(tsUri);
+        //const tsEditor = await vscode.window.showTextDocument(tsDocument, {
+        //        preview: false,
+        //        viewColumn: vscode.ViewColumn.Beside
+        //});
+        console.log('[Delphine] file opened =', tsDocument.uri.fsPath);
+
+        const tsEditor = await vscode.window.showTextDocument(tsDocument, {
+                preview: false,
+                viewColumn: vscode.ViewColumn.Active, // 🔥 IMPORTANT
+                preserveFocus: false // 🔥 DONNE LE FOCUS
+        });
+
+        const componentName = sanitizeIdentifier(msg.componentName ?? 'component');
+        const eventName = sanitizeIdentifier(msg.eventName ?? 'onclick');
+
+        const handlerName = sanitizeIdentifier(msg.handlerName ?? '') || `${componentName}_${eventName.toLowerCase()}`;
+
+        let code = tsDocument.getText();
+        let pos = findHandlerPosition(code, handlerName);
+
+        if (pos === null) {
+                const dformText = dformDocument.getText();
+                const className = getDelphineClassName(dformText) ?? 'MainForm';
+
+                const classEnd = findClassEndPosition(code, className);
+
+                if (classEnd !== null) {
+                        const insertion = createHandler(handlerName);
+
+                        const insertPos = tsDocument.positionAt(classEnd);
+
+                        await tsEditor.edit((edit) => {
+                                edit.insert(insertPos, insertion);
+                        });
+                } else {
+                        // fallback provisoire
+
+                        const endPos = tsDocument.positionAt(code.length);
+
+                        await tsEditor.edit((edit) => {
+                                edit.insert(endPos, createExportedHandler(handlerName));
+                        });
+                }
+
+                const insertion = createHandler(handlerName);
+
+                code = tsDocument.getText();
+                pos = findHandlerPosition(code, handlerName);
+        }
+
+        if (pos === null) {
+                return;
+        }
+        const target = findHandlerBodyPosition(code, handlerName) ?? pos;
+
+        const position = tsDocument.positionAt(target + 1);
+
+        tsEditor.selection = new vscode.Selection(position, position);
+
+        tsEditor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+
+        //const position = tsDocument.positionAt(pos);
+        //tsEditor.selection = new vscode.Selection(position, position);
+        //tsEditor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+        /*
+        setTimeout(() => {
+                const position = tsDocument.positionAt(pos);
+
+                tsEditor.selection = new vscode.Selection(position, position);
+                tsEditor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+        }, 50);
+        console.log('[Delphine] jumping to handler at pos=', pos);
+        /*
+        const tsEditor2 = await vscode.window.showTextDocument(tsDocument, {
+                preview: false,
+                viewColumn: vscode.ViewColumn.Active, // 🔥 IMPORTANT
+                preserveFocus: false // 🔥 DONNE LE FOCUS
+        });
+        */
+}
+
 /****************************************************************************************************************** */
 /**
  * Minimal custom editor provider.
@@ -12,6 +238,7 @@ import { mergeFormSource, splitFormSource } from '../dformSource';
  * - no reveal loops
  * - one update path
  */
+
 export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProvider {
         public static readonly viewType = 'delphine.customEditor';
         private static _context: vscode.ExtensionContext;
@@ -65,11 +292,69 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 }
         }
 
+        async revealComponentInDform(document: vscode.TextDocument, componentName: string) {
+                if (!componentName) return;
+
+                const editor = await vscode.window.showTextDocument(document, {
+                        preview: false,
+                        viewColumn: vscode.ViewColumn.Active,
+                        preserveFocus: false
+                });
+
+                const text = document.getText();
+                const pos = this.findComponentInDform(text, componentName);
+
+                if (pos === null) return;
+
+                const position = document.positionAt(pos);
+
+                editor.selection = new vscode.Selection(position, position);
+                editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+        }
+
+        findComponentInDform(text: string, componentName: string): number | null {
+                const escaped = this.escapeRegExp(componentName);
+
+                const regex = new RegExp(`data-delphine-name=["']${escaped}["']`, 'i');
+
+                const match = regex.exec(text);
+                return match?.index ?? null;
+        }
+
+        escapeRegExp(value: string): string {
+                return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        findComponentNameAtPosition(text: string, offset: number): string | null {
+                const before = text.slice(0, offset);
+
+                // trouver le dernier "<"
+                const tagStart = before.lastIndexOf('<');
+                if (tagStart < 0) return null;
+
+                const tagEnd = text.indexOf('>', tagStart);
+                if (tagEnd < 0) return null;
+
+                // vérifier qu'on est dans la balise
+                if (offset > tagEnd) return null;
+
+                const tagText = text.slice(tagStart, tagEnd + 1);
+
+                if (!tagText.includes('data-delphine-component')) {
+                        return null;
+                }
+
+                const match = tagText.match(/data-delphine-name=["']([^"']+)["']/i);
+                return match?.[1] ?? null;
+        }
+
         async resolveCustomTextEditor(document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel, _token: vscode.CancellationToken): Promise<void> {
                 const panelId = Math.random().toString(36).slice(2, 8);
+                debugger;
                 console.log(`[Delphine/ext] resolveCustomTextEditor panel=${panelId} doc=${document.uri.fsPath}`);
                 let lastRev = 0;
                 webviewPanel.webview.onDidReceiveMessage(async (msg) => {
+                        debugger;
                         //const msg = await e;
                         console.log('[Delphine/ext] message reçu =', msg);
                         console.log(`[VSCode] ${msg.type} <- from bootEditor`);
@@ -123,6 +408,14 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
 
                                 case 'bootEditor:ready':
                                         updateWebviewFromFile(document);
+                                        return;
+
+                                case 'delphine:open-handler':
+                                        await handleOpenHandler(msg, document);
+                                        return;
+
+                                case 'delphine:designer-selection-changed':
+                                        await this.revealComponentInDform(document, msg.componentName);
                                         return;
                         }
                 });
@@ -183,7 +476,27 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                         void updateWebviewFromDocument(e.document);
                 });
 
-                webviewPanel.onDidDispose(() => changeSubscription.dispose());
+                const selectionSubscription = vscode.window.onDidChangeTextEditorSelection((e) => {
+                        if (e.textEditor.document.uri.toString() !== document.uri.toString()) {
+                                return;
+                        }
+
+                        const offset = document.offsetAt(e.selections[0].active);
+
+                        const componentName = this.findComponentNameAtPosition(document.getText(), offset);
+
+                        if (!componentName) return;
+
+                        webviewPanel.webview.postMessage({
+                                type: 'delphine:select-component',
+                                componentName
+                        });
+                });
+
+                webviewPanel.onDidDispose(() => {
+                        changeSubscription.dispose();
+                        selectionSubscription.dispose();
+                });
 
                 // ******************************************************************* Functions *********************************************
 
