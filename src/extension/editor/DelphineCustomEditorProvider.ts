@@ -142,23 +142,39 @@ function createHandler(handlerName: string): string {
 function createExportedHandler(handlerName: string): string {
         return `\n\nexport function ${handlerName}(_ev: Event | null, _sender: TControl): void {\n` + `        // TODO: handle ${handlerName}\n` + `}\n`;
 }
+function findVisibleEditor(uri: vscode.Uri): vscode.TextEditor | undefined {
+        return vscode.window.visibleTextEditors.find((editor) => editor.document.uri.toString() === uri.toString());
+}
+async function showTypescriptDocument(doc: vscode.TextDocument, uri: vscode.Uri): Promise<vscode.TextEditor> {
+        const existing = findVisibleEditor(uri);
+
+        if (existing) {
+                await vscode.window.showTextDocument(existing.document, {
+                        viewColumn: existing.viewColumn,
+                        preserveFocus: false,
+                        preview: false
+                });
+
+                return existing;
+        }
+
+        //const doc = await vscode.workspace.openTextDocument(uri);
+
+        return vscode.window.showTextDocument(doc, {
+                viewColumn: vscode.ViewColumn.Beside,
+                preserveFocus: false,
+                preview: false
+        });
+}
 
 async function handleOpenHandler(msg: any, dformDocument: vscode.TextDocument) {
         debugger;
         const tsUri = getCompanionTypescriptUri(dformDocument.uri);
 
         const tsDocument = await vscode.workspace.openTextDocument(tsUri);
-        //const tsEditor = await vscode.window.showTextDocument(tsDocument, {
-        //        preview: false,
-        //        viewColumn: vscode.ViewColumn.Beside
-        //});
         console.log('[Delphine] file opened =', tsDocument.uri.fsPath);
 
-        const tsEditor = await vscode.window.showTextDocument(tsDocument, {
-                preview: false,
-                viewColumn: vscode.ViewColumn.Active, // 🔥 IMPORTANT
-                preserveFocus: false // 🔥 DONNE LE FOCUS
-        });
+        const tsEditor = await showTypescriptDocument(tsDocument, tsUri);
 
         const componentName = sanitizeIdentifier(msg.componentName ?? 'component');
         const eventName = sanitizeIdentifier(msg.eventName ?? 'onclick');
@@ -208,25 +224,6 @@ async function handleOpenHandler(msg: any, dformDocument: vscode.TextDocument) {
         tsEditor.selection = new vscode.Selection(position, position);
 
         tsEditor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
-
-        //const position = tsDocument.positionAt(pos);
-        //tsEditor.selection = new vscode.Selection(position, position);
-        //tsEditor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
-        /*
-        setTimeout(() => {
-                const position = tsDocument.positionAt(pos);
-
-                tsEditor.selection = new vscode.Selection(position, position);
-                tsEditor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
-        }, 50);
-        console.log('[Delphine] jumping to handler at pos=', pos);
-        /*
-        const tsEditor2 = await vscode.window.showTextDocument(tsDocument, {
-                preview: false,
-                viewColumn: vscode.ViewColumn.Active, // 🔥 IMPORTANT
-                preserveFocus: false // 🔥 DONNE LE FOCUS
-        });
-        */
 }
 
 /****************************************************************************************************************** */
@@ -295,11 +292,11 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
         async revealComponentInDform(document: vscode.TextDocument, componentName: string) {
                 if (!componentName) return;
 
-                const editor = await vscode.window.showTextDocument(document, {
-                        preview: false,
-                        viewColumn: vscode.ViewColumn.Active,
-                        preserveFocus: false
-                });
+                const editor = vscode.window.visibleTextEditors.find((e) => e.document.uri.toString() === document.uri.toString());
+
+                // Important:
+                // Do not open/reveal the .dform editor if it is not already visible.
+                if (!editor) return;
 
                 const text = document.getText();
                 const pos = this.findComponentInDform(text, componentName);
@@ -350,11 +347,9 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
 
         async resolveCustomTextEditor(document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel, _token: vscode.CancellationToken): Promise<void> {
                 const panelId = Math.random().toString(36).slice(2, 8);
-                debugger;
                 console.log(`[Delphine/ext] resolveCustomTextEditor panel=${panelId} doc=${document.uri.fsPath}`);
                 let lastRev = 0;
                 webviewPanel.webview.onDidReceiveMessage(async (msg) => {
-                        debugger;
                         //const msg = await e;
                         console.log('[Delphine/ext] message reçu =', msg);
                         console.log(`[VSCode] ${msg.type} <- from bootEditor`);
@@ -416,6 +411,14 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
 
                                 case 'delphine:designer-selection-changed':
                                         await this.revealComponentInDform(document, msg.componentName);
+                                        return;
+
+                                case 'delphine:devtools':
+                                        await vscode.commands.executeCommand('workbench.action.webview.openDeveloperTools');
+                                        return;
+
+                                case 'delphine:run-app':
+                                        await vscode.commands.executeCommand('delphine.runApp', document.uri);
                                         return;
                         }
                 });

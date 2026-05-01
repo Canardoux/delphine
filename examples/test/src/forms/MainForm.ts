@@ -109,4 +109,8 @@ export default class MainForm extends TForm {
         myPanel_onclick(_ev: Event | null, _sender: TControl) {
                 // TODO: handle myPanel_onclick
         }
+
+        checkBox_onclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle checkBox_onclick
+        }
 }

@@ -425,7 +425,32 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                                         captionPart.components(String(value ?? ''));
                                                 }
 
+                                                const inputPart = this.findPart(model, 'chkBox');
+
+                                                if (!inputPart) return;
+
+                                                const checked = Boolean(value);
+
+                                                // 🔥 DOM
+
+                                                inputPart.setAttributes({
+                                                        ...inputPart.getAttributes(),
+
+                                                        checked: checked ? 'checked' : undefined
+                                                });
+
+                                                // 🔥 IMPORTANT : forcer aussi la propriété DOM
+
+                                                const view = inputPart.view;
+
+                                                const el = view?.el as HTMLInputElement | undefined;
+
+                                                if (el) {
+                                                        el.checked = checked;
+                                                }
+
                                                 const attrs = { ...(model.getAttributes?.() ?? {}) };
+                                                attrs['data-delphine-checked'] = String(checked);
                                                 attrs['data-delphine-caption'] = String(value ?? '');
                                                 model.setAttributes(attrs);
                                         }
@@ -479,7 +504,7 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                         {
                                 name: 'checked',
                                 kind: 'boolean',
-                                default: true,
+                                default: false,
                                 retrieve: (o) => {
                                         return o.checked;
                                 },
@@ -503,19 +528,25 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                         applyToModel: (model, value) => {
                                                 const inputPart = this.findPart(model, 'chkBox');
                                                 if (!inputPart) return;
+                                                const checked = Boolean(value);
 
                                                 const attrs = { ...(inputPart.getAttributes?.() ?? {}) };
 
-                                                if (Boolean(value)) {
+                                                if (checked) {
                                                         attrs.checked = 'checked';
                                                 } else {
                                                         delete attrs.checked;
                                                 }
 
                                                 inputPart.setAttributes(attrs);
+                                                const el = inputPart.view?.el as HTMLInputElement | undefined;
+
+                                                if (el) {
+                                                        el.checked = checked;
+                                                }
 
                                                 const rootAttrs = { ...(model.getAttributes?.() ?? {}) };
-                                                rootAttrs['data-delphine-checked'] = String(Boolean(value));
+                                                rootAttrs['data-delphine-checked'] = String(checked);
                                                 model.setAttributes(rootAttrs);
                                         }
                                 }

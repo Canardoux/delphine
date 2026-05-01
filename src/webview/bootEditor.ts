@@ -1,6 +1,6 @@
 import { TTypeRegistry } from '../vcl/TypeRegistry.js';
 import { registerBuiltins } from '../vcl/RegisterVcl.js';
-import { registerDelphineComponentsFromRegistry, showDelphineTraitTab } from './delphineGrapesBridge.js';
+import { registerDelphineComponentsFromRegistry, showDelphineTraitTab, showCurrentDelphineTraitTab } from './delphineGrapesBridge.js';
 
 type DelphineInboundMessage =
         | {
@@ -42,20 +42,6 @@ type DocUpdateMessage = {
 let lastSentHtml = '';
 let lastSentCss = '';
 let isApplyingRemoteDocument = false;
-
-/*
-function postToVsCode(payload: unknown): void {
-        console.log(`[boot ${bootInstanceId}] postToVsCode payload =`, payload);
-
-        window.postMessage(
-                {
-                        __delphineFromChild: true,
-                        payload
-                },
-                '*'
-        );
-}
-        */
 
 function postToVsCode(payload: any): void {
         window.parent.postMessage(
@@ -203,6 +189,40 @@ function flushPendingDirectMessages(): void {
         }
 }
 
+function openEventHandler(editor: any, model: any, eventName: string): void {
+        if (!model) return;
+
+        const attrs = model.getAttributes?.() ?? {};
+
+        const componentName = attrs['data-delphine-name'];
+        const componentClass = attrs['data-delphine-component'];
+
+        if (!componentName || !componentClass) return;
+
+        const attrName = `data-delphine-${eventName}`;
+
+        let handlerName = attrs[attrName];
+
+        if (!handlerName || String(handlerName).trim() === '') {
+                handlerName = `${componentName}_${eventName}`;
+
+                model.setAttributes({
+                        ...attrs,
+                        [attrName]: handlerName
+                });
+
+                model.set(eventName, handlerName);
+        }
+
+        postToVsCode({
+                type: 'delphine:open-handler',
+                componentName,
+                componentClass,
+                eventName,
+                handlerName
+        });
+}
+
 async function waitForGrapesJs(): Promise<any> {
         for (let i = 0; i < 100; i++) {
                 const grapes = (window as any).grapesjs;
@@ -310,6 +330,7 @@ function grapesJSEditor(grapes: any): void {
         (globalThis as any).editor = editor;
 
         registerDelphineCommands(editor);
+        registerDelphineEventTrait(editor);
 
         let dirtyTimer: number | undefined;
 
@@ -456,6 +477,64 @@ function grapesJSEditor(grapes: any): void {
                 }
         };
 
+        function registerDelphineEventTrait(editor: any): void {
+                editor.TraitManager.addType('delphine-event', {
+                        createInput({ trait, component }: any) {
+                                const container = document.createElement('div');
+                                container.style.display = 'flex';
+                                container.style.gap = '4px';
+
+                                const input = document.createElement('input');
+                                input.style.flex = '1';
+
+                                const button = document.createElement('button');
+                                button.textContent = '⚡';
+                                button.title = 'Open handler';
+                                button.style.cursor = 'pointer';
+
+                                const eventName = trait.get('name');
+                                const attrName = `data-delphine-${eventName}`;
+                                const attrs = component.getAttributes?.() ?? {};
+
+                                input.value = attrs[attrName] ?? '';
+
+                                input.addEventListener('change', () => {
+                                        const currentAttrs = component.getAttributes?.() ?? {};
+
+                                        component.setAttributes({
+                                                ...currentAttrs,
+                                                [attrName]: input.value
+                                        });
+
+                                        component.set(eventName, input.value);
+                                });
+
+                                button.addEventListener('click', () => {
+                                        openEventHandler(editor, component, eventName);
+                                });
+
+                                // bonus : double click aussi
+                                input.addEventListener('dblclick', () => {
+                                        openEventHandler(editor, component, eventName);
+                                });
+
+                                container.appendChild(input);
+                                container.appendChild(button);
+
+                                return container;
+                        }
+                });
+        }
+
+        function findModelFromElement(editor: any, el: HTMLElement): any | null {
+                const name = el.getAttribute('data-delphine-name');
+                if (!name) return null;
+
+                const found = editor.getWrapper().find(`[data-delphine-name="${cssEscape(name)}"]`)[0];
+
+                return found ?? null;
+        }
+
         function openDefaultEventHandler(editor: any, model: any): void {
                 debugger;
                 if (!model) return;
@@ -468,6 +547,9 @@ function grapesJSEditor(grapes: any): void {
                 if (!componentName || !componentClass) return;
 
                 const eventName = getDefaultEventName(componentClass);
+                openEventHandler(editor, model, eventName);
+
+                /*
                 const attrName = `data-delphine-${eventName}`;
 
                 let handlerName = attrs[attrName];
@@ -487,6 +569,7 @@ function grapesJSEditor(grapes: any): void {
                         eventName,
                         handlerName
                 });
+                */
         }
 
         function getDefaultEventName(componentClass: string): string {
@@ -524,12 +607,8 @@ function grapesJSEditor(grapes: any): void {
 
         /*
         editor.on('component:selected', (model: any) => {
-                showDelphineTraitTab(editor, model, 'properties');
-        });
-        */
-        editor.on('component:selected', (model: any) => {
                 debugger;
-                showDelphineTraitTab(editor, model, 'properties');
+                showCurrentDelphineTraitTab(editor, model);
 
                 const attrs = model.getAttributes?.() ?? {};
 
@@ -539,6 +618,32 @@ function grapesJSEditor(grapes: any): void {
 
                                 componentName: attrs['data-delphine-name'],
 
+                                componentClass: attrs['data-delphine-component']
+                        });
+                }
+        });
+        */
+        editor.on('component:selected', (model: any) => {
+                const attrs = model.getAttributes?.() ?? {};
+
+                if (attrs['data-delphine-part']) {
+                        const parent = model.parent?.();
+
+                        if (parent) {
+                                setTimeout(() => {
+                                        editor.select(parent);
+                                }, 0);
+                        }
+
+                        return;
+                }
+
+                showCurrentDelphineTraitTab(editor, model);
+
+                if (!isSelectingFromHost) {
+                        postToVsCode({
+                                type: 'delphine:designer-selection-changed',
+                                componentName: attrs['data-delphine-name'],
                                 componentClass: attrs['data-delphine-component']
                         });
                 }
@@ -563,7 +668,7 @@ function grapesJSEditor(grapes: any): void {
                                 const root = target.closest('[data-delphine-component]') as HTMLElement | null;
                                 if (!root) return;
 
-                                const model = editor.getSelected();
+                                const model = findModelFromElement(editor, root);
 
                                 if (model) {
                                         openDefaultEventHandler(editor, model);
@@ -571,15 +676,78 @@ function grapesJSEditor(grapes: any): void {
                         },
                         true
                 );
-        });
-        /*
+                doc.addEventListener(
+                        'mousedown',
+                        (event: MouseEvent) => {
+                                const target = event.target as HTMLElement | null;
+                                if (!target) return;
 
-        editor.on('component:dblclick', (model: any) => {
-                openDefaultEventHandler(editor, model);
+                                const root = target.closest('[data-delphine-component]');
+                                if (!root) return;
+
+                                const model = findModelFromElement(editor, root as HTMLElement);
+                                if (!model) return;
+
+                                // 🔥 force la sélection du composant racine
+                                editor.select(model);
+
+                                event.stopPropagation();
+                        },
+                        true
+                );
+                for (const eventName of ['mousedown', 'mouseup', 'click']) {
+                        doc.addEventListener(
+                                eventName,
+                                (event: MouseEvent) => {
+                                        const target = event.target as HTMLElement | null;
+
+                                        if (!target) return;
+
+                                        const part = target.closest('[data-delphine-part]');
+
+                                        const root = target.closest('[data-delphine-component]') as HTMLElement | null;
+
+                                        if (!root) return;
+
+                                        // Prevent native checkbox toggle inside the designer
+
+                                        if (part) {
+                                                event.preventDefault();
+
+                                                event.stopPropagation();
+                                        }
+
+                                        const model = findModelFromElement(editor, root);
+
+                                        if (!model) return;
+
+                                        setTimeout(() => {
+                                                editor.select(model);
+                                        }, 0);
+                                },
+                                true
+                        );
+                }
         });
-        */
 
         applyDelphineBodyTraits();
+
+        editor.Panels.addButton('options', {
+                id: 'delphine-devtools',
+                label: '🛠',
+                attributes: { title: 'Open DevTools' },
+                command: () => {
+                        postToVsCode({ type: 'delphine:devtools' });
+                }
+        });
+        editor.Panels.addButton('options', {
+                id: 'delphine-run',
+                label: '▶',
+                attributes: { title: 'Run App' },
+                command: () => {
+                        postToVsCode({ type: 'delphine:run-app' });
+                }
+        });
 }
 
 async function main(): Promise<void> {

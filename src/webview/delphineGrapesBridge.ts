@@ -15,6 +15,11 @@ export function registerDelphineComponentsFromRegistry(editor: Editor, typeRegis
         customizeOptionsPanel(editor);
 }
 
+export function showCurrentDelphineTraitTab(editor: any, model: any) {
+        showDelphineTraitTab(editor, model, currentTraitTab);
+        //updateTraitButtons(editor);
+}
+
 export function showDelphineTraitTab(editor: any, model: any, tab: 'properties' | 'events') {
         if (!model) {
                 console.warn('[Delphine] No component selected');
@@ -37,6 +42,21 @@ export function showDelphineTraitTab(editor: any, model: any, tab: 'properties' 
         editor.Panels.getButton('views', 'open-tm')?.set('active', true);
 }
 
+let currentTraitTab: 'properties' | 'events' = 'properties';
+//function updateTraitButtons(editor: any) {
+//const propsBtn = editor.Panels.getButton('options', 'delphine-properties');
+//const eventsBtn = editor.Panels.getButton('options', 'delphine-events');
+
+//propsBtn?.set('active', currentTraitTab === 'properties');
+//eventsBtn?.set('active', currentTraitTab === 'events');
+//}
+
+function setTraitTab(editor: any, model: any, tab: 'properties' | 'events') {
+        currentTraitTab = tab;
+
+        showDelphineTraitTab(editor, model, tab);
+        //updateTraitButtons(editor);
+}
 function customizeOptionsPanel(editor: Editor): void {
         // Remove buttons we do not want
         editor.Panels.removeButton('options', 'fullscreen');
@@ -82,25 +102,54 @@ function customizeOptionsPanel(editor: Editor): void {
                 {
                         id: 'delphine-properties',
 
-                        label: 'Props',
+                        label: '🔧',
 
                         command: () => {
                                 const model = editor.getSelected();
 
-                                showDelphineTraitTab(editor, model, 'properties');
-                        }
+                                setTraitTab(editor, model, 'properties');
+                        },
+                        attributes: { title: 'Properties' }
                 },
                 {
                         id: 'delphine-events',
 
-                        label: 'Events',
+                        label: '⚡',
 
                         command: () => {
                                 const model = editor.getSelected();
 
-                                showDelphineTraitTab(editor, model, 'events');
+                                setTraitTab(editor, model, 'events');
+                        },
+                        attributes: { title: 'Events' }
+                }
+                /*
+                {
+                        id: 'delphine-reload',
+
+                        label: '🔄',
+
+                        attributes: { title: 'Reload Designer' },
+
+                        command: () => {
+                                location.reload();
                         }
                 }
+                        */
+
+                /*
+                {
+                        id: 'delphine-devtools',
+
+                        label: '🛠',
+
+                        attributes: { title: 'Open DevTools' },
+
+                        command: () => {
+                                postToVsCode({ type: 'delphine:devtools' });
+                        }
+                }
+                        */
         ]);
 }
 
@@ -145,7 +194,8 @@ function buildTraitsFromPropSpecs(propSpecs: PropSpec<any>[], kind: 'properties'
                 if (kind === 'events' && !isEvent) continue;
 
                 traits.push({
-                        type: spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind),
+                        //type: spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind),
+                        type: spec.kind === 'handler' ? 'delphine-event' : (spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind)),
                         name: spec.name,
                         label: spec.grapes?.label ?? spec.name,
                         changeProp: true
@@ -183,9 +233,6 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
                                 resizable: schema.resizable ?? false,
                                 draggable: schema.draggable ?? true,
                                 droppable: schema.droppable ?? schema.isContainer ?? false,
-
-                                //traits: buildTraitsFromPropSpecs(propSpecs)
-                                traits: buildTraitsFromPropSpecs(propSpecs, 'properties'),
 
                                 delphineTraits: {
                                         properties: buildTraitsFromPropSpecs(propSpecs, 'properties'),
@@ -242,6 +289,7 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
                         }
                 }
         });
+        //registerDelphineEventTrait(editor);
 }
 
 function escapeHtml(value: string): string {

@@ -84,7 +84,6 @@ body {
                 data-delphine-caption="Ririxxx"
                 data-delphine-onclick="chk_onclick"
                 id="idhc"
-                data-delphine-checked="false"
         >
                 <input
                         data-delphine-component="TCheckBox"
@@ -151,12 +150,24 @@ body {
                 </button>
                 <label
                         data-delphine-component="TCheckBox"
-                        data-delphine-name="checkBox"
+                        data-delphine-name="checkBoxA"
                         data-delphine-onclick="chk_onclick"
-                        data-delphine-caption="Caption"
+                        data-delphine-caption="CaptionA"
+                        id="ixxol"
+                        data-delphine-checked="true"
                 >
-                        <input type="checkbox" data-delphine-part="chkBox" checked="checked" />
-                        <span data-delphine-part="caption">Caption</span>
+                        <input type="checkbox" data-delphine-part="chkBox" id="ifnu8" checked="checked" />
+                        <span data-delphine-part="caption" id="i42bo">CaptionA</span>
+                </label>
+                <label
+                        data-delphine-component="TCheckBox"
+                        data-delphine-name="checkBoxB"
+                        data-delphine-onclick=""
+                        data-delphine-caption="CaptionB"
+                        id="ifykl"
+                >
+                        <input type="checkbox" data-delphine-part="chkBox" id="ifl0k" />
+                        <span data-delphine-part="caption" id="i91rg">CaptionB</span>
                 </label>
         </div>
         <button
@@ -183,6 +194,26 @@ body {
         >
                 Delphine buttonx caption
         </button>
+        <label
+                data-delphine-component="TCheckBox"
+                data-delphine-name="checkBoxC"
+                data-delphine-onclick=""
+                data-delphine-caption="CaptionC"
+                id="ij1yq"
+        >
+                <input type="checkbox" data-delphine-part="chkBox" id="ib9qw" />
+                <span data-delphine-part="caption" id="in5lk">CaptionC</span>
+        </label>
+        <label
+                data-delphine-component="TCheckBox"
+                data-delphine-name="checkBoxD"
+                data-delphine-onclick="checkBox_onclick"
+                data-delphine-caption="CaptionD"
+                id="iw4hj"
+        >
+                <input type="checkbox" data-delphine-part="chkBox" id="ig72q" />
+                <span data-delphine-part="caption" id="iy8ue">CaptionD</span>
+        </label>
         <h1 id="igfu" data-delphine-onclick="" data-delphine-caption="Caption">Bonjour</h1>
         <div
                 data-delphine-component="THostFrame"

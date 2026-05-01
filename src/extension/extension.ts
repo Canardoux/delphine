@@ -14,6 +14,33 @@ import { loadDoc } from './loadForm';
 import { parseDformSource } from './dformSource'; // ou le bon chemin chez vous
 
 let activeRuntimePreviewUri: vscode.Uri | undefined;
+
+function findVisibleEditor(uri: vscode.Uri): vscode.TextEditor | undefined {
+        return vscode.window.visibleTextEditors.find((editor) => editor.document.uri.toString() === uri.toString());
+}
+
+async function showTypescriptDocument(uri: vscode.Uri): Promise<vscode.TextEditor> {
+        const existing = findVisibleEditor(uri);
+
+        if (existing) {
+                await vscode.window.showTextDocument(existing.document, {
+                        viewColumn: existing.viewColumn,
+                        preserveFocus: false,
+                        preview: false
+                });
+
+                return existing;
+        }
+
+        const doc = await vscode.workspace.openTextDocument(uri);
+
+        return vscode.window.showTextDocument(doc, {
+                viewColumn: vscode.ViewColumn.Beside,
+                preserveFocus: false,
+                preview: false
+        });
+}
+
 async function createRuntimePreviewPanel(context: vscode.ExtensionContext, url: string, sourceUri: vscode.Uri): Promise<void> {
         console.log('[Delphine] createRuntimePreviewPanel called', url, sourceUri.toString());
         activeRuntimePreviewUri = sourceUri;
@@ -226,10 +253,7 @@ export function activate(context: vscode.ExtensionContext): void {
                                 return;
                         }
 
-                        await vscode.window.showTextDocument(targetUri, {
-                                preview: false,
-                                viewColumn: vscode.ViewColumn.One
-                        });
+                        await showTypescriptDocument(targetUri);
                 })
         );
 
