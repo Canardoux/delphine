@@ -74,7 +74,7 @@ export class TControl extends TComponent implements IControl {
         //return TMetaControl.metaclass;
         //}
 
-        readonly name: string;
+        name: string;
         readonly parent: TControl | null = null;
 
         form: IForm | null = null;
@@ -208,6 +208,24 @@ export class TMetaControl extends TMetaComponent implements IMetaControl {
                                 },
                                 //apply: (o, v) => (o.onclick = new THandler(String(v)))
                                 apply: (o, v) => (o.onclick = v as THandler)
+                        },
+                        {
+                                name: 'name',
+
+                                kind: 'string',
+
+                                default: '',
+                                retrieve: (o) => {
+                                        return o.name;
+                                },
+                                //apply: (o, v) => (o.onclick = new THandler(String(v)))
+                                apply: (o, v) => {
+                                        o.name = String(v);
+                                },
+
+                                grapes: {
+                                        label: 'Name'
+                                }
                         }
                         //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
                 ];

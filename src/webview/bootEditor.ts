@@ -257,7 +257,6 @@ function canSendOutbound(): boolean {
 }
 
 function postContentChanged(editor: any) {
-        debugger;
         if (!canSendOutbound()) {
                 return;
         }
@@ -460,7 +459,6 @@ function grapesJSEditor(grapes: any): void {
         }
 
         messageHandler = async (payload: DelphineInboundMessage) => {
-                debugger;
                 switch (payload.type) {
                         case 'doc:update': {
                                 const msg = payload as DocUpdateMessage;
@@ -535,8 +533,24 @@ function grapesJSEditor(grapes: any): void {
                 return found ?? null;
         }
 
+        function generateUniqueName(editor: any, base: string): string {
+                const wrapper = editor.getWrapper();
+                const all = wrapper.find('[data-delphine-name]');
+
+                const existing = new Set(all.map((c: any) => c.getAttributes()?.['data-delphine-name']));
+
+                let i = 1;
+                let name = `${base}${i}`;
+
+                while (existing.has(name)) {
+                        i++;
+                        name = `${base}${i}`;
+                }
+
+                return name;
+        }
+
         function openDefaultEventHandler(editor: any, model: any): void {
-                debugger;
                 if (!model) return;
 
                 const attrs = model.getAttributes?.() ?? {};
@@ -583,6 +597,53 @@ function grapesJSEditor(grapes: any): void {
                                 return 'onclick';
                 }
         }
+        function isValidUniqueName(editor: any, model: any, name: string): boolean {
+                if (!name) return false;
+
+                const wrapper = editor.getWrapper();
+                const all = wrapper.find('[data-delphine-name]');
+
+                for (const comp of all) {
+                        if (comp === model) continue;
+
+                        const other = comp.getAttributes?.()['data-delphine-name'];
+                        if (other === name) return false;
+                }
+
+                return true;
+        }
+        function assignNameIfMissing(editor: any, model: any): void {
+                if ((model as any).__delphineNameAssigned) return;
+
+                if (!model.getEl?.()) return;
+
+                const attrs = model.getAttributes?.() ?? {};
+
+                const type = attrs['data-delphine-component'];
+                if (!type) return;
+
+                if (attrs['data-delphine-part']) return;
+
+                let name = attrs['data-delphine-name'];
+
+                if (!isValidUniqueName(editor, model, name)) {
+                        const base = type.replace(/^T/, '') || 'Component';
+                        name = generateUniqueName(editor, base);
+
+                        model.setAttributes({
+                                ...attrs,
+                                'data-delphine-name': name
+                        });
+                        (model as any).__delphineSyncingName = true;
+                        try {
+                                model.set('name', name, { silent: true });
+                        } finally {
+                                (model as any).__delphineSyncingName = false;
+                        }
+                }
+
+                (model as any).__delphineNameAssigned = true;
+        }
 
         const typeRegistry = new TTypeRegistry();
         registerBuiltins(typeRegistry);
@@ -593,8 +654,43 @@ function grapesJSEditor(grapes: any): void {
                 markDirty(editor, 'component:update');
         });
 
-        editor.on('component:add', () => {
+        /*
+        editor.on('component:add', (model: any) => {
                 markDirty(editor, 'component:add');
+                const attrs = model.getAttributes?.() ?? {};
+
+                if (!attrs['data-delphine-component']) return;
+
+                if (attrs['data-delphine-part']) return;
+
+                if (attrs['data-delphine-name']) return;
+
+                const type = attrs['data-delphine-component'] ?? 'Component';
+
+                const base = type.replace(/^T/, '') || 'Component';
+
+                const name = generateUniqueName(editor, base);
+
+                model.setAttributes({
+                        ...attrs,
+
+                        name: name
+                });
+
+                // Optional: only for Layer Manager display.
+
+                // Do NOT use "name" if it is also a Delphine prop.
+
+                //model.set('delphineDisplayName', `${name}(${type})`, { silent: true });
+        });
+        */
+
+        editor.on('component:add', (model: any) => {
+                markDirty(editor, 'component:add');
+
+                setTimeout(() => {
+                        assignNameIfMissing(editor, model);
+                }, 0);
         });
 
         editor.on('component:remove', () => {
@@ -605,24 +701,6 @@ function grapesJSEditor(grapes: any): void {
                 markDirty(editor, 'style:update');
         });
 
-        /*
-        editor.on('component:selected', (model: any) => {
-                debugger;
-                showCurrentDelphineTraitTab(editor, model);
-
-                const attrs = model.getAttributes?.() ?? {};
-
-                if (!isSelectingFromHost) {
-                        postToVsCode({
-                                type: 'delphine:designer-selection-changed',
-
-                                componentName: attrs['data-delphine-name'],
-
-                                componentClass: attrs['data-delphine-component']
-                        });
-                }
-        });
-        */
         editor.on('component:selected', (model: any) => {
                 const attrs = model.getAttributes?.() ?? {};
 

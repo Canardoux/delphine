@@ -168,7 +168,6 @@ async function showTypescriptDocument(doc: vscode.TextDocument, uri: vscode.Uri)
 }
 
 async function handleOpenHandler(msg: any, dformDocument: vscode.TextDocument) {
-        debugger;
         const tsUri = getCompanionTypescriptUri(dformDocument.uri);
 
         const tsDocument = await vscode.workspace.openTextDocument(tsUri);

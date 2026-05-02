@@ -3,32 +3,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 //import { FormsProvider } from './FormsProvider';
 import { resolveApp } from '../projectModel';
-/*
-export async function newForm() {
-        const name = await vscode.window.showInputBox({
-                prompt: 'Form name'
-        });
-
-        if (!name) return;
-
-        const workspace = vscode.workspace.workspaceFolders?.[0];
-        if (!workspace) return;
-
-        const formsDir = path.join(workspace.uri.fsPath, 'src/forms');
-        debugger;
-        const formDir = path.join(formsDir, `${name}.form`);
-        console.log('[Delphine] creating form in', formDir);
-
-        fs.mkdirSync(formDir, { recursive: true });
-
-        fs.writeFileSync(path.join(formDir, `${name}.html`), `<div data-delphine-form="${name}">\n</div>\n`);
-
-        fs.writeFileSync(path.join(formDir, `${name}.ts`), `export class ${name} {\n}\n`);
-
-        fs.writeFileSync(path.join(formDir, `${name}.css`), '');
-        fs.writeFileSync(path.join(formDir, `${name}.json`), '{}');
-}
-*/
 
 function normalizeFormName(name: string): string {
         return name.charAt(0).toUpperCase() + name.slice(1);

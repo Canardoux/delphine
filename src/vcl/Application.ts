@@ -100,7 +100,6 @@ export class TApplication implements IApplication {
         }
 
         constructor(appName: string, appConfig: TApplicationConfig) {
-                debugger;
                 this.appName = appName;
                 this.appConfig = appConfig;
                 setApplication(this);
@@ -129,28 +128,12 @@ export class TApplication implements IApplication {
         }
 
         protected registerForm(form: TForm): void {
-                debugger;
                 this.forms.set(form.name, form);
 
                 if (!this.mainForm) {
                         this.mainForm = form;
                 }
         }
-
-        /*
-        // Actually not used
-        createForm<T extends TForm>(ctor: new (...args: any[]) => T, name: string, html: string): T {
-                debugger;
-                const f = new ctor(name);
-                f.create(html);
-
-                this.forms.push(f);
-
-                if (!this.mainForm) this.mainForm = f;
-
-                return f;
-        }
-                */
 
         async createAndShow(formName: string) {
                 let form = this.getFormByName('formName');
@@ -311,7 +294,6 @@ export class TApplication implements IApplication {
         // By default we show() the main Form
         // This method can be overriden in a user TApplication
         start() {
-                debugger;
                 this.runWhenDomReady(() => {
                         this.installBrowserBackHandler();
                         const url = new URL(window.location.href);
@@ -349,16 +331,6 @@ export class TApplication implements IApplication {
         // By default, we create a TForm for every Forms declared in app.json.
         // This method can be overriden in a user TApplication
         async initialize(): Promise<void> {}
-
-        /*
-        protected autoStart(): void {
-                debugger;
-                //if (this.forms.length > 0) {
-                //        this.mainForm = this.forms[0]!;
-                this.mainForm!.show();
-                //}
-        }
-                */
 
         runWhenDomReady(fn: () => void): void {
                 if (document.readyState === 'loading') {
@@ -415,24 +387,4 @@ export class TApplication implements IApplication {
 
                 return form;
         }
-
-        /*
-        protected async loadFormModule(formName: string): Promise<any> {
-                debugger;
-                const modulePath = `/src/apps/${this.appName}/forms/${formName}.form/${formName}.ts`;
-                return import(/ * @vite-ignore * / modulePath);
-        }
-
-        protected async loadFormHtml(formName: string): Promise<string> {
-                debugger;
-                const htmlPath = `/src/apps/${this.appName}/forms/${formName}.form/${formName}.html`;
-
-                const response = await fetch(htmlPath);
-                if (!response.ok) {
-                        throw new Error(`Cannot load ${htmlPath}`);
-                }
-
-                return await response.text();
-        }
-        */
 }

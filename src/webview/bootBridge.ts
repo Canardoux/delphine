@@ -89,7 +89,6 @@ type DelphineWindow = Window &
                 console.log(`[bridge ${bridgeInstanceId}] adding message listener`);
 
                 window.addEventListener('message', (event: MessageEvent) => {
-                        debugger;
                         const msg = event.data;
                         console.log(`[bridge ${bridgeInstanceId}] message received in parent`, msg);
 

@@ -63,7 +63,7 @@ export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, 
                         icon: undefined,
                         component: this,
                         isContainer: true,
-                        instanceName: 'form',
+                        instanceName: 'Form',
                         tagName: 'div',
                         resizable: false,
 
@@ -118,7 +118,6 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
         }
 
         show(): void {
-                debugger;
                 if (!this.elem || !this._created) {
                         throw new Error(`Form ${this.name} not created`);
                 }

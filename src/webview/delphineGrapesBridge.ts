@@ -204,6 +204,54 @@ function buildTraitsFromPropSpecs(propSpecs: PropSpec<any>[], kind: 'properties'
 
         return traits;
 }
+function normalizeComponentName(value: string): string {
+        let name = value.trim();
+
+        // Replace invalid characters with "_"
+        name = name.replace(/[^a-zA-Z0-9_$]/g, '_');
+
+        // Component names should not start with a digit
+        if (!/^[a-zA-Z_$]/.test(name)) {
+                name = `_${name}`;
+        }
+
+        return name || 'component';
+}
+
+function ensureUniqueComponentName(editor: any, model: any, wantedName: string): string {
+        const wrapper = editor.getWrapper?.();
+        if (!wrapper) return wantedName;
+
+        const all = wrapper.find?.('[data-delphine-name]') ?? [];
+
+        const existing = new Set<string>();
+
+        for (const comp of all) {
+                if (comp === model) continue;
+
+                const attrs = comp.getAttributes?.() ?? {};
+                const name = attrs['data-delphine-name'];
+
+                if (name) {
+                        existing.add(String(name));
+                }
+        }
+
+        if (!existing.has(wantedName)) {
+                return wantedName;
+        }
+
+        let index = 1;
+        let candidate = `${wantedName}${index}`;
+
+        while (existing.has(candidate)) {
+                index++;
+                candidate = `${wantedName}${index}`;
+        }
+
+        return candidate;
+}
+
 function registerComponentType(editor: Editor, meta: IMetaComponent, schema: ComponentSchema): void {
         const typeId = `delphine-${schema.name}`;
         const propSpecs = meta.getPropSpecs?.() ?? [];
@@ -243,6 +291,8 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
 
                         init(this: any) {
                                 const model = this;
+
+                                let syncingName = false;
                                 const attrs = model.getAttributes?.() ?? {};
 
                                 // 1) Hydrate model props from DOM attributes
@@ -261,8 +311,31 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
 
                                         const traitEvent = `change:${spec.name}`;
                                         model.on(traitEvent, () => {
-                                                const value = model.get(spec.name);
+                                                if (spec.name === 'name' && syncingName) {
+                                                        return;
+                                                }
+                                                let value = model.get(spec.name);
+                                                if (spec.name === 'name') {
+                                                        const normalized = ensureUniqueComponentName(
+                                                                editor,
 
+                                                                model,
+
+                                                                normalizeComponentName(String(value ?? ''))
+                                                        );
+
+                                                        if (normalized !== value) {
+                                                                syncingName = true;
+
+                                                                try {
+                                                                        model.set(spec.name, normalized, { silent: true });
+
+                                                                        value = normalized;
+                                                                } finally {
+                                                                        syncingName = false;
+                                                                }
+                                                        }
+                                                }
                                                 if (spec.grapes?.applyToModel) {
                                                         spec.grapes.applyToModel(model, value);
                                                 } else {
@@ -353,6 +426,21 @@ function applyDefaultTraitToModel(model: any, spec: PropSpec<any>, value: unknow
 function syncModelValueToAttributes(model: any, spec: PropSpec<any>, value: unknown): void {
         const attrName = `data-delphine-${spec.name}`;
         const attrs = { ...(model.getAttributes?.() ?? {}) };
+
+        if (spec.name === 'name') {
+                attrs['data-delphine-name'] = String(value ?? '');
+                model.setAttributes(attrs);
+
+                const componentClass = attrs['data-delphine-component'];
+
+                // Use a different GrapesJS internal display key if needed,
+                // but avoid setting the same "name" property again here.
+                model.set('label', componentClass ? `${value} (${componentClass})` : String(value ?? ''), {
+                        silent: true
+                });
+
+                return;
+        }
 
         if (spec.kind === 'boolean') {
                 const boolValue = value === true || value === 'true' || value === 1 || value === '1' || value === 'on' || value === 'yes';

@@ -57,7 +57,7 @@ export class TMetaFrame<T extends TFrame> extends TMetaCompositeControl implemen
                         icon: undefined,
                         component: this,
                         isContainer: true,
-                        instanceName: 'frame',
+                        instanceName: 'Frame',
                         tagName: 'div',
                         resizable: false,
 
@@ -118,7 +118,7 @@ export class TMetaHostFrame<T extends THostFrame> extends TMetaContainer {
                         icon: undefined,
                         component: this,
                         isContainer: true,
-                        instanceName: 'frame',
+                        instanceName: 'Frame',
                         tagName: 'div',
                         resizable: false,
 

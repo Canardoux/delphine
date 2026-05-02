@@ -84,7 +84,7 @@ export class TMetaCompositeControl extends TMetaContainer implements IMetaCompon
                 component: this,
                 props: this.propSpecsToSchemaProps(),
                 isContainer: true,
-                instanceName: 'compositeControl',
+                instanceName: 'CompositeControl',
                 tagName: 'div',
                 resizable: false
         };
