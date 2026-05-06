@@ -36,6 +36,11 @@ export type TApplicationConfig = {
         mainForm?: string;
         forms?: string[];
         frames?: any[];
+        ui?: {
+                theme?: string;
+                density?: 'compact' | 'normal' | 'spacious';
+                fontScale?: number;
+        };
 };
 
 export class TMetaApplication extends TMetaclass {
@@ -54,7 +59,7 @@ export class TApplication implements IApplication {
         currentForm: TForm | null = null;
         mainForm: TForm | null = null;
         protected appName: string;
-        protected appConfig: TApplicationConfig;
+        protected appConfig: TApplicationConfig | null = null;
         private formStack: TForm[] = [];
         private handlingBrowserPop = false;
 
@@ -63,6 +68,49 @@ export class TApplication implements IApplication {
         //}
         private forms: Map<string, TForm> = new Map<string, TForm>();
         private loadedUnits = new Map<string, TLoadedUnit>();
+
+        private _theme: string | null = null;
+
+        // get theme(): string {
+        //         return this._theme;
+        // }
+
+        set theme(value: string) {
+                this.setTheme(value);
+        }
+
+        setTheme(theme: string): void {
+                this._theme = theme;
+                this.applyTheme();
+        }
+
+        applyTheme(): void {
+                const themeId = 'delphine-current-theme';
+
+                let link = document.getElementById(themeId) as HTMLLinkElement | null;
+                const theme = this._theme || (this.appConfig?.ui?.theme ?? 'win95');
+
+                if (!link) {
+                        link = document.createElement('link');
+                        link.id = themeId;
+                        link.rel = 'stylesheet';
+                        link.setAttribute('data-delphine-theme', theme);
+                        document.head.appendChild(link);
+                }
+
+                link.href = `/themes/${theme}.css`;
+                link.setAttribute('data-delphine-theme', theme);
+
+                // Important: keep the theme last in <head>
+                document.head.appendChild(link);
+        }
+
+        // theme = 'flat';
+
+        // setTheme(theme: string) {
+        //         this.theme = theme;
+        //         applyTheme(theme);
+        // }
 
         private async loadDformUnit(basePath: string, unitName: string): Promise<TLoadedUnit> {
                 const formPath = `${basePath}/${unitName}.dform`;
@@ -99,14 +147,27 @@ export class TApplication implements IApplication {
                 return this.loadedUnits.get(name);
         }
 
-        constructor(appName: string, appConfig: TApplicationConfig) {
+        constructor(appName: string) {
                 this.appName = appName;
-                this.appConfig = appConfig;
+                //this.appConfig = appConfig;
                 setApplication(this);
                 this.typeRegistry = new TTypeRegistry();
                 registerBuiltins(this.typeRegistry);
 
                 //registerBuiltins(this.types);
+        }
+
+        async readConfig() {
+                const appConfigUrl = `/app.json`;
+
+                const appConfigResponse = await fetch(appConfigUrl);
+                if (!appConfigResponse.ok) {
+                        throw new Error(`Cannot load ${appConfigUrl}`);
+                }
+
+                const appConfig = await appConfigResponse.json();
+                console.log(`Loaded app config. Theme:`, appConfig.ui.theme);
+                this.appConfig = appConfig;
         }
 
         getClass(type: string): IMetaComponent | undefined {
@@ -299,6 +360,7 @@ export class TApplication implements IApplication {
                         const url = new URL(window.location.href);
                         url.searchParams.set('form', this.mainForm!.name);
                         history.replaceState({ form: this.mainForm!.name }, '', url);
+                        this.setTheme(this.appConfig?.ui?.theme ?? 'win95');
                         this.run();
                         //if (this.mainForm) {
                         //} else {
@@ -312,7 +374,7 @@ export class TApplication implements IApplication {
         }
 
         async registerRuntimeTypes() {
-                const frames = this.appConfig.frames ?? [];
+                const frames = this.appConfig?.frames ?? [];
                 for (const frame of frames) {
                         const loaded = await this.loadDformUnit(`/src/frames`, frame.className);
                         this.registerLoadedUnit(frame.tagName, loaded);
@@ -320,7 +382,7 @@ export class TApplication implements IApplication {
                 }
         }
         async createAutoForms() {
-                const formNames = this.appConfig.forms ?? [];
+                const formNames = this.appConfig?.forms ?? [];
 
                 for (const formName of formNames) {
                         const form = await this.createFormByName(formName);
@@ -384,6 +446,7 @@ export class TApplication implements IApplication {
                 this.applyDformStyle(formName, css);
                 form.create(html);
                 this.registerForm(form);
+                this.applyTheme();
 
                 return form;
         }

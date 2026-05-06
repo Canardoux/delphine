@@ -4,15 +4,6 @@ const params = new URLSearchParams(window.location.search);
 const appName = params.get('app') ?? 'MainApp';
 
 async function main(): Promise<void> {
-        const appConfigUrl = `/src/app.json`;
-
-        const appConfigResponse = await fetch(appConfigUrl);
-        if (!appConfigResponse.ok) {
-                throw new Error(`Cannot load ${appConfigUrl}`);
-        }
-
-        const appConfig = await appConfigResponse.json();
-
         let app: TApplication;
 
         try {
@@ -20,14 +11,16 @@ async function main(): Promise<void> {
 
                 const AppClass = module.default ?? module[appName] ?? module.MainApp;
                 if (AppClass) {
-                        app = new AppClass(appName, appConfig);
+                        app = new AppClass(appName);
                 } else {
                         throw new Error('No App class found');
                 }
         } catch {
-                app = new TApplication(appName, appConfig);
+                app = new TApplication(appName);
         }
 
+        //app.setTheme(appConfig.ui.theme);
+        await app.readConfig();
         await app.registerRuntimeTypes();
         await app.createAutoForms();
         await app.initialize();

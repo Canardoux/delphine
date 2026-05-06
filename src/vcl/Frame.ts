@@ -49,7 +49,7 @@ export class TMetaFrame<T extends TFrame> extends TMetaCompositeControl implemen
                 ];
         }
 
-        getSchema(): ComponentSchema {
+        getSchema(): ComponentSchema | null {
                 return {
                         name: this.typeName,
                         label: 'TFrame',
@@ -110,7 +110,7 @@ export class TMetaHostFrame<T extends THostFrame> extends TMetaContainer {
                 ];
         }
 
-        getSchema(): ComponentSchema {
+        getSchema(): ComponentSchema | null {
                 return {
                         name: this.typeName,
                         label: 'THostFrame',
@@ -139,7 +139,7 @@ export class THostFrame extends TContainer {
                 return true;
         }
 
-        getSchema(): ComponentSchema {
+        getSchema(): ComponentSchema | null {
                 return TMetaHostFrame.metaclass.getSchema();
         }
 

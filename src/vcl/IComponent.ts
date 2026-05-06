@@ -68,7 +68,7 @@ export interface IMetaComponent {
         create(name: string, form: any, parent: any): any;
         isAForm(): boolean;
         isACompositeControl(): boolean;
-        getSchema(): ComponentSchema;
+        getSchema(): ComponentSchema | null;
         getPropSpecs?(): PropSpec<any>[];
         defProps(): PropSpec<any>[];
 }

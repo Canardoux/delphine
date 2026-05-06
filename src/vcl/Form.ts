@@ -55,7 +55,8 @@ export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, 
                 ];
         }
 
-        getSchema(): ComponentSchema {
+        /*
+        getSchema(): ComponentSchema | null {
                 return {
                         name: this.typeName,
                         label: 'TForm',
@@ -76,6 +77,10 @@ export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, 
 
                         props: this.propSpecsToSchemaProps()
                 };
+        }
+                */
+        getSchema(): ComponentSchema | null {
+                return null;
         }
 }
 

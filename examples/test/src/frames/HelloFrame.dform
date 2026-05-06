@@ -39,8 +39,9 @@ body {
                 data-delphine-caption="Change message"
                 data-delphine-name="button-changeMessage"
                 data-delphine-onclick="changeMessage_onclick"
+                class="delphine-button"
         >
-                Change Message
+                Change message
         </button>
         <button
                 data-delphine-component="TButton"
@@ -48,8 +49,9 @@ body {
                 data-delphine-caption="Delphine HTML caption"
                 data-delphine-name="myframeButton"
                 data-delphine-onclick="myframeButton_onclick"
+                class="delphine-button"
         >
-                Titi
+                Delphine HTML caption
         </button>
 </div>
 </template>

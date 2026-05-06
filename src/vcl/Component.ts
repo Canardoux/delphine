@@ -74,7 +74,7 @@ export class TMetaComponent extends TMetaObject {
                 return new TComponent(TMetaComponent.metaclass, name, form, parent);
         }
 
-        getSchema(): ComponentSchema {
+        getSchema(): ComponentSchema | null {
                 return {
                         name: this.typeName,
                         label: 'TComponent',

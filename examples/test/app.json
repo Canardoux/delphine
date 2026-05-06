@@ -1,0 +1,20 @@
+{
+  "name": "test",
+  "mainForm": "MainForm",
+  "forms": [
+    "MainForm",
+    "Riri"
+  ],
+  "frames": [
+    {
+      "className": "HelloFrame",
+      "url": "/src/frames/HelloFrame.dform",
+      "tagName": "hello-frame"
+    }
+  ],
+  "ui": {
+    "theme": "flat",
+    "density": "normal",
+    "fontScale": 1
+  }
+}

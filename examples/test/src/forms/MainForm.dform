@@ -1,6 +1,16 @@
 <delphine version="1.0" class="MainForm" name="MainForm"></delphine>
 
 <style>
+.delphine-button {
+        color: rgb(255, 128, 128);
+        height: 40px;
+}
+
+.delphine-control.delphine-button {
+        color: rgb(255, 128, 128);
+        height: 40px;
+}
+
 * {
         box-sizing: border-box;
 }
@@ -33,6 +43,7 @@
 
 #MainForm {
         background-color: rgb(207, 196, 196);
+        color: rgb(255, 128, 128);
 }
 
 #mypanel {
@@ -77,27 +88,8 @@ body {
                 id="idhc"
                 data-delphine-delphinedisplayname=""
         >
-                <input
-                        data-delphine-component="TCheckBox"
-                        data-delphine-name="TCheckBox"
-                        type="checkbox"
-                        data-delphine-part="chkBox"
-                        id="zzz"
-                        data-delphine-onclick=""
-                        data-delphine-caption="Caption"
-                        data-delphine-delphinedisplayname=""
-                />
-                <span
-                        data-delphine-component="TCheckBox"
-                        data-delphine-name="TCheckBox"
-                        data-delphine-part="caption"
-                        id="ifg2"
-                        data-delphine-onclick=""
-                        data-delphine-caption="Caption"
-                        data-delphine-delphinedisplayname=""
-                >
-                        Ririxxx
-                </span>
+                <input type="checkbox" data-delphine-part="chkBox" id="zzz" />
+                <span data-delphine-part="caption" id="ifg2">Ririxxx</span>
         </label>
         <div
                 data-delphine-component="TPanel"
@@ -114,6 +106,7 @@ body {
                         data-delphine-name="button-a"
                         data-delphine-onclick="buttona_onclick"
                         data-delphine-delphinedisplayname=""
+                        class="delphine-control delphine-button"
                 >
                         Riri
                 </button>
@@ -124,8 +117,36 @@ body {
                         data-delphine-name="button-b"
                         data-delphine-onclick="buttonb_onclick"
                         data-delphine-delphinedisplayname=""
+                        class="delphine-control delphine-button"
                 >
                         push Riri
+                </button>
+                <button
+                        data-delphine-component="TButton"
+                        data-delphine-name="Button"
+                        data-delphine-onclick="Button_onclick"
+                        data-delphine-caption="Caption"
+                        class="delphine-control delphine-button"
+                >
+                        Caption
+                </button>
+                <button
+                        data-delphine-component="TButton"
+                        data-delphine-name="Button1"
+                        data-delphine-onclick="Button1_onclick"
+                        data-delphine-caption="Caption"
+                        class="delphine-control delphine-button"
+                >
+                        Caption
+                </button>
+                <button
+                        data-delphine-component="TButton"
+                        data-delphine-name="Button2"
+                        data-delphine-onclick=""
+                        data-delphine-caption="Caption"
+                        class="delphine-control delphine-button"
+                >
+                        Caption
                 </button>
         </div>
         <button
@@ -141,6 +162,7 @@ body {
                 data-delphine-caption="Button1 Caption"
                 data-delphine-onclick="button1_onclick"
                 data-delphine-delphinedisplayname=""
+                class="delphine-control delphine-button"
         >
                 Button1 Caption
         </button>
@@ -151,8 +173,27 @@ body {
                 data-delphine-name="buttonx"
                 data-delphine-onclick="label_onclick"
                 data-delphine-delphinedisplayname=""
+                class="delphine-control delphine-button"
         >
                 Delphine buttonx caption
+        </button>
+        <button
+                data-delphine-component="TButton"
+                data-delphine-name="Flat"
+                data-delphine-onclick="Flat_onclick"
+                data-delphine-caption="Flat Design"
+                class="delphine-control delphine-button"
+        >
+                Flat Design
+        </button>
+        <button
+                data-delphine-component="TButton"
+                data-delphine-name="Win95"
+                data-delphine-onclick="Win95_onclick"
+                data-delphine-caption="Win95 Design"
+                class="delphine-control delphine-button"
+        >
+                Win95 Design
         </button>
         <h1 id="igfu" data-delphine-onclick="" data-delphine-caption="Caption" data-delphine-name="Component1">Bonjour</h1>
         <div
@@ -162,7 +203,7 @@ body {
                 data-delphine-message="Bonjour depuis Delphine!!!"
                 data-delphine-props='{
             "message": "Hello depuis Delphine",
-            "count": 3,
+            "count": 3
           }'
                 data-delphine-frame="hello-frame"
                 data-delphine-onframeevent="myframe_onFrameEvent"
@@ -182,23 +223,32 @@ body {
         >
                 <button
                         data-delphine-component="TButton"
-                        data-delphine-caption="sub-button1"
-                        data-delphine-name="sub-button1"
-                        data-delphine-onclick="subButton1_onclick"
+                        data-delphine-caption="sub-btn1"
+                        data-delphine-name="sub-btn1"
+                        data-delphine-onclick="subBtn1_onclick"
                         id="igqcr"
                         data-delphine-delphinedisplayname=""
+                        class="delphine-button"
                 >
-                        sub-button1
+                        sub-btn1
                 </button>
                 <button
                         data-delphine-component="TButton"
-                        data-delphine-caption="sub-button2"
-                        data-delphine-name="sub-button2"
-                        data-delphine-onclick="subButton1_onclick"
-                        id="i8hlw"
-                        data-delphine-delphinedisplayname=""
+                        data-delphine-name="Button3"
+                        data-delphine-onclick="Button3_onclick"
+                        data-delphine-caption="Caption"
+                        class="delphine-control delphine-button"
                 >
-                        sub-button2
+                        Caption
+                </button>
+                <button
+                        data-delphine-component="TButton"
+                        data-delphine-name="Button4"
+                        data-delphine-onclick=""
+                        data-delphine-caption="Caption"
+                        class="delphine-control delphine-button"
+                >
+                        Caption
                 </button>
         </div>
 </div>

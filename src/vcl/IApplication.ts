@@ -38,6 +38,8 @@ export interface IApplication {
 
         getClass(type: string): IMetaComponent | undefined;
         getLoadedUnit(name: string): TLoadedUnit | undefined;
+        applyTheme(): void;
+        setTheme(theme: string): void;
 }
 
 //export const TheApplication: IApplication | null = null;

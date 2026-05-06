@@ -344,6 +344,73 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 return match?.[1] ?? null;
         }
 
+        // async readThemeFromAppJson(uri: vscode.Uri): Promise<string | null> {
+        //         return 'win95'; // ??? !!!
+        // }
+
+        async readThemeFromAppJson(dformUri: vscode.Uri): Promise<string> {
+                const workspaceFolder = vscode.workspace.getWorkspaceFolder(dformUri);
+                if (!workspaceFolder) return 'flat';
+
+                const appJsonUri = vscode.Uri.joinPath(workspaceFolder.uri, 'app.json');
+
+                try {
+                        const bytes = await vscode.workspace.fs.readFile(appJsonUri);
+                        const text = new TextDecoder('utf-8').decode(bytes);
+                        const config = JSON.parse(text);
+
+                        return config?.ui?.theme ?? 'flat';
+                } catch {
+                        return 'flat';
+                }
+        }
+
+        async writeThemeToAppJson(dformUri: vscode.Uri, theme: string): Promise<void> {
+                const workspaceFolder = vscode.workspace.getWorkspaceFolder(dformUri);
+                if (!workspaceFolder) return;
+
+                const appJsonUri = vscode.Uri.joinPath(workspaceFolder.uri, 'app.json');
+
+                let config: any = {};
+
+                try {
+                        const bytes = await vscode.workspace.fs.readFile(appJsonUri);
+                        config = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+                } catch {
+                        config = {};
+                }
+
+                config.ui ??= {};
+                config.ui.theme = theme;
+
+                const text = JSON.stringify(config, null, 2) + '\n';
+                await vscode.workspace.fs.writeFile(appJsonUri, new TextEncoder().encode(text));
+        }
+
+        async sendThemeToWebview(theme: string, webviewPanel: vscode.WebviewPanel): Promise<void> {
+                const themeUri = vscode.Uri.joinPath(
+                        DelphineCustomEditorProvider._context.extensionUri,
+
+                        'media',
+
+                        'themes',
+
+                        `${theme}.css`
+                );
+
+                const bytes = await vscode.workspace.fs.readFile(themeUri);
+
+                const themeCss = new TextDecoder('utf-8').decode(bytes);
+
+                webviewPanel.webview.postMessage({
+                        type: 'delphine:theme',
+
+                        theme,
+
+                        themeCss
+                });
+        }
+
         async resolveCustomTextEditor(document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel, _token: vscode.CancellationToken): Promise<void> {
                 const panelId = Math.random().toString(36).slice(2, 8);
                 console.log(`[Delphine/ext] resolveCustomTextEditor panel=${panelId} doc=${document.uri.fsPath}`);
@@ -419,6 +486,47 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                                 case 'delphine:run-app':
                                         await vscode.commands.executeCommand('delphine.runApp', document.uri);
                                         return;
+
+                                case 'delphine:get-theme':
+                                        const theme = (await this.readThemeFromAppJson(document.uri)) ?? 'flat';
+                                        const themeUri = vscode.Uri.joinPath(
+                                                DelphineCustomEditorProvider._context.extensionUri,
+
+                                                'media',
+
+                                                'themes',
+
+                                                `${theme}.css`
+                                        );
+
+                                        const bytes = await vscode.workspace.fs.readFile(themeUri);
+
+                                        const themeCss = new TextDecoder('utf-8').decode(bytes);
+
+                                        webviewPanel.webview.postMessage({
+                                                type: 'delphine:theme',
+
+                                                theme,
+
+                                                themeCss
+                                        });
+
+                                        return;
+
+                                case 'delphine:set-theme':
+                                        await this.writeThemeToAppJson(document.uri, msg.theme);
+                                        await this.sendThemeToWebview(msg.theme, webviewPanel);
+                                        return;
+                                // const theme = await this.readThemeFromAppJson(document.uri);
+                                // const themeUri = webviewPanel.webview.asWebviewUri(vscode.Uri.joinPath(DelphineCustomEditorProvider._context.extensionUri, 'media', 'themes', `${theme}.css`));
+
+                                // webviewPanel.webview.postMessage({
+                                //         type: 'delphine:theme',
+                                //         themeUrl: themeUri.toString()
+                                // });
+
+                                // await postThemeToWebview();
+                                // return;
                         }
                 });
 

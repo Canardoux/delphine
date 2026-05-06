@@ -261,6 +261,9 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
                         if (!(el instanceof HTMLElement)) return false;
 
                         const componentName = el.getAttribute('data-delphine-component');
+                        if (componentName) {
+                                console.log('match candidate', componentName, schema);
+                        }
                         if (componentName === schema.name) {
                                 const delphineName = el.getAttribute('data-delphine-name');
                                 return { name: `${delphineName}(${componentName})`, type: typeId };
@@ -369,6 +372,10 @@ function escapeHtml(value: string): string {
         return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function delphineCssClass(schema: ComponentSchema): string {
+        return `delphine-control delphine-${schema.name.replace(/^T/, '').toLowerCase()}`;
+}
+
 function schemaToHtml(schema: ComponentSchema, isRoot = false): string {
         const tag = schema.tagName ?? 'div';
 
@@ -378,6 +385,7 @@ function schemaToHtml(schema: ComponentSchema, isRoot = false): string {
 
         if (schema.component) {
                 attrs['data-delphine-component'] = schema.name;
+                attrs.class = [attrs.class, delphineCssClass(schema)].filter(Boolean).join(' ');
         }
 
         if (isRoot) {
@@ -397,10 +405,15 @@ function schemaToHtml(schema: ComponentSchema, isRoot = false): string {
         return `<${tag}${attrText}>${children}</${tag}>`;
 }
 
+function shortBlockLabel(schema: ComponentSchema): string {
+        return schema.label?.replace(/^T/, '') ?? schema.name.replace(/^T/, '');
+}
+
 function registerBlock(editor: Editor, schema: ComponentSchema): void {
         editor.BlockManager.add(`delphine-block-${schema.name}`, {
-                label: schema.label,
+                label: shortBlockLabel(schema), // Button, Panel, CheckBox
                 category: schema.category,
+                media: schema.icon ?? '▣',
                 content: schemaToHtml(schema, true)
         });
 }

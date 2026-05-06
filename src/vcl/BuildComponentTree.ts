@@ -128,7 +128,6 @@ export class BuildComponentTree {
                         spec.apply(comp, value);
                 }
         }
-        //titi=12;
         /**
          * Parse HTML attributes + JSON bulk into a plain object of typed props.
          * - Reads JSON from data-delphine-props
@@ -216,6 +215,8 @@ export class BuildComponentTree {
                         if (loaded?.style) {
                                 this.applyLoadedUnitStyle(maybeFrame, loaded.style);
                         }
+                        debugger;
+                        app?.applyTheme(); // re-apply theme to let it cascade to the new content
                 }
 
                 // Done in the constructor //parent.children.push(child);

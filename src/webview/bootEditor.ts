@@ -15,6 +15,11 @@ type DelphineInboundMessage =
         | {
                   type: 'delphine:select-component';
                   componentName: string;
+          }
+        | {
+                  type: 'delphine:theme';
+                  theme: string;
+                  themeCss: string;
           };
 
 type DelphineWindow = Window &
@@ -51,6 +56,47 @@ function postToVsCode(payload: any): void {
                 },
                 '*'
         );
+}
+
+
+function addThemeSelector(_editor: any): void {
+        setTimeout(() => {
+                const bar = document.querySelector('.gjs-pn-options .gjs-pn-buttons') ?? document.querySelector('.gjs-pn-options');
+
+                if (!bar) {
+                        console.warn('[Delphine] options panel not found');
+                        return;
+                }
+
+                const select = document.createElement('select');
+                select.id = 'delphine-theme-selector';
+                select.title = 'Theme';
+
+                select.innerHTML = `
+                        <option value="flat">Flat</option>
+                        <option value="win95">Windows 95</option>
+                        <option value="material">Material</option>
+                        <option value="motif">Motif</option>
+                        <option value="openlook">Open Look</option>
+                `;
+
+                select.style.height = '22px';
+                select.style.marginLeft = '6px';
+                select.style.marginRight = '6px';
+                select.style.maxWidth = '120px';
+
+                select.addEventListener('mousedown', (ev) => ev.stopPropagation());
+                select.addEventListener('click', (ev) => ev.stopPropagation());
+
+                select.addEventListener('change', () => {
+                        postToVsCode({
+                                type: 'delphine:set-theme',
+                                theme: select.value
+                        });
+                });
+
+                bar.appendChild(select);
+        }, 100);
 }
 
 function log(text: string): void {
@@ -330,6 +376,7 @@ function grapesJSEditor(grapes: any): void {
 
         registerDelphineCommands(editor);
         registerDelphineEventTrait(editor);
+        //addThemeSelector(editor);
 
         let dirtyTimer: number | undefined;
 
@@ -417,6 +464,48 @@ function grapesJSEditor(grapes: any): void {
                         isSelectingFromHost = false;
                 }, 0);
         }
+        function applyThemeToDesigner(editor: any, themeName: string, themeCss: string): void {
+                const frame = editor.Canvas.getFrameEl();
+                const doc = frame?.contentDocument || frame?.contentWindow?.document;
+                if (!doc) return;
+
+                const styleId = 'delphine-current-theme';
+
+                let styleEl = doc.getElementById(styleId) as HTMLStyleElement | null;
+
+                if (!styleEl) {
+                        styleEl = doc.createElement('style');
+                        styleEl!.id = styleId;
+                        styleEl!.setAttribute('data-delphine-theme', themeName);
+                }
+
+                styleEl!.textContent = themeCss;
+
+                // Keep theme last
+                doc.head.appendChild(styleEl);
+
+                console.log('[Delphine] theme CSS injected', themeName, themeCss.length);
+        }
+        // function applyThemeToDesigner(editor: any, theme: string): void {
+        //         const frame = editor.Canvas.getFrameEl();
+        //         const doc = frame?.contentDocument;
+        //         if (!doc) return;
+
+        //         const themeId = 'delphine-current-theme';
+
+        //         let link = doc.getElementById(themeId) as HTMLLinkElement | null;
+
+        //         if (!link) {
+        //                 link = doc.createElement('link');
+        //                 link!.id = themeId;
+        //                 link!.rel = 'stylesheet';
+        //         }
+
+        //         link!.href = `/themes/${theme}.css`;
+        //         link!.setAttribute('data-delphine-theme', theme);
+
+        //         doc.head.appendChild(link);
+        // }
 
         function loadDocument(html: string, css: string): void {
                 const selectedKey = getSelectedComponentKey(editor);
@@ -457,12 +546,20 @@ function grapesJSEditor(grapes: any): void {
                         });
                 }
         }
-
+        let currentThemeCss = '';
+        let currentThemeName = 'win95';
         messageHandler = async (payload: DelphineInboundMessage) => {
                 switch (payload.type) {
                         case 'doc:update': {
                                 const msg = payload as DocUpdateMessage;
                                 loadDocument(msg.html ?? '', msg.css ?? '');
+
+                                requestAnimationFrame(() => {
+                                        if (currentThemeCss) {
+                                                applyThemeToDesigner(editor, currentThemeName, currentThemeCss);
+                                        }
+                                });
+
                                 break;
                         }
 
@@ -471,6 +568,18 @@ function grapesJSEditor(grapes: any): void {
 
                         case 'delphine:select-component':
                                 selectComponentByName(editor, payload.componentName);
+                                break;
+
+                        case 'delphine:theme':
+                                currentThemeName = payload.theme ?? 'flat';
+                                currentThemeCss = payload.themeCss ?? '';
+
+                                const select = document.querySelector('#delphine-theme-selector select') as HTMLSelectElement | null;
+                                if (select) {
+                                        select.value = currentThemeName;
+                                }
+
+                                applyThemeToDesigner(editor, currentThemeName, currentThemeCss);
                                 break;
                 }
         };
@@ -690,6 +799,12 @@ function grapesJSEditor(grapes: any): void {
 
                 setTimeout(() => {
                         assignNameIfMissing(editor, model);
+                        const attrs = model.getAttributes?.() ?? {};
+
+                        if (attrs['data-delphine-component'] && !attrs['data-delphine-part']) {
+                                editor.select(model);
+                                //openDefaultEventHandler(editor, model);
+                        }
                 }, 0);
         });
 
@@ -701,37 +816,77 @@ function grapesJSEditor(grapes: any): void {
                 markDirty(editor, 'style:update');
         });
 
+        // editor.on('component:selected', (model: any) => {
+        //         const attrs = model.getAttributes?.() ?? {};
+
+        //         if (attrs['data-delphine-part']) {
+        //                 const parent = model.parent?.();
+
+        //                 if (parent) {
+        //                         setTimeout(() => {
+        //                                 editor.select(parent);
+        //                         }, 0);
+        //                 }
+
+        //                 return;
+        //         }
+
+        //         showCurrentDelphineTraitTab(editor, model);
+
+        //         if (!isSelectingFromHost) {
+        //                 postToVsCode({
+        //                         type: 'delphine:designer-selection-changed',
+        //                         componentName: attrs['data-delphine-name'],
+        //                         componentClass: attrs['data-delphine-component']
+        //                 });
+        //         }
+        // });
+
+        //editor.on('component:selected', (model: any) => {
+        // optionnel : garder sélection courante
+        //});
+
+        let lastSelection: string | undefined;
+
         editor.on('component:selected', (model: any) => {
                 const attrs = model.getAttributes?.() ?? {};
 
+                const name = attrs['data-delphine-name'];
+                const cls = attrs['data-delphine-component'];
+
                 if (attrs['data-delphine-part']) {
                         const parent = model.parent?.();
-
                         if (parent) {
-                                setTimeout(() => {
-                                        editor.select(parent);
-                                }, 0);
+                                setTimeout(() => editor.select(parent), 0);
                         }
-
                         return;
                 }
 
                 showCurrentDelphineTraitTab(editor, model);
 
                 if (!isSelectingFromHost) {
+                        if (name === lastSelection) return; // 🔥 clé
+
+                        lastSelection = name;
+
                         postToVsCode({
                                 type: 'delphine:designer-selection-changed',
-                                componentName: attrs['data-delphine-name'],
-                                componentClass: attrs['data-delphine-component']
+                                componentName: name,
+                                componentClass: cls
                         });
                 }
         });
 
-        //editor.on('component:selected', (model: any) => {
-        // optionnel : garder sélection courante
-        //});
+        editor.on('canvas:frame:load', () => {
+                console.log('[Delphine] frame loaded');
+
+                if (currentThemeCss) {
+                        applyThemeToDesigner(editor, currentThemeName, currentThemeCss);
+                }
+        });
 
         editor.on('load', () => {
+                addThemeSelector(editor);
                 const frame = editor.Canvas.getFrameEl();
                 const doc = frame?.contentDocument;
 
@@ -806,13 +961,14 @@ function grapesJSEditor(grapes: any): void {
                                 true
                         );
                 }
+                postToVsCode({ type: 'delphine:get-theme' });
         });
 
         applyDelphineBodyTraits();
 
         editor.Panels.addButton('options', {
                 id: 'delphine-devtools',
-                label: '🛠',
+                label: '🐞',
                 attributes: { title: 'Open DevTools' },
                 command: () => {
                         postToVsCode({ type: 'delphine:devtools' });

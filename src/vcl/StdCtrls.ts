@@ -144,12 +144,14 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
                 ];
         }
 
-        getSchema(): ComponentSchema {
+        getSchema(): ComponentSchema | null {
                 return {
                         name: this.typeName,
                         label: 'TButton',
                         category: 'Standard Control',
-                        icon: undefined,
+                        icon: '🔘',
+                        //icon: `<svg viewBox="0 0 24 24" width="22" height="22"><rect x="4" y="8" width="16" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+
                         component: this,
                         isContainer: false,
                         instanceName: 'Button',
@@ -192,12 +194,12 @@ export class TMetaPanel extends TMetaContainer {
                 ];
         }
 
-        getSchema(): ComponentSchema {
+        getSchema(): ComponentSchema | null {
                 return {
                         name: this.typeName,
                         label: 'TPanel',
                         category: 'Standard Control',
-                        icon: undefined,
+                        icon: '▭',
                         component: TMetaPanel.metaclass,
                         isContainer: true,
                         instanceName: 'Panel',
@@ -300,12 +302,12 @@ export class TMetaLabel<T extends TLabel> extends TMetaControl {
                 ];
         }
 
-        getSchema(): ComponentSchema {
+        getSchema(): ComponentSchema | null {
                 return {
                         name: this.typeName,
                         label: 'TLabel',
                         category: 'Standard Control',
-                        icon: undefined,
+                        icon: '🏷️',
                         component: this,
                         isContainer: false,
                         instanceName: 'Label',
@@ -554,12 +556,12 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                 ];
         }
 
-        getSchema(): ComponentSchema {
+        getSchema(): ComponentSchema | null {
                 return {
                         name: this.typeName,
                         label: 'TCheckBox',
                         category: 'Standard Control',
-                        icon: undefined,
+                        icon: '☑️',
                         component: this,
                         isContainer: false,
                         instanceName: 'CheckBox',

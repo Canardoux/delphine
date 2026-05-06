@@ -1,0 +1,13 @@
+.delphine-button {
+        border: 2px outset #d0d0d0;
+        background: #c0c0c0;
+        padding: 2px 8px;
+}
+
+.delphine-button:active {
+        border-style: inset;
+        padding-left: 9px;
+        padding-top: 3px;
+        padding-right: 7px;
+        padding-bottom: 1px;
+}

@@ -106,7 +106,7 @@ function disposeCurrentUnit(): void {
 
         currentUnit = undefined;
 }
-function renderLoadedUnit(loaded: LoadedUnit): void {
+async function renderLoadedUnit(loaded: LoadedUnit) {
         clearPreviewDom();
 
         disposeCurrentUnit();
@@ -117,13 +117,22 @@ function renderLoadedUnit(loaded: LoadedUnit): void {
                 } catch {}
         }
 
-        app = new TApplication(appName, { mainForm: unitName });
+        app = new TApplication(appName);
+
+        // -------------------------------------------------
+        // The following calls could be a bad idea !!!
+        await app.readConfig();
+        await app.registerRuntimeTypes();
+        // await app.createAutoForms();
+        // await app.initialize();
+        // --------------------------------------------------
 
         const UnitClass = loaded.module.default ?? loaded.module[unitName];
         const unit = new UnitClass(unitName);
 
         unit.create(loaded.html);
         app.mainForm = unit;
+
         unit.show();
 
         currentUnit = unit;

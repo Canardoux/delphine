@@ -65,7 +65,7 @@ export default class MainForm extends TForm {
                 console.log('Button1 clicked!!!!');
         }
 
-        subButton1_onclick(_ev: Event | null, _sender: TControl) {
+        subBtn1_onclick(_ev: Event | null, _sender: TControl) {
                 const panel = this.componentRegistry.get<TPanel>('myPanel');
                 if (!panel) {
                         console.warn('myPanel not found in registry');
@@ -77,11 +77,6 @@ export default class MainForm extends TForm {
                 const frame = hostFrame!.getFrame() as HelloFrame;
                 const btn = frame.componentRegistry.get<TButton>('myframeButton');
                 btn!.caption = 'Message updated from Delphine!!!';
-        }
-
-        subButton2_onclick(_ev: Event | null, _sender: TControl) {
-                const frame = this.componentRegistry.get<TPluginHost>('myframeplugin');
-                frame!.setPluginProp('message', 'Message updated from Delphine!!!');
         }
 
         zaza_onclick(_ev: Event | null, _sender: TControl) {
@@ -106,11 +101,21 @@ export default class MainForm extends TForm {
                 }
         }
 
-        myPanel_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle myPanel_onclick
+        Flat_onclick(_ev: Event | null, _sender: TControl) {
+                const app = getApplication();
+                app!.setTheme('flat');
         }
 
-        checkBox_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle checkBox_onclick
+        Win95_onclick(_ev: Event | null, _sender: TControl) {
+                const app = getApplication();
+                app!.setTheme('win95');
+        }
+
+        Button2_onclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle Button2_onclick
+        }
+
+        Button3_onclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle Button3_onclick
         }
 }

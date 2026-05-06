@@ -76,6 +76,7 @@ export type UIPluginMessage = { type: 'setProp'; hostName: string; key: string; 
 
 export class TMetaCompositeControl extends TMetaContainer implements IMetaComponent, IMetaControl, IMetaCompositeControl {
         static readonly metaclass: TMetaCompositeControl = new TMetaCompositeControl(TMetaContainer.metaclass, 'TCompositeControl');
+        /*
         schema: ComponentSchema = {
                 name: this.typeName,
                 label: 'TCompositeControl',
@@ -88,6 +89,7 @@ export class TMetaCompositeControl extends TMetaContainer implements IMetaCompon
                 tagName: 'div',
                 resizable: false
         };
+        */
 
         constructor(superClass: TMetaContainer, name: string) {
                 super(superClass, name);
@@ -100,8 +102,8 @@ export class TMetaCompositeControl extends TMetaContainer implements IMetaCompon
                 ];
         }
 
-        getSchema(): ComponentSchema {
-                return this.schema;
+        getSchema(): ComponentSchema | null {
+                return null;
         }
 
         isACompositeControl(): boolean {

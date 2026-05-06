@@ -30,6 +30,7 @@ body {
                 data-delphine-caption="MainForm"
                 data-delphine-name="button1"
                 data-delphine-onclick="button1_onclick"
+                class="delphine-control delphine-button"
         >
                 MainForm
         </button>
@@ -38,11 +39,13 @@ body {
                 data-delphine-caption="POP to MainForm"
                 data-delphine-name="button2"
                 data-delphine-onclick="button2_onclick"
+                class="delphine-control delphine-button"
         >
                 POP to MainForm
         </button>
 </div>
-<button data-delphine-component="TButton" data-delphine-name="button" data-delphine-onclick="" data-delphine-caption="Caption">
+<button data-delphine-component="TButton" data-delphine-name="button" data-delphine-onclick="" data-delphine-caption="Caption"
+class="delphine-control delphine-button">
         Caption
 </button>
 </template>
