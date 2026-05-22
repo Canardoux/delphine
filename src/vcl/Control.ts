@@ -67,6 +67,14 @@ export class THandler {
         }
 }
 
+export class PopupMenu {
+        s: string;
+
+        constructor(s: string) {
+                this.s = s;
+        }
+}
+
 // --------------------------------------
 
 export class TControl extends TComponent implements IControl {
@@ -74,13 +82,11 @@ export class TControl extends TComponent implements IControl {
         //return TMetaControl.metaclass;
         //}
 
-        name: string;
         readonly parent: TControl | null = null;
 
         form: IForm | null = null;
-        children: TControl[] = [];
+        popupMenu: string = '';
 
-        elem: Element | null = null;
         get htmlElement(): HTMLElement | null {
                 return this.elem as HTMLElement | null;
         }
@@ -88,7 +94,6 @@ export class TControl extends TComponent implements IControl {
                 super(metaclass, name, form, parent);
                 this.name = name;
                 this.parent = parent;
-                parent?.children.push(this); // Could be done in buildComponentTree()
                 this.form = form;
 
                 // IMPORTANT: Initialize props at runtime (declare would not do it).
@@ -98,17 +103,13 @@ export class TControl extends TComponent implements IControl {
         // NOTE: This is runtime data, so it must be initialized (no "declare").
         //props: ComponentProps;
 
-        /** May contain child components */
-        allowsChildren(): boolean {
-                return false;
+        get onContextPopup(): THandler {
+                const handler = this.props.oncontextpopup as THandler;
+                return handler ?? new THandler('');
         }
 
-        get color(): TColor {
-                return new TColor(this.getHtmlStyleProp('color'));
-        }
-
-        set color(color) {
-                this.setHtmlStyleProp('color', color.s);
+        set onContextPopup(handler) {
+                this.props.oncontextpopup = handler;
         }
 
         get onclick(): THandler {
@@ -118,6 +119,34 @@ export class TControl extends TComponent implements IControl {
 
         set onclick(handler) {
                 this.props.onclick = handler;
+        }
+
+        get ondblclick(): THandler {
+                const handler = this.props.ondblclick as THandler;
+                return handler ?? new THandler('');
+        }
+
+        set ondblclick(handler) {
+                this.props.ondblclick = handler;
+        }
+
+        /*
+        get popupMenu(): string {
+                const popupMenu = this.props.popupMenu as string;
+                return popupMenu ?? '';
+        }
+
+        set popupMenu(popupMenu: string) {
+                this.props.popupMenu = popupMenu;
+        }
+                */
+
+        get color(): TColor {
+                return new TColor(this.getHtmlStyleProp('color'));
+        }
+
+        set color(color) {
+                this.setHtmlStyleProp('color', color.s);
         }
 
         /*
@@ -183,13 +212,13 @@ export class TMetaControl extends TMetaComponent implements IMetaControl {
         //return TMetaComponent.metaclass;
         //}
 
-        isAForm(): boolean {
-                return false;
-        }
+        // isAForm(): boolean {
+        //         return false;
+        // }
 
-        isACompositeControl(): boolean {
-                return false;
-        }
+        // isACompositeControl(): boolean {
+        //         return false;
+        // }
 
         // Create the runtime instance and attach it to the DOM element.
         create(name: string, form: IForm, parent: TControl): TControl {
@@ -199,6 +228,29 @@ export class TMetaControl extends TMetaComponent implements IMetaControl {
         defProps(): PropSpec<TControl>[] {
                 return [
                         //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
+                        //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
+                        {
+                                name: 'popupmenu',
+                                default: '',
+                                kind: 'popupMenu',
+                                retrieve: (o) => {
+                                        return o.popupMenu;
+                                },
+                                //apply: (o, v) => (o.onclick = new THandler(String(v)))
+                                apply: (o, v) => (o.popupMenu = v as string),
+                                grapes: {
+                                        traitType: 'text',
+
+                                        label: 'PopupMenu',
+
+                                        applyToModel: (model: any, value) => {
+                                                //model.components(String(value ?? 'GLOUPS'));
+                                                model.addAttributes({
+                                                        'data-delphine-popupmenu': String(value ?? '')
+                                                });
+                                        }
+                                }
+                        },
                         {
                                 name: 'onclick',
                                 default: '',
@@ -207,29 +259,58 @@ export class TMetaControl extends TMetaComponent implements IMetaControl {
                                         return o.onclick;
                                 },
                                 //apply: (o, v) => (o.onclick = new THandler(String(v)))
-                                apply: (o, v) => (o.onclick = v as THandler)
+                                apply: (o, v) => (o.onclick = v as THandler),
+                                grapes: {
+                                        label: 'OnClick'
+                                }
                         },
                         {
-                                name: 'name',
-
-                                kind: 'string',
-
+                                name: 'ondblclick',
                                 default: '',
+                                kind: 'handler',
                                 retrieve: (o) => {
-                                        return o.name;
+                                        return o.ondblclick;
                                 },
                                 //apply: (o, v) => (o.onclick = new THandler(String(v)))
-                                apply: (o, v) => {
-                                        o.name = String(v);
-                                },
-
+                                apply: (o, v) => (o.ondblclick = v as THandler),
                                 grapes: {
-                                        label: 'Name'
+                                        label: 'OnDblClick'
+                                }
+                        },
+                        {
+                                name: 'oncontextpopup',
+                                default: '',
+                                kind: 'handler',
+                                retrieve: (o) => {
+                                        return o.onContextPopup;
+                                },
+                                //apply: (o, v) => (o.onclick = new THandler(String(v)))
+                                apply: (o, v) => (o.onContextPopup = v as THandler),
+                                grapes: {
+                                        label: 'OnContextPopup'
                                 }
                         }
+                        // {
+                        //         name: 'name',
+
+                        //         kind: 'string',
+
+                        //         default: '',
+                        //         retrieve: (o) => {
+                        //                 return o.name;
+                        //         },
+                        //         //apply: (o, v) => (o.onclick = new THandler(String(v)))
+                        //         apply: (o, v) => {
+                        //                 o.name = String(v);
+                        //         },
+
+                        //         grapes: {
+                        //                 label: 'Name'
+                        //         }
+                        // }
                         //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
                 ];
         }
 
-        domEvents?(): string[]; // default [];
+        domEvents?(): string[]; // default []; // ??? !!!
 }

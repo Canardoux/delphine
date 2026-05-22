@@ -167,6 +167,24 @@ async function showTypescriptDocument(doc: vscode.TextDocument, uri: vscode.Uri)
         });
 }
 
+let applyingEditFromWebview = false;
+
+async function replaceDocumentFromWebview(doc: vscode.TextDocument, newText: string) {
+        applyingEditFromWebview = true;
+
+        try {
+                const edit = new vscode.WorkspaceEdit();
+                const fullRange = new vscode.Range(doc.positionAt(0), doc.positionAt(doc.getText().length));
+
+                edit.replace(doc.uri, fullRange, newText);
+                await vscode.workspace.applyEdit(edit);
+        } finally {
+                setTimeout(() => {
+                        applyingEditFromWebview = false;
+                }, 100);
+        }
+}
+
 async function handleOpenHandler(msg: any, dformDocument: vscode.TextDocument) {
         const tsUri = getCompanionTypescriptUri(dformDocument.uri);
 
@@ -263,12 +281,13 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 html: string
                 //css: string
         ): Promise<boolean> {
-                console.log('[Delphine/ext] replacing full document with =');
-                console.log(html);
+                //console.log(html);
                 if (html === document.getText()) {
                         console.log('[Delphine/ext] skipped applyEdit because document text is identical');
                         return false;
                 } // ✅ évite de salir le doc pour rien
+                console.log('[Delphine/ext] replacing full document with =', html);
+
                 this.isApplyingFromWebview = true;
 
                 try {
@@ -282,9 +301,8 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                         return ok;
                 } finally {
                         // Release on next tick to avoid races with onDidChangeTextDocument handlers
-                        setTimeout(() => {
-                                this.isApplyingFromWebview = false;
-                        }, 0);
+                        await new Promise((resolve) => setTimeout(resolve, 50));
+                        this.isApplyingFromWebview = false;
                 }
         }
 
@@ -464,7 +482,6 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                                         console.log('================ SAVED DFORM END =====================');
                                         await this.updateTextDocument(document, d ?? '');
 
-                                        //await this.updateTextDocument(document, msg.html ?? ''); // !!!! Pas coule !!!!
                                         return;
 
                                 case 'bootEditor:ready':
@@ -590,6 +607,11 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                         if (e.textEditor.document.uri.toString() !== document.uri.toString()) {
                                 return;
                         }
+                        if (applyingEditFromWebview) {
+                                console.log('[Delphine/ext] ignored self document change');
+
+                                return;
+                        }
 
                         const offset = document.offsetAt(e.selections[0].active);
 
@@ -653,12 +675,12 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
 </html>`;
         }
 
-        private async replaceDocument(document: vscode.TextDocument, text: string): Promise<void> {
-                const edit = new vscode.WorkspaceEdit();
-                const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
-                edit.replace(document.uri, fullRange, text);
-                await vscode.workspace.applyEdit(edit);
-        }
+        // private async replaceDocument(document: vscode.TextDocument, text: string): Promise<void> {
+        //         const edit = new vscode.WorkspaceEdit();
+        //         const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
+        //         edit.replace(document.uri, fullRange, text);
+        //         await vscode.workspace.applyEdit(edit);
+        // }
 }
 
 function escapeHtml(s: string): string {

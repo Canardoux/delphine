@@ -1,11 +1,11 @@
 import type { UnknownRecord } from './Oops';
-import type { PropKind } from './Component';
-import type { PropSpec } from './IComponent';
+import type { TComponent, TMetaComponent } from './Component';
+import type { PropSpec, PropKind } from './IComponent';
 
 import type { IForm } from './IForm';
 import { getApplication } from './IApplication';
 import { TControl, TMetaControl, TColor, THandler } from './Control';
-import type { IPluginHost } from './CompositeControl';
+import type { IPluginHost, TCompositeControl } from './CompositeControl';
 import type { ICompositeControl } from './ICompositeControl';
 
 export class BuildComponentTree {
@@ -114,7 +114,7 @@ export class BuildComponentTree {
 
                 return out;
         }
-        private applyPropsFromSource(comp: TControl, src: UnknownRecord, meta: TMetaControl) {
+        private applyPropsFromSource(comp: TComponent, src: UnknownRecord, meta: TMetaControl) {
                 for (const [name, rawValue] of Object.entries(src)) {
                         const spec = this.resolveNearestPropSpec(meta, name);
                         if (!spec) continue; // Not a declared prop -> ignore
@@ -136,7 +136,7 @@ export class BuildComponentTree {
          * - Applies conversion based on spec.kind
          * - data-delphine-xxx overrides data-delphine-props
          */
-        private parsePropsFromElement(comp: TControl) {
+        private parsePropsFromElement(comp: TComponent) {
                 const el: Element | null = comp.elem;
 
                 if (!el) return;
@@ -169,7 +169,7 @@ export class BuildComponentTree {
                 styleEl.textContent = cssText;
         }
 
-        buildComponentTree(el: Element, form: IForm, parent: TControl): TControl | null {
+        createTree(el: Element, form: IForm, parent: TCompositeControl): TComponent | null {
                 const name = el.getAttribute('data-delphine-name');
                 const type = el.getAttribute('data-delphine-component');
 
@@ -180,7 +180,7 @@ export class BuildComponentTree {
                 let child = null;
                 // The TForm are already created by the user.
                 if (!cls.isAForm()) {
-                        const metaComp = cls as TMetaControl;
+                        const metaComp = cls as TMetaComponent;
                         child = metaComp.create(name!, form, parent); // ------- The instance variable is created HERE!
                         if (cls.isACompositeControl()) {
                                 const comp = child as any as ICompositeControl;
@@ -200,7 +200,7 @@ export class BuildComponentTree {
 
                 //child.syncDomFromProps();
 
-                (child as any).onAttachedToDom?.();
+                (child as any).onAttachedToDom?.(); // ??? !!!
 
                 const maybeFrame = el.getAttribute('data-delphine-frame');
 
@@ -230,14 +230,21 @@ export class BuildComponentTree {
                         maybePluginHost?.setPluginSpec!({ plugin: type, props });
                         maybePluginHost?.mountPluginIfReady!();
                 }
+                parent?.children.push(child);
 
                 if (child.allowsChildren()) {
                         el.querySelectorAll(':scope > [data-delphine-component]').forEach((el) => {
-                                this.buildComponentTree(el, form, child);
+                                //parent?.children.push(child);
+
+                                this.createTree(el, form, child as TCompositeControl); // RECURSION
                                 //if (el === root) return;
                         });
                 }
                 return child;
                 //if (el === root) return; // No need to go higher in the hierachy
+        }
+
+        buildComponentTree(el: Element, form: IForm, parent: TCompositeControl): void {
+                this.createTree(el, form, parent);
         }
 }

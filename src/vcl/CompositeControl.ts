@@ -38,6 +38,7 @@ import { TComponentRegistry } from './ComponentRegistry';
 import { TControl } from './Control';
 import { BuildComponentTree } from './BuildComponentTree';
 import { EventManager } from './event';
+import { TComponent } from './Component';
 //import type { UIPluginInstance } from './ICompositeControl';
 //import type { Json } from './IComponent';
 
@@ -122,6 +123,8 @@ export class TCompositeControl extends TContainer implements IControl, IComponen
         pluginName: string | null = null;
         pluginProps: any = {};
         pluginPropsKey: string = '';
+        nonVisualComponents: TComponent[] = [];
+
         //private instance: UIPluginInstance | null = null;
 
         isACompositeControl(): boolean {
@@ -170,12 +173,14 @@ export class TCompositeControl extends TContainer implements IControl, IComponen
         resolveRoot(container: HTMLElement): HTMLElement {
                 // Look for first element marked as a Delphine component root
                 for (const child of Array.from(container.children)) {
+                        // loop on [TForm and NonVisualComponents]
                         if (child instanceof HTMLElement && child.hasAttribute('data-delphine-component')) {
                                 // Debug (optional)
                                 for (const c of Array.from(container.children)) {
                                         console.log('child:', c.tagName, c.getAttribute('data-delphine-component'));
                                 }
 
+                                // return the first element (probably the TForm)
                                 return child;
                         }
                 }
@@ -208,7 +213,7 @@ export class TCompositeControl extends TContainer implements IControl, IComponen
                 //    In your current architecture, resolveRoot() knows how to find:
                 //    - <body> if it is itself the root
                 //    - or the first child carrying TForm metadata
-                this.elem = this.resolveRoot(host);
+                this.elem = this.resolveRoot(host); // Probably the TForm component
 
                 if (!this.elem) {
                         throw new Error(`Unable to resolve root element for form '${this.name}'`);
@@ -217,6 +222,17 @@ export class TCompositeControl extends TContainer implements IControl, IComponen
                 // 4. Build Delphine component tree
                 this.componentRegistry.clear();
                 BuildComponentTree.singeleton.buildComponentTree(this.elem, this, this);
+
+                // 4.5 Remove the NonVisualComponents from the DOM since they are not real components and just metadata carriers
+                const nonVisualRoot = host.querySelector('delphine-nonvisual');
+                if (nonVisualRoot) {
+                        BuildComponentTree.singeleton.buildComponentTree(nonVisualRoot, this, this);
+                        for (const c of Array.from(this.children)) {
+                                console.log(c.name);
+                        }
+
+                        nonVisualRoot.remove();
+                }
 
                 // 5. Install event routing
                 this.eventManager.installEventRouter(this, this.elem);

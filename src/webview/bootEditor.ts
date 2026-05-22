@@ -1,6 +1,6 @@
 import { TTypeRegistry } from '../vcl/TypeRegistry.js';
 import { registerBuiltins } from '../vcl/RegisterVcl.js';
-import { registerDelphineComponentsFromRegistry, showDelphineTraitTab, showCurrentDelphineTraitTab } from './delphineGrapesBridge.js';
+import { registerDelphineComponentsFromRegistry, showDelphineTraitTab, showCurrentDelphineTraitTab, keepTypeRegistry } from './delphineGrapesBridge.js';
 
 type DelphineInboundMessage =
         | {
@@ -58,7 +58,6 @@ function postToVsCode(payload: any): void {
         );
 }
 
-
 function addThemeSelector(_editor: any): void {
         setTimeout(() => {
                 const bar = document.querySelector('.gjs-pn-options .gjs-pn-buttons') ?? document.querySelector('.gjs-pn-options');
@@ -74,7 +73,9 @@ function addThemeSelector(_editor: any): void {
 
                 select.innerHTML = `
                         <option value="flat">Flat</option>
-                        <option value="win95">Windows 95</option>
+                        <option value="win95">Win 95</option>
+                        <option value="win98">Win 98</option>
+                        <option value="win7">Win 7</option>
                         <option value="material">Material</option>
                         <option value="motif">Motif</option>
                         <option value="openlook">Open Look</option>
@@ -370,7 +371,12 @@ function grapesJSEditor(grapes: any): void {
         const editor = grapes.init({
                 container: '#gjs',
                 height: '100vh',
-                storageManager: false
+                storageManager: false,
+                avoidInlineStyle: true,
+
+                selectorManager: {
+                        componentFirst: true
+                }
         });
         (globalThis as any).editor = editor;
 
@@ -449,21 +455,21 @@ function grapesJSEditor(grapes: any): void {
                 return null;
         }
 
-        function selectComponentByName(editor: any, componentName: string): void {
-                if (!componentName) return;
+        // function selectComponentByName(editor: any, componentName: string): void {
+        //         if (!componentName) return;
 
-                const found = editor.getWrapper().find(`[data-delphine-name="${cssEscape(componentName)}"]`)[0];
+        //         const found = editor.getWrapper().find(`[data-delphine-name="${cssEscape(componentName)}"]`)[0];
 
-                if (!found) return;
+        //         if (!found) return;
 
-                isSelectingFromHost = true;
+        //         isSelectingFromHost = true;
 
-                editor.select(found);
+        //         editor.select(found);
 
-                setTimeout(() => {
-                        isSelectingFromHost = false;
-                }, 0);
-        }
+        //         setTimeout(() => {
+        //                 isSelectingFromHost = false;
+        //         }, 0);
+        // }
         function applyThemeToDesigner(editor: any, themeName: string, themeCss: string): void {
                 const frame = editor.Canvas.getFrameEl();
                 const doc = frame?.contentDocument || frame?.contentWindow?.document;
@@ -553,12 +559,12 @@ function grapesJSEditor(grapes: any): void {
                         case 'doc:update': {
                                 const msg = payload as DocUpdateMessage;
                                 loadDocument(msg.html ?? '', msg.css ?? '');
-
                                 requestAnimationFrame(() => {
                                         if (currentThemeCss) {
                                                 applyThemeToDesigner(editor, currentThemeName, currentThemeCss);
                                         }
                                 });
+                                editor.refresh();
 
                                 break;
                         }
@@ -566,10 +572,31 @@ function grapesJSEditor(grapes: any): void {
                         case 'log':
                                 break;
 
-                        case 'delphine:select-component':
-                                selectComponentByName(editor, payload.componentName);
-                                break;
+                        case 'delphine:select-component': {
+                                const componentName = payload.componentName;
 
+                                console.log('[select] requested =', componentName);
+
+                                const all = editor.DomComponents.getWrapper().find('[data-delphine-name]');
+
+                                console.log('[select] candidates =', all.length);
+
+                                for (const cmp of all) {
+                                        const name = cmp.getAttributes()['data-delphine-name'];
+
+                                        console.log('[select] candidate =', name);
+
+                                        if (name === componentName) {
+                                                console.log('[select] FOUND');
+
+                                                editor.select(cmp);
+                                                return;
+                                        }
+                                }
+
+                                console.warn('[select] NOT FOUND:', componentName);
+                                break;
+                        }
                         case 'delphine:theme':
                                 currentThemeName = payload.theme ?? 'flat';
                                 currentThemeCss = payload.themeCss ?? '';
@@ -721,6 +748,9 @@ function grapesJSEditor(grapes: any): void {
 
                 return true;
         }
+        function isLoadingRemoteDocument(): boolean {
+                return suppressOutbound > 0 || isApplyingRemoteDocument;
+        }
         function assignNameIfMissing(editor: any, model: any): void {
                 if ((model as any).__delphineNameAssigned) return;
 
@@ -754,56 +784,44 @@ function grapesJSEditor(grapes: any): void {
                 (model as any).__delphineNameAssigned = true;
         }
 
+        function removeGeneratedGrapesClasses(component: any) {
+                const classes = component.getClasses();
+
+                for (const cls of classes) {
+                        if (/^c\d+$/.test(cls)) {
+                                component.removeClass(cls);
+                        }
+                }
+        }
+
         const typeRegistry = new TTypeRegistry();
         registerBuiltins(typeRegistry);
         registerDelphineComponentsFromRegistry(editor, typeRegistry);
+        keepTypeRegistry(typeRegistry);
         flushPendingDirectMessages();
 
         editor.on('component:update', () => {
                 markDirty(editor, 'component:update');
         });
 
-        /*
         editor.on('component:add', (model: any) => {
-                markDirty(editor, 'component:add');
-                const attrs = model.getAttributes?.() ?? {};
+                if (isLoadingRemoteDocument()) {
+                        return;
+                }
 
-                if (!attrs['data-delphine-component']) return;
-
-                if (attrs['data-delphine-part']) return;
-
-                if (attrs['data-delphine-name']) return;
-
-                const type = attrs['data-delphine-component'] ?? 'Component';
-
-                const base = type.replace(/^T/, '') || 'Component';
-
-                const name = generateUniqueName(editor, base);
-
-                model.setAttributes({
-                        ...attrs,
-
-                        name: name
-                });
-
-                // Optional: only for Layer Manager display.
-
-                // Do NOT use "name" if it is also a Delphine prop.
-
-                //model.set('delphineDisplayName', `${name}(${type})`, { silent: true });
-        });
-        */
-
-        editor.on('component:add', (model: any) => {
                 markDirty(editor, 'component:add');
 
                 setTimeout(() => {
+                        if (isLoadingRemoteDocument()) {
+                                return;
+                        }
+
                         assignNameIfMissing(editor, model);
+
                         const attrs = model.getAttributes?.() ?? {};
 
                         if (attrs['data-delphine-component'] && !attrs['data-delphine-part']) {
                                 editor.select(model);
-                                //openDefaultEventHandler(editor, model);
                         }
                 }, 0);
         });
@@ -816,39 +834,12 @@ function grapesJSEditor(grapes: any): void {
                 markDirty(editor, 'style:update');
         });
 
-        // editor.on('component:selected', (model: any) => {
-        //         const attrs = model.getAttributes?.() ?? {};
-
-        //         if (attrs['data-delphine-part']) {
-        //                 const parent = model.parent?.();
-
-        //                 if (parent) {
-        //                         setTimeout(() => {
-        //                                 editor.select(parent);
-        //                         }, 0);
-        //                 }
-
-        //                 return;
-        //         }
-
-        //         showCurrentDelphineTraitTab(editor, model);
-
-        //         if (!isSelectingFromHost) {
-        //                 postToVsCode({
-        //                         type: 'delphine:designer-selection-changed',
-        //                         componentName: attrs['data-delphine-name'],
-        //                         componentClass: attrs['data-delphine-component']
-        //                 });
-        //         }
-        // });
-
-        //editor.on('component:selected', (model: any) => {
-        // optionnel : garder sélection courante
-        //});
-
         let lastSelection: string | undefined;
 
         editor.on('component:selected', (model: any) => {
+                if (isLoadingRemoteDocument()) {
+                        return;
+                }
                 const attrs = model.getAttributes?.() ?? {};
 
                 const name = attrs['data-delphine-name'];
@@ -962,6 +953,25 @@ function grapesJSEditor(grapes: any): void {
                         );
                 }
                 postToVsCode({ type: 'delphine:get-theme' });
+        });
+
+        editor.on('component:styleUpdate', (component: any) => {
+                removeGeneratedGrapesClasses(component);
+
+                const view = component.view;
+                const el = view?.el as HTMLElement | undefined;
+
+                if (!el) return;
+
+                const style = component.getStyle();
+
+                if (style.height) {
+                        el.style.height = String(style.height);
+                }
+
+                if (style.width) {
+                        el.style.width = String(style.width);
+                }
         });
 
         applyDelphineBodyTraits();

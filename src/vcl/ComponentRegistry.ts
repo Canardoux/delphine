@@ -20,7 +20,7 @@
  */
 
 import { TControl, TMetaControl, TColor, THandler } from './Control';
-import type { PropKind } from './Component';
+//import type { PropKind } from './Component';
 //import { PropSpec, ComponentSchema } from './IComponent';
 import type { IForm } from './IForm';
 //import { TMetaForm, TForm } from './Form';

@@ -2,13 +2,30 @@
 
 <style>
 .delphine-button {
-        color: rgb(255, 128, 128);
+        color: rgb(1, 1, 1);
         height: 40px;
 }
 
 .delphine-control.delphine-button {
-        color: rgb(255, 128, 128);
-        height: 40px;
+        color: rgb(1, 1, 1);
+        height: 0px;
+        margin-top: 0px;
+        margin-right: 0px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+}
+
+.delphine-control.delphine-button.c115386.c130985.c159325 {
+        height: 54px;
+}
+
+.delphine-control.delphine-panel {
+        width: 743px;
+        height: 139px;
+        padding-top: 5px;
+        padding-right: 0px;
+        padding-bottom: 0px;
+        padding-left: 5px;
 }
 
 * {
@@ -16,6 +33,11 @@
 }
 
 #button-a {
+        color: rgb(255, 0, 255);
+}
+
+#button-b {
+        height: 123px;
         color: rgb(255, 0, 255);
 }
 
@@ -32,7 +54,11 @@
 }
 
 #button1 {
-        color: rgb(255, 0, 0);
+        color: rgb(1, 1, 1);
+}
+
+#buttonx {
+        height: 59px;
 }
 
 #buttonx {
@@ -41,16 +67,61 @@
         height: 100px;
 }
 
+#idhc {
+        color: rgb(1, 1, 1);
+}
+
+#ih0k {
+        height: 60px;
+}
+
+#iimad {
+        color: rgb(255, 0, 0);
+}
+
+#ir6qk {
+        height: 75px;
+}
+
+#itiqa {
+        height: 0px;
+}
+
+#izlxi {
+        width: 848px;
+        height: 152px;
+}
+
 #MainForm {
-        background-color: rgb(207, 196, 196);
-        color: rgb(255, 128, 128);
+        padding-top: 0px;
+        padding-right: 0px;
+        padding-bottom: 0px;
+        padding-left: 0px;
+}
+
+#MainForm {
+        color: rgb(1, 1, 128);
 }
 
 #mypanel {
         color: rgb(1, 1, 1);
-        background-color: rgb(222, 232, 18);
+        background-color: rgb(224, 192, 192);
         width: 360px;
-        height: 146px;
+        height: 144px;
+}
+
+#mypanel1 {
+        padding-top: 0px;
+        padding-right: 0px;
+        padding-bottom: 0px;
+        padding-left: 0px;
+}
+
+#mypanel1 {
+        padding-top: 5px;
+        padding-right: 0px;
+        padding-bottom: 0px;
+        padding-left: 0px;
 }
 
 body {
@@ -78,37 +149,44 @@ body {
         data-delphine-onshown="onMyShown"
         data-delphine-onclick="mainForm_onclick"
         data-delphine-caption="Caption"
-        data-delphine-delphinedisplayname=""
+        class="delphine-form"
 >
-        <label
-                data-delphine-component="TCheckBox"
-                data-delphine-name="chk3"
-                data-delphine-caption="Ririxxx"
-                data-delphine-onclick="chk_onclick"
-                id="idhc"
-                data-delphine-delphinedisplayname=""
+        <button
+                data-delphine-component="TButton"
+                data-delphine-name="Button1ZZZ"
+                data-delphine-popupmenu="PopupMenu3"
+                data-delphine-onclick="Button1_onclick"
+                data-delphine-ondblclick="Button1_ondblclick"
+                data-delphine-oncontextpopup="Button1_oncontextpopup"
+                data-delphine-caption="CaptionZZZ"
+                id="icxqb"
+                class="delphine-control delphine-button"
         >
-                <input type="checkbox" data-delphine-part="chkBox" id="zzz" />
-                <span data-delphine-part="caption" id="ifg2">Ririxxx</span>
-        </label>
+                CaptionZZZ
+        </button>
         <div
                 data-delphine-component="TPanel"
                 id="mypanel1"
                 data-delphine-name="myPanel1"
                 data-delphine-onclick=""
                 data-delphine-caption="Caption"
-                data-delphine-delphinedisplayname=""
+                data-delphine-ondblclick=""
+                data-delphine-popupmenu=""
+                data-delphine-oncontextpopup=""
+                class="delphine-control delphine-panel"
         >
                 <button
                         data-delphine-component="TButton"
                         id="button-a"
-                        data-delphine-caption="Riri"
+                        data-delphine-caption="Show Riri"
                         data-delphine-name="button-a"
                         data-delphine-onclick="buttona_onclick"
-                        data-delphine-delphinedisplayname=""
+                        data-delphine-ondblclick=""
+                        data-delphine-popupmenu=""
+                        data-delphine-oncontextpopup=""
                         class="delphine-control delphine-button"
                 >
-                        Riri
+                        Show Riri
                 </button>
                 <button
                         data-delphine-component="TButton"
@@ -116,37 +194,104 @@ body {
                         data-delphine-caption="push Riri"
                         data-delphine-name="button-b"
                         data-delphine-onclick="buttonb_onclick"
-                        data-delphine-delphinedisplayname=""
+                        data-delphine-ondblclick=""
+                        data-delphine-popupmenu=""
+                        data-delphine-oncontextpopup=""
                         class="delphine-control delphine-button"
                 >
                         push Riri
                 </button>
                 <button
                         data-delphine-component="TButton"
+                        data-delphine-name="ButtonXXXXXX"
+                        data-delphine-onclick=""
+                        data-delphine-caption="Caption"
+                        id="ih0k"
+                        data-delphine-ondblclick=""
+                        data-delphine-popupmenu=""
+                        data-delphine-oncontextpopup=""
+                        class="delphine-control delphine-button"
+                >
+                        Caption
+                </button>
+                <button
+                        data-delphine-component="TButton"
                         data-delphine-name="Button"
                         data-delphine-onclick="Button_onclick"
                         data-delphine-caption="Caption"
+                        id="ir6qk"
+                        data-delphine-ondblclick="Button_ondblclick"
+                        data-delphine-popupmenu=""
+                        data-delphine-oncontextpopup=""
                         class="delphine-control delphine-button"
                 >
                         Caption
                 </button>
+                <label
+                        data-delphine-component="TCheckBox"
+                        data-delphine-name="chk3"
+                        data-delphine-caption="Is Riri"
+                        data-delphine-onclick="chk_onclick"
+                        id="idhc"
+                        data-delphine-ondblclick=""
+                        data-delphine-popupmenu=""
+                        data-delphine-oncontextpopup=""
+                        class="c3843161"
+                >
+                        <input type="checkbox" data-delphine-part="chkBox" id="zzz" />
+                        <span data-delphine-part="caption" id="ifg2">Is Riri</span>
+                </label>
                 <button
                         data-delphine-component="TButton"
-                        data-delphine-name="Button1"
-                        data-delphine-onclick="Button1_onclick"
-                        data-delphine-caption="Caption"
+                        data-delphine-name="Flat"
+                        data-delphine-onclick="Flat_onclick"
+                        data-delphine-caption="Flat"
+                        id="itiqa"
+                        data-delphine-ondblclick=""
+                        data-delphine-popupmenu=""
+                        data-delphine-oncontextpopup=""
                         class="delphine-control delphine-button"
                 >
-                        Caption
+                        Flat
                 </button>
                 <button
                         data-delphine-component="TButton"
-                        data-delphine-name="Button2"
-                        data-delphine-onclick=""
-                        data-delphine-caption="Caption"
+                        data-delphine-name="Win95"
+                        data-delphine-onclick="Win95_onclick"
+                        data-delphine-caption="Win95"
+                        id="ipm9k"
+                        data-delphine-ondblclick=""
+                        data-delphine-popupmenu=""
+                        data-delphine-oncontextpopup=""
                         class="delphine-control delphine-button"
                 >
-                        Caption
+                        Win95
+                </button>
+                <button
+                        data-delphine-component="TButton"
+                        data-delphine-name="Win98"
+                        data-delphine-onclick="Win98_onclick"
+                        data-delphine-caption="Win98"
+                        data-delphine-ondblclick=""
+                        id="i90r7"
+                        data-delphine-popupmenu=""
+                        data-delphine-oncontextpopup=""
+                        class="delphine-control delphine-button"
+                >
+                        Win98
+                </button>
+                <button
+                        data-delphine-component="TButton"
+                        data-delphine-name="Win7"
+                        data-delphine-onclick="Win7_onclick"
+                        data-delphine-caption="Win7"
+                        data-delphine-ondblclick=""
+                        id="iimad"
+                        data-delphine-popupmenu=""
+                        data-delphine-oncontextpopup=""
+                        class="delphine-control delphine-button"
+                >
+                        Win7
                 </button>
         </div>
         <button
@@ -161,7 +306,9 @@ body {
           }'
                 data-delphine-caption="Button1 Caption"
                 data-delphine-onclick="button1_onclick"
-                data-delphine-delphinedisplayname=""
+                data-delphine-ondblclick="button1_ondblclick"
+                data-delphine-popupmenu=""
+                data-delphine-oncontextpopup=""
                 class="delphine-control delphine-button"
         >
                 Button1 Caption
@@ -172,30 +319,26 @@ body {
                 data-delphine-caption="Delphine buttonx caption"
                 data-delphine-name="buttonx"
                 data-delphine-onclick="label_onclick"
-                data-delphine-delphinedisplayname=""
+                data-delphine-ondblclick=""
+                data-delphine-popupmenu=""
+                data-delphine-oncontextpopup=""
                 class="delphine-control delphine-button"
         >
                 Delphine buttonx caption
         </button>
-        <button
-                data-delphine-component="TButton"
-                data-delphine-name="Flat"
-                data-delphine-onclick="Flat_onclick"
-                data-delphine-caption="Flat Design"
-                class="delphine-control delphine-button"
-        >
-                Flat Design
-        </button>
-        <button
-                data-delphine-component="TButton"
-                data-delphine-name="Win95"
-                data-delphine-onclick="Win95_onclick"
-                data-delphine-caption="Win95 Design"
-                class="delphine-control delphine-button"
-        >
-                Win95 Design
-        </button>
+        <div
+                data-delphine-component="TPanel"
+                data-delphine-name="Panel"
+                data-delphine-onclick=""
+                id="izlxi"
+                data-delphine-ondblclick=""
+                data-delphine-popupmenu=""
+                data-delphine-oncontextpopup=""
+                class="delphine-control delphine-panel"
+        ></div>
         <h1 id="igfu" data-delphine-onclick="" data-delphine-caption="Caption" data-delphine-name="Component1">Bonjour</h1>
+        <h1 id="igfu-2" data-delphine-onclick="" data-delphine-caption="Caption" data-delphine-name="Component1">Toto</h1>
+        MIMI
         <div
                 data-delphine-component="THostFrame"
                 id="myframeplugin"
@@ -209,7 +352,9 @@ body {
                 data-delphine-onframeevent="myframe_onFrameEvent"
                 data-delphine-onclick=""
                 data-delphine-caption="Caption"
-                data-delphine-delphinedisplayname=""
+                data-delphine-ondblclick=""
+                data-delphine-popupmenu=""
+                data-delphine-oncontextpopup=""
         >
                 MY-FRAME-PLUGIN
         </div>
@@ -219,7 +364,10 @@ body {
                 data-delphine-name="myPanel"
                 data-delphine-onclick="myPanel_onclick"
                 data-delphine-caption="Caption"
-                data-delphine-delphinedisplayname=""
+                data-delphine-ondblclick=""
+                data-delphine-popupmenu=""
+                data-delphine-oncontextpopup=""
+                class="delphine-control delphine-panel"
         >
                 <button
                         data-delphine-component="TButton"
@@ -227,29 +375,40 @@ body {
                         data-delphine-name="sub-btn1"
                         data-delphine-onclick="subBtn1_onclick"
                         id="igqcr"
-                        data-delphine-delphinedisplayname=""
+                        data-delphine-ondblclick=""
+                        data-delphine-popupmenu=""
+                        data-delphine-oncontextpopup=""
                         class="delphine-button"
                 >
                         sub-btn1
                 </button>
-                <button
-                        data-delphine-component="TButton"
-                        data-delphine-name="Button3"
-                        data-delphine-onclick="Button3_onclick"
-                        data-delphine-caption="Caption"
-                        class="delphine-control delphine-button"
-                >
-                        Caption
-                </button>
-                <button
-                        data-delphine-component="TButton"
-                        data-delphine-name="Button4"
-                        data-delphine-onclick=""
-                        data-delphine-caption="Caption"
-                        class="delphine-control delphine-button"
-                >
-                        Caption
-                </button>
+        </div>
+        <div data-delphine-component="TPopupMenu" id="popup-menu" data-delphine-name="PopupMenu3" hidden class="delphine-popup-menu">
+                <div class="menu-item">Open</div>
+                <div class="menu-item">Save</div>
+                <div class="menu-separator"></div>
+                <div class="menu-item">Quit</div>
         </div>
 </div>
+<delphine-nonvisual data-delphine-component="TNonVisualComponents" height="100" data-delphine-onclick="" data-delphine-name="">
+        <h3 id="ivqrn">Non visual components</h3>
+        <div data-delphine-component="TPopupMenu" data-delphine-name="PopupMenu1" id="itfx9">
+                TOTO
+                <div data-delphine-caption="Foo" data-delphine-onclick="PopupMenu1Foo_onclick" class="menu-item">Open</div>
+                <div data-delphine-caption="Save" data-delphine-onclick="PopupMenu1Save_onclick" class="menu-item">Save</div>
+                <div class="menu-separator"></div>
+                <div data-delphine-caption="First" data-delphine-onclick="PopupMenu1First_onclick" class="menu-item submenu">First</div>
+                <div data-delphine-caption="Sub1" data-delphine-onclick="PopupMenu1FirstSub1_onclick" class="menu-item">Sub1</div>
+                <div data-delphine-caption="Sub2" data-delphine-onclick="PopupMenu1FirstSub2_onclick" class="menu-item">Sub2</div>
+        </div>
+        <div data-delphine-component="TPopupMenu" data-delphine-name="PopupMenu2" id="itfx9-2">
+                ZOZO
+                <div data-delphine-caption="Option 1" class="menu-item">Option 1</div>
+                <div data-delphine-caption="Option 2" class="menu-item">Option 2</div>
+                <div class="menu-separator"></div>
+                <div data-delphine-caption="A" class="menu-item submenu">A</div>
+                <div data-delphine-caption="Toto 1" class="menu-item">Toto 1</div>
+                <div data-delphine-caption="Toto 2" class="menu-item">Toto 2</div>
+        </div>
+</delphine-nonvisual>
 </template>

@@ -23,6 +23,7 @@ import type { IForm } from './IForm';
 import type { TMetaclass } from './Oops';
 import { TControl, TMetaControl } from './Control';
 import type { PropSpec } from './IComponent';
+import { TComponent } from './Component';
 
 // This clas does not do anything except overrides allowsChildren()
 export class TContainer extends TControl {
@@ -32,6 +33,9 @@ export class TContainer extends TControl {
 
         //private get cprops(): ContainerProps {
         //return this.props as ContainerProps;
+        children: TComponent[] = [];
+        //nonVisualComponents: TComponent[] = [];
+
         //}
 
         constructor(metaclass: TMetaclass, name: string, form: IForm | null, parent: TControl | null) {

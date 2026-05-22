@@ -3,6 +3,11 @@ import type { TTypeRegistry } from '../vcl/TypeRegistry.js';
 import type { IMetaComponent, ComponentSchema } from '../vcl/IComponent.js';
 import type { PropSpec } from '../vcl/IComponent.js';
 
+let typeRegistry: TTypeRegistry;
+export function keepTypeRegistry(reg: TTypeRegistry) {
+        typeRegistry = reg;
+}
+
 export function registerDelphineComponentsFromRegistry(editor: Editor, typeRegistry: TTypeRegistry): void {
         for (const meta of typeRegistry.getAll()) {
                 const schema = meta.getSchema?.();
@@ -20,24 +25,36 @@ export function showCurrentDelphineTraitTab(editor: any, model: any) {
         //updateTraitButtons(editor);
 }
 
+function getDelphineComponentName(model: any): string | undefined {
+        const attrs = model.getAttributes?.() ?? {};
+        return attrs['data-delphine-component'];
+}
+
 export function showDelphineTraitTab(editor: any, model: any, tab: 'properties' | 'events') {
-        if (!model) {
-                console.warn('[Delphine] No component selected');
+        if (!model) return;
+
+        const componentName = getDelphineComponentName(model);
+
+        if (!componentName) {
+                console.warn('[Delphine] Selected GrapesJS model is not a Delphine component');
                 return;
         }
 
-        const sets = model.get('delphineTraits');
+        const meta = typeRegistry.get(componentName);
 
-        if (!sets) {
-                console.warn('[Delphine] Selected component has no delphineTraits', model);
+        if (!meta) {
+                console.warn('[Delphine] No Delphine metaclass for', componentName);
                 return;
         }
 
-        model.set('traits', sets[tab]);
+        const propSpecs = meta.allProps();
+
+        const traits = buildTraitsFromPropSpecs(editor, propSpecs, tab);
+
+        model.set('traits', traits);
+
         editor.TraitManager.select(model);
         editor.TraitManager.render?.();
-
-        // Open Settings / Trait Manager panel
 
         editor.Panels.getButton('views', 'open-tm')?.set('active', true);
 }
@@ -184,22 +201,50 @@ function readPropFromAttrs(attrs: Record<string, any>, spec: PropSpec<any>): unk
         }
 }
 
-function buildTraitsFromPropSpecs(propSpecs: PropSpec<any>[], kind: 'properties' | 'events' = 'properties') {
+function findPopupMenus(editor: any): { id: string; name: string }[] {
+        const wrapper = editor.DomComponents.getWrapper();
+        console.log(wrapper.toHTML());
+        const pm = wrapper.find('[data-delphine-component="TPopupMenu"]');
+        return pm
+                .map((cmp: any) => {
+                        const attrs = cmp.getAttributes();
+                        const name = attrs['data-delphine-name'] ?? '';
+                        return { id: name, name };
+                })
+                .filter((m: any) => m.name);
+}
+
+function buildTraitsFromPropSpecs(editor: Editor, propSpecs: PropSpec<any>[], propOrEvent: 'properties' | 'events' = 'properties') {
         const traits: any[] = [];
 
         for (const spec of propSpecs) {
                 const isEvent = spec.kind === 'handler';
 
-                if (kind === 'properties' && isEvent) continue;
-                if (kind === 'events' && !isEvent) continue;
+                if (propOrEvent === 'properties' && isEvent) continue;
+                if (propOrEvent === 'events' && !isEvent) continue;
 
-                traits.push({
-                        //type: spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind),
-                        type: spec.kind === 'handler' ? 'delphine-event' : (spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind)),
-                        name: spec.name,
-                        label: spec.grapes?.label ?? spec.name,
-                        changeProp: true
-                });
+                if (spec.kind === 'popupMenu') {
+                        const popupMenus = findPopupMenus(editor);
+
+                        traits.push({
+                                type: 'select',
+
+                                name: `data-delphine-${spec.name.toLowerCase()}`,
+
+                                label: spec.grapes?.label ?? 'PopupMenu',
+                                changeProp: false,
+
+                                options: [{ id: '', name: '(none)' }, ...popupMenus]
+                        });
+                } else {
+                        traits.push({
+                                //type: spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind),
+                                type: spec.kind === 'handler' ? 'delphine-event' : (spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind)),
+                                name: spec.name,
+                                label: spec.grapes?.label ?? spec.name,
+                                changeProp: true
+                        });
+                }
         }
 
         return traits;
@@ -261,10 +306,11 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
                         if (!(el instanceof HTMLElement)) return false;
 
                         const componentName = el.getAttribute('data-delphine-component');
-                        if (componentName) {
-                                console.log('match candidate', componentName, schema);
-                        }
+                        // if (componentName) {
+                        //         console.log('match candidate', componentName, schema);
+                        // }
                         if (componentName === schema.name) {
+                                //console.log('[isComponent] matched', componentName);
                                 const delphineName = el.getAttribute('data-delphine-name');
                                 return { name: `${delphineName}(${componentName})`, type: typeId };
                         }
@@ -286,9 +332,9 @@ function registerComponentType(editor: Editor, meta: IMetaComponent, schema: Com
                                 droppable: schema.droppable ?? schema.isContainer ?? false,
 
                                 delphineTraits: {
-                                        properties: buildTraitsFromPropSpecs(propSpecs, 'properties'),
+                                        properties: buildTraitsFromPropSpecs(editor, propSpecs, 'properties'),
 
-                                        events: buildTraitsFromPropSpecs(propSpecs, 'events')
+                                        events: buildTraitsFromPropSpecs(editor, propSpecs, 'events')
                                 }
                         },
 

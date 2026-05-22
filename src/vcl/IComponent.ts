@@ -21,7 +21,7 @@
 
 import { TObject, TMetaclass, TMetaObject } from './Oops';
 import type { IControl } from './IControl';
-import type { PropKind } from './Component';
+export type PropKind = 'string' | 'number' | 'boolean' | 'color' | 'handler' | 'popupMenu';
 
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type TGrapesTraitType = 'text' | 'checkbox' | 'number' | 'select';

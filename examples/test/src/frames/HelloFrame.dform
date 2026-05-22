@@ -39,6 +39,7 @@ body {
                 data-delphine-caption="Change message"
                 data-delphine-name="button-changeMessage"
                 data-delphine-onclick="changeMessage_onclick"
+                data-delphine-ondblclick=""
                 class="delphine-button"
         >
                 Change message
@@ -49,6 +50,7 @@ body {
                 data-delphine-caption="Delphine HTML caption"
                 data-delphine-name="myframeButton"
                 data-delphine-onclick="myframeButton_onclick"
+                data-delphine-ondblclick=""
                 class="delphine-button"
         >
                 Delphine HTML caption

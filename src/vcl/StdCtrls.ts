@@ -19,6 +19,7 @@
  */
 
 import { TControl, TMetaControl } from './Control';
+import { TMetaComponent } from './Component';
 import { TMetaContainer, TContainer } from './Container';
 import type { PropSpec } from './IComponent';
 import type { ComponentSchema } from './IComponent';
@@ -26,6 +27,7 @@ import type { IForm } from './IForm';
 import type { IControl } from './IControl';
 import type { TMetaclass } from './Oops';
 import { TCompositeControl, TMetaCompositeControl } from './CompositeControl';
+import { TComponent } from './Component';
 //import { TForm } from './Form';
 
 export class TButton extends TControl {
@@ -127,18 +129,7 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
 
                                         label: 'Enabled',
 
-                                        applyToModel: (model, value) => {
-                                                /*
-                                                const attrs = { ...(model.getAttributes?.() ?? {}) };
-
-                                                if (Boolean(value)) {
-                                                        delete attrs.disabled;
-                                                } else {
-                                                        attrs.disabled = 'disabled';
-                                                }
-                                                model.setAttributes(attrs);
-                                                */
-                                        }
+                                        applyToModel: (model, value) => {}
                                 }
                         }
                 ];
@@ -167,7 +158,6 @@ export class TMetaButton<T extends TButton> extends TMetaControl {
         }
 }
 
-// This class does not do anything useful
 // --------------------------------------
 
 export class TPanel extends TContainer {
@@ -217,6 +207,110 @@ export class TMetaPanel extends TMetaContainer {
                 };
         }
 }
+
+// --------------------------------------
+
+export class TNonVisualComponents extends TContainer {
+        constructor(name: string, form: IForm, parent: TControl) {
+                super(TMetaNonVisualComponents.metaclass, name, form, parent);
+        }
+}
+
+export class TMetaNonVisualComponents extends TMetaContainer {
+        static readonly metaclass = new TMetaNonVisualComponents(TMetaContainer.metaclass, 'TNonVisualComponents');
+
+        protected constructor(superClass: TMetaContainer, name: string) {
+                super(superClass, name);
+        }
+
+        create(name: string, form: IForm, parent: TControl): TContainer {
+                return new TNonVisualComponents(name, form, parent);
+        }
+
+        defProps(): PropSpec<any>[] {
+                return [
+                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
+                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
+                ];
+        }
+
+        /*
+        getSchema(): ComponentSchema | null {
+                return {
+                        name: this.typeName,
+                        label: 'TPanel',
+                        category: 'Standard Control',
+                        icon: '▭',
+                        component: TMetaPanel.metaclass,
+                        isContainer: true,
+                        instanceName: 'Panel',
+                        tagName: 'div',
+                        resizable: true,
+
+                        //hoverable: true,
+                        //layerable: true,
+                        //removable: true,
+                        //draggable: true,
+                        droppable: true,
+                        //copyable: true,
+
+                        props: this.propSpecsToSchemaProps()
+                };
+        }
+                */
+}
+
+// --------------------------------------
+
+export class TPopupMenu extends TComponent {
+        constructor(name: string, form: IForm, parent: TControl) {
+                super(TMetaPopupMenu.metaclass, name, form, parent);
+        }
+}
+
+export class TMetaPopupMenu extends TMetaComponent {
+        static readonly metaclass = new TMetaPopupMenu(TMetaComponent.metaclass, 'TPopupMenu');
+
+        protected constructor(superClass: TMetaComponent, name: string) {
+                super(superClass, name);
+        }
+
+        create(name: string, form: IForm, parent: TControl): TPopupMenu {
+                return new TPopupMenu(name, form, parent);
+        }
+
+        defProps(): PropSpec<any>[] {
+                return [
+                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
+                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
+                ];
+        }
+
+        getSchema(): ComponentSchema | null {
+                return {
+                        name: this.typeName,
+                        label: 'TPopupMenu',
+                        category: 'Standard Control',
+                        icon: 'X',
+                        component: TMetaPopupMenu.metaclass,
+                        isContainer: false,
+                        instanceName: 'PopupMenu',
+                        tagName: 'div',
+                        resizable: false,
+
+                        //hoverable: true,
+                        //layerable: true,
+                        //removable: true,
+                        //draggable: true,
+                        droppable: false,
+                        //copyable: true,
+
+                        props: this.propSpecsToSchemaProps()
+                };
+        }
+}
+
+// ------------------------------------------
 
 export class TLabel extends TControl {
         htmlButton(): HTMLButtonElement {
@@ -417,9 +511,6 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                 grapes: {
                                         traitType: 'text',
                                         label: 'Caption',
-                                        // applyToModel: (model: any, value) => {
-                                        //model.components(String(value ?? 'GLOUPS'));
-                                        //}
                                         applyToModel: (model: any, value) => {
                                                 const captionPart = this.findPart(model, 'caption');
 
@@ -471,17 +562,7 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                 grapes: {
                                         traitType: 'checkbox',
                                         label: 'Enabled',
-                                        /*
-                                        applyToModel: (model, value) => {
-                                                const attrs = { ...(model.getAttributes?.() ?? {}) };
 
-                                                if (Boolean(value)) {
-                                                        delete attrs.disabled;
-                                                } else {
-                                                        attrs.disabled = 'disabled';
-                                                }
-                                                model.setAttributes(attrs);
-                                        }*/
                                         applyToModel: (model, value) => {
                                                 const inputPart = this.findPart(model, 'chkBox');
                                                 if (!inputPart) return;
@@ -515,18 +596,7 @@ export class TMetaCheckBox<T extends TCheckBox> extends TMetaContainer {
                                 grapes: {
                                         traitType: 'checkbox',
                                         label: 'Checked',
-                                        /*
-                                        applyToModel: (model, value) => {
-                                                const attrs = { ...(model.getAttributes?.() ?? {}) };
 
-                                                if (Boolean(value)) {
-                                                        attrs.checked = 'checked';
-                                                } else {
-                                                        delete attrs.checked;
-                                                }
-                                                model.setAttributes(attrs);
-                                        }
-                                                */
                                         applyToModel: (model, value) => {
                                                 const inputPart = this.findPart(model, 'chkBox');
                                                 if (!inputPart) return;

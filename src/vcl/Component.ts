@@ -27,15 +27,18 @@ import type { IForm } from './IForm';
 import type { IComponent, IMetaComponent, ComponentSchema, PropSchema, TGrapesPropBinding, PropSpec } from './IComponent';
 
 export type ComponentProps = Record<string, unknown>;
-export type PropKind = 'string' | 'number' | 'boolean' | 'color' | 'handler';
 
 export class TComponent extends TObject implements IComponent {
         //getMetaclass() {
         //return TMetaComponent.metaclass;
         //}
+        name: string;
+        elem: Element | null = null; // elem is mandatory because it is used during BuilComponentTree()
+
         constructor(metaclass: TMetaclass, name: string, form: IForm | null, parent: TComponent | null) {
                 super(metaclass);
                 //super(name, form, parent);
+                this.name = name;
         }
         isAForm(): boolean {
                 return false;
@@ -60,6 +63,10 @@ export class TComponent extends TObject implements IComponent {
         isACompositeControl(): boolean {
                 return false;
         }
+        /** May contain child components */
+        allowsChildren(): boolean {
+                return false;
+        }
 }
 
 export class TMetaComponent extends TMetaObject {
@@ -75,17 +82,7 @@ export class TMetaComponent extends TMetaObject {
         }
 
         getSchema(): ComponentSchema | null {
-                return {
-                        name: this.typeName,
-                        label: 'TComponent',
-                        category: 'Standard Control',
-                        icon: undefined,
-                        component: this,
-                        props: this.propSpecsToSchemaProps(),
-                        instanceName: 'Component',
-                        tagName: 'div',
-                        resizable: false
-                };
+                return null;
         }
 
         //getMetaclass() {
@@ -102,7 +99,24 @@ export class TMetaComponent extends TMetaObject {
 
         defProps(): PropSpec<any>[] {
                 return [
-                        //{ name: 'color', kind: 'color', apply: (o, v) => (o.color = new TColor(String(v))) },
+                        {
+                                name: 'name',
+
+                                kind: 'string',
+
+                                default: '',
+                                retrieve: (o) => {
+                                        return o.name;
+                                },
+                                //apply: (o, v) => (o.onclick = new THandler(String(v)))
+                                apply: (o, v) => {
+                                        o.name = String(v);
+                                },
+
+                                grapes: {
+                                        label: 'Name'
+                                }
+                        }
                         //{ name: 'oncreate', kind: 'handler', apply: (o, v) => (o.oncreate = new THandler(String(v))) }
                 ];
         }
@@ -146,5 +160,15 @@ export class TMetaComponent extends TMetaObject {
                 }
 
                 return result;
+        }
+
+        allProps(): PropSpec<any>[] {
+                let parent = [] as PropSpec<any>[];
+                if (this !== TMetaComponent.metaclass) {
+                        parent = (this.superClass! as TMetaComponent).allProps() ?? [];
+                        return [...parent, ...this.defProps()];
+                }
+
+                return [...parent, ...this.defProps()];
         }
 }

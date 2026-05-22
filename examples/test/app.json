@@ -13,7 +13,7 @@
     }
   ],
   "ui": {
-    "theme": "flat",
+    "theme": "win98",
     "density": "normal",
     "fontScale": 1
   }

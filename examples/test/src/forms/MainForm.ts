@@ -31,6 +31,7 @@ export default class MainForm extends TForm {
         }
 
         buttonb_onclick(_ev: Event | null, _sender: TControl) {
+                const popupMenu1 = this.componentRegistry.get<TPluginHost>('PopupMenu1');
                 const btn = this.componentRegistry.get<TButton>('button-b');
                 if (!btn) {
                         console.warn('button-b not found in registry');
@@ -111,11 +112,31 @@ export default class MainForm extends TForm {
                 app!.setTheme('win95');
         }
 
-        Button2_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle Button2_onclick
+        Win98_onclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle Win98_onclick
+                const app = getApplication();
+                app!.setTheme('win98');
         }
 
-        Button3_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle Button3_onclick
+        Win7_onclick(_ev: Event | null, _sender: TControl) {
+                const app = getApplication();
+                app!.setTheme('win7');
+        }
+
+        Button1_ondblclick(_ev: Event | null, _sender: TControl) {
+                console.log('Button1 double clicked!!!!');
+        }
+
+        Button1_oncontextpopup(_ev: Event | null, _sender: TControl) {
+                console.log('Button1 context popup!!!!'); // TODO: handle Button1_oncontextpopup
+        }
+
+        Button1_onclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle Button1_onclick
+                console.log('Button1 clicked!!!!');
+        }
+
+        button1_ondblclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle button1_ondblclick
         }
 }
