@@ -23,6 +23,9 @@ import { TMetaObject, TObject } from './Oops';
 import { TMetaComponent } from './Component';
 import type { IMetaComponent } from './IComponent';
 import type { ComponentSchema } from './IComponent';
+import { register } from './palettes/standard/standardPalette';
+
+export const allPalettes = ['standard', 'lit' /*, 'additional', 'menus'*/];
 
 /*
 export class TMetaTypeRegistry extends TMetaObject {
@@ -52,6 +55,7 @@ export class TTypeRegistry /*extends TObject*/ {
                 if (this.componentsClass.has(mc.typeName)) {
                         throw new Error(`Component type already registered: ${mc.typeName}`);
                 }
+                console.log('[Delphine] register mc =', mc.typeName);
                 this.componentsClass.set(mc.typeName, mc);
         }
 
@@ -66,5 +70,35 @@ export class TTypeRegistry /*extends TObject*/ {
 
         list(): string[] {
                 return [...this.componentsClass.keys()].sort();
+        }
+}
+
+//import type { TTypeRegistry } from '../TTypeRegistry';
+
+type PaletteModule = {
+        register: (typeRegistry: TTypeRegistry) => void | Promise<void>;
+};
+
+const paletteLoaders: Record<string, () => Promise<PaletteModule>> = {
+        standard: () => import('./palettes/standard/standardPalette'),
+        lit: () => import('./palettes/lit/litPalette')
+        // additional: () => import('./palettes/additional/additionalPalette'),
+        // menus: () => import('./palettes/menus/menusPalette'),
+};
+
+export async function registerPalettes(typeRegistry: TTypeRegistry, enabledPalettes: string[]) {
+        for (const paletteName of enabledPalettes) {
+                const loader = paletteLoaders[paletteName];
+
+                if (!loader) {
+                        console.warn(`[Delphine] Unknown palette: ${paletteName}`);
+                        continue;
+                }
+
+                const palette = await loader();
+                console.log('[Delphine] registerPalettes BEGIN', paletteName);
+                await palette.register(typeRegistry);
+                console.log('[Delphine] registerPalettes END', paletteName, typeRegistry);
+                console.log('[Delphine] registered types =', typeRegistry.getAll?.());
         }
 }

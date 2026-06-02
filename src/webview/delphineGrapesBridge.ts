@@ -455,11 +455,28 @@ function shortBlockLabel(schema: ComponentSchema): string {
         return schema.label?.replace(/^T/, '') ?? schema.name.replace(/^T/, '');
 }
 
+export type AssetResolver = (path: string) => string;
+export class DelphineGrapesBridge {
+        constructor(
+                private readonly editor: any,
+
+                private readonly resolveAsset: AssetResolver
+        ) {}
+
+        icon(name: string): string {
+                return this.resolveAsset(`media/icons/${name}.png`);
+        }
+}
+
 function registerBlock(editor: Editor, schema: ComponentSchema): void {
+        //const iconUri = bridge.icon('button');
         editor.BlockManager.add(`delphine-block-${schema.name}`, {
                 label: shortBlockLabel(schema), // Button, Panel, CheckBox
                 category: schema.category,
-                media: schema.icon ?? '▣',
+                //media: schema.icon ?? '▣',
+                //media: `<img src="${iconUri}" class="delphine-block-icon" />`,
+                media: schema.icon ? schema.icon : '▣',
+
                 content: schemaToHtml(schema, true)
         });
 }

@@ -1,1601 +1,1465 @@
-/*
- * This file is a part of the NsCDE - Not so Common Desktop Environment
- * Author: Hegel3DReloaded
- * Licence: GPLv3
-*/
-
-/* userContent.css NsCDE include CSS file for firefox */
-
-@-moz-document url-prefix(about:about),
- url-prefix(about:addons),
- url-prefix(about:buildconfig),
- url-prefix(about:certificate),
- url-prefix(about:compat),
- url-prefix(about:config),
- url-prefix(about:crashes),
- url-prefix(about:debugging),
- url-prefix(about:devtools),
- url-prefix(about:downloads),
- url-prefix(about:license),
- url-prefix(about:logins),
- url-prefix(about:networking),
- url-prefix(about:performance),
- url-prefix(about:plugins),
- url-prefix(about:policies),
- url-prefix(about:privatebrowsing),
- url-prefix(about:processes),
- url-prefix(about:profiles),
- url-prefix(about:profiling),
- url-prefix(about:protections),
- url-prefix(about:rights),
- url-prefix(about:robots),
- url-prefix(about:serviceworkers),
- url-prefix(about:studies),
- url-prefix(about:support),
- url-prefix(about:sync-log),
- url-prefix(about:telemetry),
- url-prefix(about:url-classifier),
- url-prefix(about:webrtc),
- url-prefix(about:welcome) {
-        :root {
-                --in-content-page-background: var(--nscde-bg-color-5) !important;
-                --in-content-page-color: var(--nscde-fg-color-5) !important;
-                --in-content-primary-button-text-color: var(--nscde-fg-color-1) !important;
-                --in-content-primary-button-background: var(--nscde-bg-color-1) !important;
-        }
-        body {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-radius: 0px !important;
-        }
-        th {
-                background-color: var(--nscde-bg-color-1) !important;
-                color: var(--nscde-fg-color-1) !important;
-                border-top: 1px solid var(--nscde-ts-color-1) !important;
-                border-left: 1px solid var(--nscde-ts-color-1) !important;
-                border-right: 1px solid var(--nscde-bs-color-1) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-1) !important;
-        }
-        td {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-        .card {
-                border-radius: 0 !important;
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-        }
-        #process-table {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-        default-button,
-        button {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-                font-weight: normal !important;
-        }
-        button:is(:active, [open='true']):not([disabled='true']):not(.menu-button):not(.menuitem-button) {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-        }
-        search-textbox,
-        input,
-        textarea {
-                border-width: 1px !important;
-                border-radius: 0px !important;
-                background-color: var(--nscde-bg-color-4) !important;
-                color: var(--nscde-fg-color-4) !important;
-                border-top-color: var(--nscde-bs-color-5) !important;
-                border-left-color: var(--nscde-bs-color-5) !important;
-                border-right-color: var(--nscde-ts-color-5) !important;
-                border-bottom-color: var(--nscde-ts-color-5) !important;
-        }
-        #action-box {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-        }
-        input[type='radio'] {
-                border-radius: 100% !important;
-        }
-        input[type='radio'],
-        input[type='checkbox'],
-        .radio-check,
-        .checkbox-check {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-        }
-        input[type='radio']:checked,
-        input[type='checkbox']:checked,
-        .radio-check[selected],
-        .checkbox-check[checked='true'] {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        .info-box-content {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        #content > div {
-                border-radius: 0 !important;
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-
-        .onboardingContainer .screen {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-
-        select#search-listtype > *,
-        select#search-listtype {
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-ts-color-6) !important;
-                border-left: 1px solid var(--nscde-ts-color-6) !important;
-                border-right: 1px solid var(--nscde-bs-color-6) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-        }
-        select#search-listtype:active {
-                background-color: var(--nscde-sel-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-bs-color-6) !important;
-                border-left: 1px solid var(--nscde-bs-color-6) !important;
-                border-right: 1px solid var(--nscde-ts-color-6) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        }
-}
-
-/* Override table header for a few abouts */
-@-moz-document url-prefix(about:config),
- url-prefix(about:profiles),
- url-prefix(about:support),
- url-prefix(about:url-classifier),
- url-prefix(about:sync-log) {
-        th {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-        }
-}
-
-@-moz-document url-prefix(about:blank) {
-        * {
-                background-color: var(--nscde-bg-color-4) !important;
-                color: var(--nscde-fg-color-4) !important;
-        }
-}
-
-@-moz-document url-prefix(about:newtab), url-prefix(about:home) {
-        body {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-
-        .outer-wrapper {
-                background-color: var(--nscde-bg-color-5) !important;
-        }
-
-        /*
-  .outer-wrapper:not(.newtab-experience) .ds-top-sites .top-sites .top-site-outer {
-    padding 8px 8px !important;
-  }
-    */
-
-        .outer-wrapper.newtab-experience .search-wrapper .search-handoff-button {
-                background-color: var(--nscde-bg-color-4) !important;
-                color: var(--nscde-fg-color-4) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-                border-radius: 0px !important;
-                box-shadow: none !important;
-        }
-
-        .outer-wrapper.newtab-experience .top-site-outer .tile,
-        .top-site-outer .tile {
-                background-color: var(--nscde-bg-color-5) !important;
-                box-shadow: none !important;
-                border-radius: 0px !important;
-        }
-
-        .top-site-outer .tile .icon-wrapper,
-        .top-site-outer .top-site-icon {
-                border-radius: 0px !important;
-                width: 80px !important;
-                height: 80px !important;
-        }
-
-        .top-site-outer .title {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-
-        .top-site-outer .top-site-icon {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-
-        .top-site-inner *:is(:active, :open, [checked='true'], [selected='true']) {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-
-        .customize-menu .close-button,
-        .home-section .section .selector {
-                border-radius: 0px !important;
-        }
-
-        .collapsible-section .section-title .collapsible-arrow,
-        .collapsible-section .section-title span {
-                fill: var(--nscde-fg-color-6) !important;
-        }
-
-        .collapsible-section .section-title .click-target-container {
-                padding: 6px !important;
-                border-width: 1px !important;
-                border-radius: 0px !important;
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-ts-color-6) !important;
-                border-left: 1px solid var(--nscde-ts-color-6) !important;
-                border-right: 1px solid var(--nscde-bs-color-6) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-        }
-
-        .collapsible-section .section-title .click-target-container:active {
-                border-top: 1px solid var(--nscde-bs-color-6) !important;
-                border-left: 1px solid var(--nscde-bs-color-6) !important;
-                border-right: 1px solid var(--nscde-ts-color-6) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        }
-
-        .collapsible-section {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border: 2px solid var(--nscde-bg-color-5) !important;
-        }
-
-        .collapsible-section:hover {
-                border: 2px solid var(--nscde-sel-color-5) !important;
-        }
-
-        .ds-header,
-        .ds-layout .section-title span {
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-        }
-
-        .outer-wrapper:not(.newtab-experience) .card-outer .context-menu-button,
-        .outer-wrapper:not(.newtab-experience) .top-site-outer .context-menu-button {
-                border-radius: 0px !important;
-                fill: none !important;
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border: 1px solid var(--nscde-bg-color-1) !important;
-        }
-
-        .top-site-outer {
-                padding-left: 10px !important;
-                padding-right: 10px !important;
-        }
-
-        .card-outer,
-        .top-site-outer {
-                border-width: 1px !important;
-                border-radius: 0px !important;
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-        }
-
-        .card-outer:active,
-        .top-site-outer:active {
-                background-color: var(--nscde-sel-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        .card-outer .card-description,
-        .card-outer .card-title,
-        .card-outer .card-host-name.alternate,
-        .card-outer .card-host-name,
-        .card-outer .card-text {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-
-        .icon.icon-bookmark-added {
-                background-image: url('nsicons/bookmark.png') !important;
-        }
-
-        .context-menu-button {
-                opacity: 1 !important;
-                fill: var(--nscde-fg-color-6) !important;
-                background-position: 50% !important;
-        }
-
-        .context-menu,
-        .context-menu-button,
-        .prefs-button button,
-        .prefs-button button:focus,
-        .prefs-button button:hover {
-                cursor: default !important;
-                border-radius: 0px !important;
-                fill: var(--nscde-fg-color-6) !important;
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-ts-color-6) !important;
-                border-left: 1px solid var(--nscde-ts-color-6) !important;
-                border-right: 1px solid var(--nscde-bs-color-6) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-        }
-
-        .context-menu > ul {
-                list-style: none;
-                margin: 0;
-                padding: 5px 0;
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-
-        .context-menu > ul > li {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 0px !important;
-        }
-
-        .context-menu > ul > li.separator {
-                -moz-appearance: none !important;
-                border-top: 1px solid var(--nscde-bs-color-6) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        }
-
-        .context-menu .icon {
-                fill: var(--nscde-fg-color-6) !important;
-        }
-
-        .context-menu > ul > li > a:hover,
-        .context-menu > ul > li > button:hover {
-                cursor: default !important;
-                background-color: inherit !important;
-                color: inherit !important;
-        }
-
-        .context-menu > ul > li > a:is(:focus, :active),
-        .context-menu > ul > li > button:is(:focus, :active),
-        .context-menu-button:is(:active, :focus, :checked),
-        .prefs-button button:active {
-                fill: var(--nscde-fg-color-6) !important;
-                background-color: var(--nscde-sel-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-bs-color-6) !important;
-                border-left: 1px solid var(--nscde-bs-color-6) !important;
-                border-right: 1px solid var(--nscde-ts-color-6) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        }
-
-        .top-site-outer .title {
-                margin-top: 16px !important;
-        }
-
-        .top-site-outer .tile,
-        .top-site-outer:hover .tile,
-        .top-site-outer .tile .icon-wrapper {
-                margin-top: 12px !important;
-                border-radius: 0px !important;
-        }
-
-        .top-site-outer .screenshot.active,
-        .top-site-outer .default-icon,
-        .top-site-outer .rich-icon,
-        .top-site-outer .top-site-icon {
-                margin-top: 0px !important;
-                border-radius: 0px !important;
-        }
-
-        .button:not(.dismiss),
-        .button:hover:not(.dismiss),
-        .button:focus:not(.dismiss),
-        .actions button:not(.dismiss),
-        .actions button:hover:not(.dismiss),
-        .actions button:focus:not(.dismiss),
-        .edit-topsites-wrapper .modal,
-        .search-wrapper .search-button,
-        .search-wrapper .search-button:hover,
-        .search-wrapper .search-button:focus {
-                fill: var(--nscde-fg-color-5) !important;
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-radius: 0px !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-        }
-
-        .search-wrapper .search-button:active {
-                background-color: var(--nscde-sel-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        search-textbox,
-        input,
-        textarea {
-                border-width: 1px !important;
-                border-radius: 0px !important;
-                background-color: var(--nscde-bg-color-4) !important;
-                color: var(--nscde-fg-color-4) !important;
-                border-top-color: var(--nscde-bs-color-5) !important;
-                border-left-color: var(--nscde-bs-color-5) !important;
-                border-right-color: var(--nscde-ts-color-5) !important;
-                border-bottom-color: var(--nscde-ts-color-5) !important;
-        }
-
-        .outer-wrapper:not(.newtab-experience) .card-outer:is(:hover, :focus, .active):not(.placeholder),
-        .outer-wrapper:not(.newtab-experience) .top-sites-list:not(.dnd-active) .top-site-outer:is(.active, :focus, :hover) .tile {
-                box-shadow: 0 0 0 2px var(--nscde-bg-color-1) !important;
-                transition: none !important;
-        }
-}
-
-@-moz-document url-prefix(about:preferences) {
-        :root {
-                --in-content-page-background: var(--nscde-bg-color-5) !important;
-                --in-content-page-color: var(--nscde-fg-color-5) !important;
-                --in-content-primary-button-text-color: var(--nscde-fg-color-1) !important;
-                --in-content-primary-button-background: var(--nscde-bg-color-1) !important;
-        }
-
-        .reload-tabs-button .button-icon,
-        .reload-tabs-button .button-text,
-        search-textbox,
-        button {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-right-color: var(--nscde-bs-color-5) !important;
-                border-left-color: var(--nscde-ts-color-5) !important;
-                border-bottom-color: var(--nscde-bs-color-5) !important;
-                border-top-color: var(--nscde-ts-color-5) !important;
-                border-radius: 0px !important;
-                font-weight: normal !important;
-        }
-        button:is(:active, [open='true']):not([disabled='true']) {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-right-color: var(--nscde-ts-color-5) !important;
-                border-left-color: var(--nscde-bs-color-5) !important;
-                border-bottom-color: var(--nscde-ts-color-5) !important;
-                border-top-color: var(--nscde-bs-color-5) !important;
-        }
-
-        input,
-        textarea {
-                background-color: var(--nscde-bg-color-4) !important;
-                color: var(--nscde-fg-color-4) !important;
-                border-right-color: var(--nscde-ts-color-4) !important;
-                border-left-color: var(--nscde-bs-color-4) !important;
-                border-bottom-color: var(--nscde-ts-color-4) !important;
-                border-top-color: var(--nscde-bs-color-4) !important;
-        }
-
-        treecol {
-                background-color: var(--nscde-bg-color-5) !important;
-                font-weight: bold !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-        }
-
-        treechildren {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-
-        treechildren,
-        treecol {
-                border-width: 1px !important;
-                border-left-color: var(--nscde-ts-color-4) !important;
-                border-right-color: var(--nscde-bs-color-4) !important;
-                border-top-color: var(--nscde-ts-color-4) !important;
-                border-bottom-color: var(--nscde-bs-color-4) !important;
-        }
-
-        .sidebar-footer-link,
-        .sidebar-footer-button > .text-link {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-                border-radius: 0px !important;
-        }
-
-        .sidebar-footer-link:active,
-        .sidebar-footer-button > .text-link {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        menupopup,
-        menulist,
-        menuseparator {
-                -moz-appearance: none !important;
-                --panel-border-color: var(--nscde-bg-color-6) !important;
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-ts-color-6) !important;
-                border-left: 1px solid var(--nscde-ts-color-6) !important;
-                border-right: 1px solid var(--nscde-bs-color-6) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-                border-radius: 0px !important;
-                font-weight: normal !important;
-        }
-
-        .panel-arrowcontainer .menupopup-arrowscrollbox,
-        .menupopup-arrowscrollbox,
-        .panel-arrowbox + slot {
-                box-shadow: none !important;
-                margin: 0px !important;
-        }
-
-        menuitem {
-                border-width: 1px !important;
-                -moz-appearance: none !important;
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-        }
-
-        menupopup:active,
-        menuitem:is(:active, :open, :checked) {
-                -moz-appearance: none !important;
-                background-color: var(--nscde-sel-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-bs-color-6) !important;
-                border-left: 1px solid var(--nscde-bs-color-6) !important;
-                border-right: 1px solid var(--nscde-ts-color-6) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-                padding: -2px !important;
-                margin: -1px !important;
-        }
-
-        .dialogClose,
-        .dialogTitleBar {
-                background-color: var(--nscde-bg-color-1) !important;
-                color: var(--nscde-fg-color-1) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-ts-color-1) !important;
-                border-left: 1px solid var(--nscde-ts-color-1) !important;
-                border-right: 1px solid var(--nscde-bs-color-1) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-1) !important;
-                border-radius: 0px !important;
-        }
-
-        .dialogClose:is([checked='true'], :hover:active) {
-                background-color: var(--nscde-bg-color-1) !important;
-                color: var(--nscde-fg-color-1) !important;
-                border-top: 1px solid var(--nscde-bs-color-1) !important;
-                border-left: 1px solid var(--nscde-bs-color-1) !important;
-                border-right: 1px solid var(--nscde-ts-color-1) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-1) !important;
-                border-radius: 0px !important;
-        }
-
-        .close-icon > .button-box > .button-icon {
-                fill: var(--nscde-fg-color-1) !important;
-        }
-
-        .dialogBox {
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-ts-color-6) !important;
-                border-left: 1px solid var(--nscde-ts-color-6) !important;
-                border-right: 1px solid var(--nscde-bs-color-6) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-                border-radius: 0px !important;
-        }
-
-        input[type='radio'],
-        input[type='checkbox'],
-        .radio-check,
-        .checkbox-check {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-        }
-
-        input[type='radio']:checked,
-        input[type='checkbox']:checked,
-        .radio-check[selected],
-        .checkbox-check[checked='true'] {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        #handlersView {
-                background-color: var(--nscde-bg-color-4) !important;
-                color: var(--nscde-fg-color-4) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        .info-panel,
-        .extension-controlled {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        #categories .category-name {
-                background-color: inherit !important;
-                color: inherit !important;
-        }
-
-        #categories .category-icon {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                fill: var(--nscde-fg-color-5) !important;
-        }
-
-        #categories > .category:hover,
-        #categories > .category {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                fill: var(--nscde-fg-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-                border-radius: 0px !important;
-        }
-
-        #categories > .category:is(:active, :focus, [selected]) .category-icon {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                fill: var(--nscde-fg-color-5) !important;
-        }
-
-        #categories > .category:is(:active, :focus, [selected]) {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        .info-box-container {
-                border-radius: 0px !important;
-        }
-}
-
-@-moz-document url-prefix(about:addons) {
-        * {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-right-color: var(--nscde-bs-color-5) !important;
-                border-left-color: var(--nscde-ts-color-5) !important;
-                border-bottom-color: var(--nscde-bs-color-5) !important;
-                border-top-color: var(--nscde-ts-color-5) !important;
-        }
-
-        button:is(:active, [open='true']):not([disabled='true']) {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-right-color: var(--nscde-ts-color-5) !important;
-                border-left-color: var(--nscde-bs-color-5) !important;
-                border-bottom-color: var(--nscde-ts-color-5) !important;
-                border-top-color: var(--nscde-bs-color-5) !important;
-        }
-
-        .page-options-menu > .more-options-button {
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                fill: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-ts-color-6) !important;
-                border-left: 1px solid var(--nscde-ts-color-6) !important;
-                border-right: 1px solid var(--nscde-bs-color-6) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-        }
-
-        #categories .category-name {
-                background-color: inherit !important;
-                color: inherit !important;
-        }
-
-        #categories .category-icon {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                fill: var(--nscde-fg-color-5) !important;
-        }
-
-        #categories > .category:hover,
-        #categories > .category {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                fill: var(--nscde-fg-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-        }
-
-        #categories > .category:focus,
-        #categories > .category:active {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        .sidebar-footer-link {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-        }
-
-        .sidebar-footer-link:active {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-
-        addon-card:not([expanded]) > .addon.card:hover,
-        .addon.card:hover {
-                box-shadow: none !important;
-                cursor: default !important;
-        }
-
-        panel-item-separator {
-                border-top: 1px solid var(--nscde-bs-color-6) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-                height: 0px !important;
-        }
-
-        panel-list,
-        .list {
-                -moz-appearance: none !important;
-                background-color: var(--nscde-bg-color-6) !important;
-                fill: var(--nscde-fg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-ts-color-6) !important;
-                border-left: 1px solid var(--nscde-ts-color-6) !important;
-                border-right: 1px solid var(--nscde-bs-color-6) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-        }
-
-        link + button *,
-        link + button {
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                fill: var(--nscde-fg-color-6) !important;
-                border: 1px solid var(--nscde-bg-color-6) !important;
-        }
-        link + button:is(:active, :focus) * {
-                background-color: var(--nscde-sel-color-6) !important;
-                border: 1px solid var(--nscde-sel-color-6) !important;
-        }
-        link + button:is(:active, :focus) {
-                background-color: var(--nscde-sel-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                fill: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-bs-color-6) !important;
-                border-left: 1px solid var(--nscde-bs-color-6) !important;
-                border-right: 1px solid var(--nscde-ts-color-6) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        }
-
-        input[type='checkbox'].toggle-button {
-                -moz-appearance: none !important;
-                background-color: var(--nscde-bg-color-5) !important;
-                fill: var(--nscde-fg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-                box-shadow: none !important;
-        }
-
-        input[type='checkbox'].toggle-button:is(:checked, :hover) {
-                -moz-appearance: none !important;
-                background-color: var(--nscde-sel-color-5) !important;
-        }
-
-        input[type='checkbox'].toggle-button::before {
-                background: var(--nscde-fg-color-5) !important;
-        }
-}
-
-@-moz-document url-prefix(about:devtools) {
-        .feature {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-        }
-        .feature:hover {
-                box-shadow: 0 0 0 2px var(--nscde-bg-color-1) !important;
-                transition: none !important;
-        }
-        .feature:active {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-                box-shadow: 0 0 0 2px var(--nscde-bg-color-1) !important;
-                transition: none !important;
-        }
-        .features {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-        }
-}
-
-@-moz-document url-prefix(about:downloads) {
-        #downloadsRichListBox {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-        }
-        #downloadsRichListBox > richlistitem {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-        }
-        #downloadsRichListBox > richlistitem:active {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-                box-shadow: 0 0 0 2px var(--nscde-bg-color-1) !important;
-                transition: none !important;
-        }
-        .downloadProgress::-moz-progress-bar {
-                background-color: var(--nscde-fg-color-5) !important;
-        }
-}
-
-@-moz-document url-prefix(about:logins) {
-        .login-list-item,
-        .login-list-item:hover,
-        .create-login-button-container,
-        .meta {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-        }
-
-        .login-list-item,
-        .login-list-item:hover,
-        .login-list-item.selected {
-                margin: 6px !important;
-        }
-
-        .menu,
-        .menu-button {
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-ts-color-6) !important;
-                border-left: 1px solid var(--nscde-ts-color-6) !important;
-                border-right: 1px solid var(--nscde-bs-color-6) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-                border-radius: 0px !important;
-        }
-
-        .menuitem-button {
-                background-color: var(--nscde-bg-color-6) !important;
-                border: 1px solid var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-        }
-
-        .menu-button:is(:active, :open, :checked),
-        .menuitem-button:is(:active, :open, :checked) {
-                background-color: var(--nscde-sel-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-bs-color-6) !important;
-                border-left: 1px solid var(--nscde-bs-color-6) !important;
-                border-right: 1px solid var(--nscde-ts-color-6) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        }
-
-        .menuitem-separator {
-                -moz-appearance: none !important;
-                background-color: var(--nscde-bg-color-6) !important;
-                color: var(--nscde-fg-color-6) !important;
-                border-top: 1px solid var(--nscde-bs-color-6) !important;
-                border-left: 1px solid var(--nscde-bs-color-6) !important;
-                border-right: 1px solid var(--nscde-ts-color-6) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        }
-
-        .login-list-item.selected {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-        }
-
-        ol,
-        .empty-search-message,
-        .intro {
-                background-color: var(--nscde-bg-color-2) !important;
-                color: var(--nscde-fg-color-2) !important;
-                border-width: 1px !important;
-                border-top: 1px solid var(--nscde-ts-color-5) !important;
-                border-left: 1px solid var(--nscde-ts-color-5) !important;
-                border-right: 1px solid var(--nscde-bs-color-5) !important;
-                border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-                border-radius: 0px !important;
-                cursor: default !important;
-        }
-
-        input {
-                border-width: 1px !important;
-                border-radius: 0px !important;
-                background-color: var(--nscde-bg-color-4) !important;
-                color: var(--nscde-fg-color-4) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-}
-
-@-moz-document url-prefix(about:memory) {
-        div.opsRow {
-                border-radius: 0px !important;
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-        div.sidebarItem,
-        div.opsRowLabel {
-                border-radius: 0px !important;
-                font-weight: bold !important;
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-        div.section {
-                background-color: var(--nscde-bg-color-4) !important;
-                color: var(--nscde-fg-color-4) !important;
-                border-radius: 0px !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-}
-
-@-moz-document url-prefix(about:performance) {
-        #dispatch-table {
-                background-color: var(--nscde-bg-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-}
-
-@-moz-document url-prefix(about:profiling) {
-        .perf-settings-dir-list {
-                background-color: var(--nscde-bg-color-4) !important;
-                color: var(--nscde-fg-color-4) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-}
-
-@-moz-document url-prefix(about:telemetry) {
-        #categories {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-                border-top: 1px solid var(--nscde-bs-color-5) !important;
-                border-left: 1px solid var(--nscde-bs-color-5) !important;
-                border-right: 1px solid var(--nscde-ts-color-5) !important;
-                border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-        }
-        #categories .category,
-        #categories .category:hover {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: var(--nscde-fg-color-5) !important;
-        }
-        #categories .category.selected {
-                font-weight: bold !important;
-                border: 1px solid var(--nscde-bg-color-1) !important;
-        }
-        #categories .category.selected .category-subsection {
-                font-weight: normal !important;
-                font-style: italic !important;
-        }
-        #categories .category.selected .category-subsection.selected {
-                font-weight: bold !important;
-        }
-}
-
-window#FontsDialog button,
-window#ColorsDialog button,
-window#BlocklistsDialog button,
-window#ClearSiteDataDialog button,
-window#ContainersDialog button,
-window#PermissionsDialog button,
-window#SanitizeDialog button,
-window#SiteDataRemoveSelectedDialog button,
-window#SiteDataSettingsDialog button,
-window#SitePermissionsDialog button,
-window#TranslationDialog button {
-        border-width: 1px !important;
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-left-color: var(--nscde-ts-color-6) !important;
-        border-right-color: var(--nscde-bs-color-6) !important;
-        border-top-color: var(--nscde-ts-color-6) !important;
-        border-bottom-color: var(--nscde-bs-color-6) !important;
-        border-radius: 0px !important;
-}
-
-window#FontsDialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window#ColorsDialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window#BlocklistsDialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window#ClearSiteDataDialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window#ContainersDialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window#PermissionsDialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window#SanitizeDialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window#SiteDataRemoveSelectedDialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window#SiteDataSettingsDialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window#SitePermissionsDialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window#TranslationDialog button:is(:hover:active, [open='true']):not([disabled='true']) {
-        border-width: 1px !important;
-        background-color: var(--nscde-sel-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-left-color: var(--nscde-bs-color-6) !important;
-        border-right-color: var(--nscde-ts-color-6) !important;
-        border-top-color: var(--nscde-bs-color-6) !important;
-        border-bottom-color: var(--nscde-ts-color-6) !important;
-}
-
-window#FontsDialog,
-window#ColorsDialog,
-window#BlocklistsDialog,
-window#ClearSiteDataDialog,
-window#ContainersDialog,
-window#PermissionsDialog,
-window#SanitizeDialog,
-window#SiteDataRemoveSelectedDialog,
-window#SiteDataSettingsDialog,
-window#SitePermissionsDialog,
-window#TranslationDialog {
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-}
-
-window#FontsDialog dialog,
-window#ColorsDialog dialog,
-window#BlocklistsDialog dialog,
-window#ClearSiteDataDialog dialog,
-window#ContainersDialog dialog,
-window#PermissionsDialog dialog,
-window#SanitizeDialog dialog,
-window#SiteDataRemoveSelectedDialog dialog,
-window#SiteDataSettingsDialog dialog,
-window#SitePermissionsDialog dialog,
-window#TranslationDialog dialog {
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-top: 1px solid var(--nscde-ts-color-6) !important;
-        border-left: 1px solid var(--nscde-ts-color-6) !important;
-        border-right: 1px solid var(--nscde-bs-color-6) !important;
-        border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-        border-radius: 0px !important;
-}
-
-window#FontsDialog listheader > treecol,
-window#ColorsDialog listheader > treecol,
-window#BlocklistsDialog listheader > treecol,
-window#ClearSiteDataDialog listheader > treecol,
-window#ContainersDialog listheader > treecol,
-window#PermissionsDialog listheader > treecol,
-window#SanitizeDialog listheader > treecol,
-window#SiteDataRemoveSelectedDialog listheader > treecol,
-window#SiteDataSettingsDialog listheader > treecol,
-window#SitePermissionsDialog listheader > treecol,
-window#TranslationDialog listheader > treecol {
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-top: 1px solid var(--nscde-ts-color-6) !important;
-        border-left: 1px solid var(--nscde-ts-color-6) !important;
-        border-right: 1px solid var(--nscde-bs-color-6) !important;
-        border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-}
-
-window#FontsDialog richlistbox,
-window#ColorsDialog richlistbox,
-window#BlocklistsDialog richlistbox,
-window#ClearSiteDataDialog richlistbox,
-window#ContainersDialog richlistbox,
-window#PermissionsDialog richlistbox,
-window#SanitizeDialog richlistbox,
-window#SiteDataRemoveSelectedDialog richlistbox,
-window#SiteDataSettingsDialog richlistbox,
-window#SitePermissionsDialog richlistbox,
-window#TranslationDialog richlistbox {
-        background-color: var(--nscde-bg-color-4) !important;
-        color: var(--nscde-fg-color-4) !important;
-        border-top-color: var(--nscde-bs-color-6) !important;
-        border-bottom-color: var(--nscde-ts-color-6) !important;
-        border-left-color: var(--nscde-bs-color-6) !important;
-        border-right-color: var(--nscde-ts-color-6) !important;
-}
-
-window#FontsDialog input,
-window#ColorsDialog input,
-window#BlocklistsDialog input,
-window#ClearSiteDataDialog input,
-window#ContainersDialog input,
-window#PermissionsDialog input,
-window#SanitizeDialog input,
-window#SiteDataRemoveSelectedDialog input,
-window#SiteDataSettingsDialog input,
-window#SitePermissionsDialog input,
-window#TranslationDialog input {
-        background-color: var(--nscde-bg-color-4) !important;
-        color: var(--nscde-fg-color-4) !important;
-        border-top-color: var(--nscde-bs-color-6) !important;
-        border-bottom-color: var(--nscde-ts-color-6) !important;
-        border-left-color: var(--nscde-bs-color-6) !important;
-        border-right-color: var(--nscde-ts-color-6) !important;
-}
-
-window#FontsDialog search-textbox,
-window#ColorsDialog search-textbox,
-window#BlocklistsDialog search-textbox,
-window#ClearSiteDataDialog search-textbox,
-window#ContainersDialog search-textbox,
-window#PermissionsDialog search-textbox,
-window#SanitizeDialog search-textbox,
-window#SiteDataRemoveSelectedDialog search-textbox,
-window#SiteDataSettingsDialog search-textbox,
-window#SitePermissionsDialog search-textbox,
-window#TranslationDialog search-textbox {
-        background-color: var(--nscde-bg-color-4) !important;
-        color: var(--nscde-fg-color-4) !important;
-        border-top-color: var(--nscde-bs-color-6) !important;
-        border-bottom-color: var(--nscde-ts-color-6) !important;
-        border-left-color: var(--nscde-bs-color-6) !important;
-        border-right-color: var(--nscde-ts-color-6) !important;
-}
-
-window menulist {
-        border-radius: 0px !important;
-}
-
-window input[type='color'] {
-        background-image: none !important;
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-5) !important;
-        border-top: 1px solid var(--nscde-ts-color-6) !important;
-        border-left: 1px solid var(--nscde-ts-color-6) !important;
-        border-right: 1px solid var(--nscde-bs-color-6) !important;
-        border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-        border-radius: 0px !important;
-}
-
-window input[type='color']:active {
-        background-color: var(--nscde-sel-color-6) !important;
-        border-top: 1px solid var(--nscde-bs-color-6) !important;
-        border-left: 1px solid var(--nscde-bs-color-6) !important;
-        border-right: 1px solid var(--nscde-ts-color-6) !important;
-        border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-}
-
-window .tree-columnpicker-button {
-        border-image: none !important;
-        fill: var(--nscde-fg-color-6) !important;
-}
-
-.proxy-port-input {
-        width: calc(5ch + 38px) !important;
-}
-
-.dialog-button-box button {
-        border-width: 1px !important;
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-left-color: var(--nscde-ts-color-6) !important;
-        border-right-color: var(--nscde-bs-color-6) !important;
-        border-top-color: var(--nscde-ts-color-6) !important;
-        border-bottom-color: var(--nscde-bs-color-6) !important;
-}
-
-.dialog-button-box button:is(:hover:active, [open='true']):not([disabled='true']) {
-        border-width: 1px !important;
-        background-color: var(--nscde-sel-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-left-color: var(--nscde-bs-color-6) !important;
-        border-right-color: var(--nscde-ts-color-6) !important;
-        border-top-color: var(--nscde-bs-color-6) !important;
-        border-bottom-color: var(--nscde-ts-color-6) !important;
-}
-
-window dialog input,
-window dialog textarea {
-        background-color: var(--nscde-bg-color-4) !important;
-        color: var(--nscde-fg-color-4) !important;
-        border-top-color: var(--nscde-bs-color-6) !important;
-        border-bottom-color: var(--nscde-ts-color-6) !important;
-        border-left-color: var(--nscde-bs-color-6) !important;
-        border-right-color: var(--nscde-ts-color-6) !important;
-}
-
-window dialog tab,
-window dialog button,
-window .radio-check,
-window .checkbox-check {
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-top: 1px solid var(--nscde-ts-color-6) !important;
-        border-left: 1px solid var(--nscde-ts-color-6) !important;
-        border-right: 1px solid var(--nscde-bs-color-6) !important;
-        border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-}
-
-window dialog tab:is(:hover:active, [open='true'], [selected='true']):not([disabled='true']),
-window dialog button:is(:hover:active, [open='true']):not([disabled='true']),
-window .radio-check[selected],
-window .checkbox-check[checked='true'] {
-        background-color: var(--nscde-sel-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-top: 1px solid var(--nscde-bs-color-6) !important;
-        border-left: 1px solid var(--nscde-bs-color-6) !important;
-        border-right: 1px solid var(--nscde-ts-color-6) !important;
-        border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-}
-
-window tree,
-window richlistbox {
-        background-color: var(--nscde-bg-color-4) !important;
-        color: var(--nscde-fg-color-4) !important;
-        border-top: 1px solid var(--nscde-bs-color-6) !important;
-        border-left: 1px solid var(--nscde-bs-color-6) !important;
-        border-right: 1px solid var(--nscde-ts-color-6) !important;
-        border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        border-radius: 0px !important;
-        --in-content-item-selected: var(--nscde-bg-color-1) !important;
-        --in-content-item-selected-text: var(--nscde-fg-color-1) !important;
-        --in-content-item-hover: var(--nscde-bg-color-4) !important;
-        --in-content-item-hover-text: var(--nscde-fg-color-4) !important;
-}
-
-window menupopup,
-window menulist,
-window menuseparator {
-        -moz-appearance: none !important;
-        --panel-border-color: var(--nscde-bg-color-6) !important;
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-top: 1px solid var(--nscde-ts-color-6) !important;
-        border-left: 1px solid var(--nscde-ts-color-6) !important;
-        border-right: 1px solid var(--nscde-bs-color-6) !important;
-        border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-}
-
-window dialog,
-window menuitem {
-        border-width: 1px !important;
-        -moz-appearance: none !important;
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-}
-
-window menupopup:active,
-window menuitem:active {
-        border-width: 1px !important;
-        -moz-appearance: none !important;
-        background-color: var(--nscde-sel-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-top: 1px solid var(--nscde-bs-color-6) !important;
-        border-left: 1px solid var(--nscde-bs-color-6) !important;
-        border-right: 1px solid var(--nscde-ts-color-6) !important;
-        border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-}
-
-window menulist:is(:active, :hover:active, [open], [checked], [selected='true']) {
-        background-color: var(--nscde-sel-color-6) !important;
-        border-top: 1px solid var(--nscde-bs-color-6) !important;
-        border-left: 1px solid var(--nscde-bs-color-6) !important;
-        border-right: 1px solid var(--nscde-ts-color-6) !important;
-        border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-}
-
-window menuitem:is(:active, :open, :checked) {
-        background-color: var(--nscde-sel-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        border-top: 1px solid var(--nscde-bs-color-6) !important;
-        border-left: 1px solid var(--nscde-bs-color-6) !important;
-        border-right: 1px solid var(--nscde-ts-color-6) !important;
-        border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        padding: 2px !important;
-}
-
-search-textbox,
-input:not([type='checkbox']):not([type='radio']):not([type='button']):not([type='color']):not([type='image']):not([type='range']):not([type='reset']):not([type='submit']),
-textarea {
-        -moz-appearance: none !important;
-        background-color: var(--nscde-bg-color-4) !important;
-        color: var(--nscde-fg-color-4) !important;
-        fill: var(--nscde-fg-color-4) !important;
-        border-radius: 0px !important;
-        border-top: 1px solid var(--nscde-bs-color-5) !important;
-        border-left: 1px solid var(--nscde-bs-color-5) !important;
-        border-right: 1px solid var(--nscde-ts-color-5) !important;
-        border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-}
-
-.btn,
-.btn:hover,
-select,
-button:not(.color-picker__simple-color-circle) {
-        -moz-appearance: none !important;
-        background-color: var(--nscde-bg-color-5) !important;
-        color: var(--nscde-fg-color-5) !important;
-        fill: var(--nscde-fg-color-5) !important;
-        border-top: 1px solid var(--nscde-ts-color-5) !important;
-        border-left: 1px solid var(--nscde-ts-color-5) !important;
-        border-right: 1px solid var(--nscde-bs-color-5) !important;
-        border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-        border-radius: 0px !important;
-}
-
-.btn:is(:active, [open='true']):not([disabled='true']),
-select:is(:active, [open='true']):not([disabled='true']),
-button:is(:active, [open='true']):not([disabled='true']) {
-        -moz-appearance: none !important;
-        background-color: var(--nscde-sel-color-5) !important;
-        color: var(--nscde-fg-color-5) !important;
-        fill: var(--nscde-fg-color-5) !important;
-        border-top: 1px solid var(--nscde-bs-color-5) !important;
-        border-left: 1px solid var(--nscde-bs-color-5) !important;
-        border-right: 1px solid var(--nscde-ts-color-5) !important;
-        border-bottom: 1px solid var(--nscde-ts-color-5) !important;
-}
-
-/ Player controls */ .player .fill,
-.ytp-button * {
-        background-color: var(--nscde-bg-color-5) !important;
-        fill: var(--nscde-fg-color-5) !important;
-        color: var(--nscde-fg-color-5) !important;
-}
-
-/* PDF viewer */
-#viewerContainer {
-        background-color: var(--nscde-bg-color-2) !important;
-        color: var(--nscde-fg-color-2) !important;
-}
-
-#toolbarViewer {
-        -moz-appearance: none !important;
-        background-color: var(--nscde-sel-color-5) !important;
-        color: var(--nscde-fg-color-5) !important;
-        fill: var(--nscde-fg-color-5) !important;
-        border-top: 1px solid var(--nscde-ts-color-5) !important;
-        border-left: 1px solid var(--nscde-ts-color-5) !important;
-        border-right: 1px solid var(--nscde-bs-color-5) !important;
-        border-bottom: 1px solid var(--nscde-bs-color-5) !important;
-}
-
-.secondaryToolbar {
-        -moz-appearance: none !important;
-        background-image: none !important;
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        fill: var(--nscde-fg-color-6) !important;
-        border-top: 1px solid var(--nscde-ts-color-6) !important;
-        border-left: 1px solid var(--nscde-ts-color-6) !important;
-        border-right: 1px solid var(--nscde-bs-color-6) !important;
-        border-bottom: 1px solid var(--nscde-bs-color-6) !important;
-}
-
-#secondaryToolbarButtonContainer .horizontalToolbarSeparator {
-        border-top: 1px solid var(--nscde-bs-color-6) !important;
-        border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        height: 0px !important;
-}
-
-.secondaryToolbarButton::before {
-        background-color: var(--nscde-fg-color-6) !important;
-}
-
-#secondaryToolbarButtonContainer button {
-        -moz-appearance: none !important;
-        background-image: none !important;
-        background-color: var(--nscde-bg-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        fill: var(--nscde-fg-color-6) !important;
-        border: 1px solid var(--nscde-bg-color-6) !important;
-        box-shadow: none !important;
-}
-
-#secondaryToolbarButtonContainer button:is(:active, [open='true']):not([disabled='true']) {
-        -moz-appearance: none !important;
-        background-image: none !important;
-        background-color: var(--nscde-sel-color-6) !important;
-        color: var(--nscde-fg-color-6) !important;
-        fill: var(--nscde-fg-color-6) !important;
-        border-top: 1px solid var(--nscde-bs-color-6) !important;
-        border-left: 1px solid var(--nscde-bs-color-6) !important;
-        border-right: 1px solid var(--nscde-ts-color-6) !important;
-        border-bottom: 1px solid var(--nscde-ts-color-6) !important;
-        box-shadow: none !important;
-}
-
-@media not (prefers-contrast) {
-        :root[dialogroot],
-        :host(dialog) {
-                --in-content-page-background: var(--nscde-bg-color-6) !important;
-        }
-
-        .content-blocking-warning,
-        .content-blocking-category {
-                background-color: inherit !important;
-                color: inherit !important;
-                border-color: var(--nscde-fg-color-5) !important;
-                border-radius: 0px !important;
-        }
-
-        .content-blocking-category.selected .content-blocking-warning,
-        .content-blocking-category.selected {
-                background-color: var(--nscde-sel-color-5) !important;
-                color: inherit !important;
-                border-radius: 0px !important;
-                border-color: var(--nscde-fg-color-5) !important;
-        }
-}
-
 :root {
-        --in-content-focus-outline-color: var(--nscde-bg-color-1) !important;
-        --focus-outline-color: var(--nscde-bg-color-1) !important;
+        --preferred-font: sans-serif;
+        --focus: #b24d7a;
+        --desktop-bg: #63639c;
+        --button-bg: #aeb2c3;
+        --button-fg: #000000;
+        --button-active-bg: #9397a5;
+        --button-active-fg: #000000;
+        --button-dark: #5d6069;
+        --button-light: #dcdee5;
+        --input-bg: #fff7e9;
+        --input-fg: #000;
+        --input-dark: #99948b;
+        --input-light: #ccc5ba;
+        --dialog-button-bg: var(--button-bg);
+        --dialog-button-fg: var(--button-fg);
+        --dialog-button-active-bg: var(--button-active-bg);
+        --dialog-button-active-fg: var(--button-active-fg);
+        --dialog-button-dark: var(--button-dark);
+        --dialog-button-light: var(--button-light);
+        --dialog-input-bg: var(--input-bg);
+        --dialog-input-fg: var(--input-fg);
+        --dialog-input-dark: var(--input-dark);
+        --dialog-input-light: var(--input-light);
+        --select-active-bg: #000000;
+        --select-active-fg: #ffffff;
+        --title-bar-bg: var(--button-bg);
+        --title-bar-fg: var(--button-fg);
+        --title-bar-dark: var(--button-dark);
+        --title-bar-light: var(--button-light);
+        --title-bar-active-bg: #b24d7a;
+        --title-bar-active-fg: #ffffff;
+        --title-bar-active-dark: #58263c;
+        --title-bar-active-light: #ddafc3;
 }
 
-::selection {
-        background-color: var(--nscde-sel-color-4);
-        color: var(--nscde-fg-color-4);
+body {
+        background-color: var(--button-bg);
+        color: var(--button-fg);
+        font-family: system-ui;
 }
 
-input::selection,
-textarea::selection {
-        background-color: var(--nscde-fg-color-4);
-        color: var(--nscde-sel-color-4);
+button::-moz-focus-inner {
+        border: none;
+}
+
+button,
+input,
+textarea,
+select {
+        font-family: inherit;
+        font-size: inherit;
+}
+
+code {
+        font-family: monospace;
+}
+
+.desktop {
+        background: var(--desktop-bg);
+}
+
+.raised {
+        background: var(--button-bg);
+        border: 1px solid var(--button-light);
+        border-bottom-color: var(--button-dark);
+        border-right-color: var(--button-dark);
+}
+
+.lowered {
+        background: var(--button-bg);
+        border: 1px solid var(--button-dark);
+        border-bottom-color: var(--button-light);
+        border-right-color: var(--button-light);
+}
+
+.top-panel,
+.right-panel,
+.buttom-panel,
+.left-panel {
+        background: var(--button-bg);
+        border: 2px solid var(--button-light);
+        border-bottom-color: var(--button-dark);
+        border-right-color: var(--button-dark);
+}
+
+fieldset {
+        border: 1px solid var(--button-dark);
+        border-bottom-color: var(--button-light);
+        border-right-color: var(--button-light);
+        box-shadow:
+                inset 1px 1px 0 var(--button-light),
+                inset -1px -1px 0 var(--button-dark);
+        position: relative;
+}
+
+legend {
+        text-align: left;
+        padding: 0 4px;
+        background-color: var(--button-bg);
+        display: block;
+}
+
+hr {
+        border-top: 1px solid var(--button-dark);
+        border-bottom: 1px solid var(--button-light);
+}
+
+.horizontal-scrollbar,
+.vertical-scrollbar {
+        display: flex;
+        background: var(--button-active-bg);
+        border: 1px solid var(--button-dark);
+        border-right-color: var(--button-light);
+        border-bottom-color: var(--button-light);
+}
+.horizontal-scrollbar > button,
+.vertical-scrollbar > button {
+        display: flex;
+        flex-shrink: 0;
+        width: 11px;
+        height: 11px;
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        background-color: var(--button-bg);
+}
+.horizontal-scrollbar > button:focus,
+.vertical-scrollbar > button:focus {
+        outline: none;
+}
+.horizontal-scrollbar > button:not(:disabled):active,
+.vertical-scrollbar > button:not(:disabled):active {
+        padding: 0;
+        background-color: var(--button-bg);
+        background-position: -11px 0;
+        border: 0;
+        box-shadow: none;
+        outline: none;
+}
+.horizontal-scrollbar > button:not(:disabled):active::after,
+.vertical-scrollbar > button:not(:disabled):active::after {
+        margin: 4px 0 0 4px;
+}
+.horizontal-scrollbar > .scrollbar-track,
+.vertical-scrollbar > .scrollbar-track {
+        flex-grow: 1;
+        position: relative;
+}
+.horizontal-scrollbar > .scrollbar-track > .scrollbar-thumb,
+.vertical-scrollbar > .scrollbar-track > .scrollbar-thumb {
+        position: absolute;
+        background: var(--button-bg);
+        border: 1px solid var(--button-light);
+        border-right-color: var(--button-dark);
+        border-bottom-color: var(--button-dark);
+}
+
+.horizontal-scrollbar > button:first-child {
+        background-image: url(scroll-left.svg);
+}
+.horizontal-scrollbar > button:last-child {
+        background-image: url(scroll-right.svg);
+}
+.horizontal-scrollbar > .scrollbar-track > .scrollbar-thumb {
+        top: 0;
+        bottom: 0;
+}
+
+.vertical-scrollbar {
+        flex-direction: column;
+        width: 13px;
+}
+.vertical-scrollbar > button:not(:disabled):active {
+        background-position: 0 -11px;
+}
+.vertical-scrollbar > button:first-child {
+        background-image: url(scroll-up.svg);
+}
+.vertical-scrollbar > button:last-child {
+        background-image: url(scroll-down.svg);
+}
+.vertical-scrollbar > .scrollbar-track > .scrollbar-thumb {
+        left: 0;
+        right: 0;
+}
+
+::-webkit-scrollbar {
+        background: var(--button-active-bg);
+        border: 1px solid var(--button-dark);
+        border-right-color: var(--button-light);
+        border-bottom-color: var(--button-light);
+        width: 13px;
+        height: 13px;
+}
+
+::-webkit-scrollbar-corner {
+        background: var(--button-bg);
+}
+
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-thumb {
+        background-color: var(--button-bg);
+}
+
+::-webkit-scrollbar-thumb {
+        box-shadow:
+                inset 1px 1px var(--button-light),
+                inset -1px -1px var(--button-dark);
+}
+::-webkit-scrollbar-thumb:vertical {
+        border-left: 1px solid var(--button-dark);
+        border-right: 1px solid var(--button-light);
+}
+::-webkit-scrollbar-thumb:horizontal {
+        border-top: 1px solid var(--button-dark);
+        border-bottom: 1px solid var(--button-light);
+}
+
+::-webkit-scrollbar-button {
+        width: 13px;
+        height: 13px;
+        display: none;
+        border: 1px solid transparent;
+}
+
+::-webkit-scrollbar-button:single-button {
+        display: block;
+}
+
+::-webkit-scrollbar-button:vertical {
+        height: 12px;
+}
+
+::-webkit-scrollbar-button:vertical:active {
+        background-position: 0 -11px;
+}
+
+::-webkit-scrollbar-button:horizontal {
+        width: 12px;
+}
+
+::-webkit-scrollbar-button:horizontal:active {
+        background-position: -11px 0;
+}
+
+::-webkit-scrollbar-button:vertical:decrement {
+        background-image: url(scroll-up.svg);
+        border-top-color: var(--button-dark);
+        border-right-color: var(--button-light);
+        border-bottom: 0;
+        border-left-color: var(--button-dark);
+}
+
+::-webkit-scrollbar-button:vertical:increment {
+        background-image: url(scroll-down.svg);
+        border-top: 0;
+        border-right-color: var(--button-light);
+        border-bottom-color: var(--button-light);
+        border-left-color: var(--button-dark);
+}
+
+::-webkit-scrollbar-button:horizontal:decrement {
+        background-image: url(scroll-left.svg);
+        border-top-color: var(--button-dark);
+        border-right: 0;
+        border-bottom-color: var(--button-light);
+        border-left-color: var(--button-dark);
+}
+
+::-webkit-scrollbar-button:horizontal:increment {
+        background-image: url(scroll-right.svg);
+        border-top-color: var(--button-dark);
+        border-right-color: var(--button-dark);
+        border-bottom-color: var(--button-light);
+        border-left: 0;
+}
+
+button,
+input[type='button'],
+input[type='submit'],
+input[type='reset'],
+.button {
+        background-color: var(--button-bg);
+        color: var(--button-fg);
+        border: 1px solid var(--button-light);
+        border-bottom: 1px solid var(--button-dark);
+        border-right: 1px solid var(--button-dark);
+        padding: 2px 4px;
+        cursor: default;
+        user-select: none;
+        text-align: center;
+}
+button:focus,
+button.focus,
+input[type='button']:focus,
+input[type='button'].focus,
+input[type='submit']:focus,
+input[type='submit'].focus,
+input[type='reset']:focus,
+input[type='reset'].focus,
+.button:focus,
+.button.focus {
+        outline: 1px solid var(--focus);
+        outline-offset: 0;
+}
+button:disabled,
+button.disabled,
+input[type='button']:disabled,
+input[type='button'].disabled,
+input[type='submit']:disabled,
+input[type='submit'].disabled,
+input[type='reset']:disabled,
+input[type='reset'].disabled,
+.button:disabled,
+.button.disabled {
+        color: var(--button-dark);
+        text-shadow: 1px 1px 0 var(--button-light);
+}
+button:not(:disabled, .disabled):active,
+button.active,
+input[type='button']:not(:disabled, .disabled):active,
+input[type='button'].active,
+input[type='submit']:not(:disabled, .disabled):active,
+input[type='submit'].active,
+input[type='reset']:not(:disabled, .disabled):active,
+input[type='reset'].active,
+.button:not(:disabled, .disabled):active,
+.button.active {
+        background-color: var(--button-active-bg);
+        color: var(--button-active-fg);
+        border: 1px solid var(--button-light);
+        border-top: 1px solid var(--button-dark);
+        border-left: 1px solid var(--button-dark);
+}
+
+form:focus-within:not(:has(button:focus, input[type='button']:focus, input[type='submit']:focus, input[type='reset']:focus)) button:default,
+form:focus-within:not(:has(button:focus, input[type='button']:focus, input[type='submit']:focus, input[type='reset']:focus)) input[type='button']:default,
+form:focus-within:not(:has(button:focus, input[type='button']:focus, input[type='submit']:focus, input[type='reset']:focus)) input[type='submit']:default,
+form:focus-within:not(:has(button:focus, input[type='button']:focus, input[type='submit']:focus, input[type='reset']:focus)) input[type='reset']:default,
+form:focus-within:not(:has(button:focus, input[type='button']:focus, input[type='submit']:focus, input[type='reset']:focus)) .button:default {
+        position: relative;
+}
+form:focus-within:not(:has(button:focus, input[type='button']:focus, input[type='submit']:focus, input[type='reset']:focus)) button:default::before,
+form:focus-within:not(:has(button:focus, input[type='button']:focus, input[type='submit']:focus, input[type='reset']:focus)) input[type='button']:default::before,
+form:focus-within:not(:has(button:focus, input[type='button']:focus, input[type='submit']:focus, input[type='reset']:focus)) input[type='submit']:default::before,
+form:focus-within:not(:has(button:focus, input[type='button']:focus, input[type='submit']:focus, input[type='reset']:focus)) input[type='reset']:default::before,
+form:focus-within:not(:has(button:focus, input[type='button']:focus, input[type='submit']:focus, input[type='reset']:focus)) .button:default::before {
+        display: block;
+        content: ' ';
+        position: absolute;
+        inset: -4px;
+        border: 1px solid var(--button-light);
+        border-top: 1px solid var(--button-dark);
+        border-left: 1px solid var(--button-dark);
+}
+
+form button:focus,
+form button.focus,
+form input[type='button']:focus,
+form input[type='button'].focus,
+form input[type='submit']:focus,
+form input[type='submit'].focus,
+form input[type='reset']:focus,
+form input[type='reset'].focus,
+form .button:focus,
+form .button.focus {
+        outline-offset: 5px;
+        position: relative;
+}
+form button:focus::before,
+form button.focus::before,
+form input[type='button']:focus::before,
+form input[type='button'].focus::before,
+form input[type='submit']:focus::before,
+form input[type='submit'].focus::before,
+form input[type='reset']:focus::before,
+form input[type='reset'].focus::before,
+form .button:focus::before,
+form .button.focus::before {
+        display: block;
+        content: ' ';
+        position: absolute;
+        inset: -4px;
+        border: 1px solid var(--button-light);
+        border-top: 1px solid var(--button-dark);
+        border-left: 1px solid var(--button-dark);
+}
+
+button.primary,
+input[type='button'].primary,
+input[type='submit'].primary,
+input[type='reset'].primary,
+.button.primary {
+        position: relative;
+}
+button.primary::before,
+input[type='button'].primary::before,
+input[type='submit'].primary::before,
+input[type='reset'].primary::before,
+.button.primary::before {
+        display: block;
+        content: ' ';
+        position: absolute;
+        inset: -4px;
+        border: 1px solid var(--button-light);
+        border-top: 1px solid var(--button-dark);
+        border-left: 1px solid var(--button-dark);
+}
+button.primary:focus,
+button.primary.focus,
+input[type='button'].primary:focus,
+input[type='button'].primary.focus,
+input[type='submit'].primary:focus,
+input[type='submit'].primary.focus,
+input[type='reset'].primary:focus,
+input[type='reset'].primary.focus,
+.button.primary:focus,
+.button.primary.focus {
+        outline-offset: 5px;
+}
+
+input:not([type='button'], [type='submit'], [type='reset'], [type='checkbox'], [type='radio'], [type='range']),
+textarea,
+.input {
+        background-color: var(--input-bg);
+        color: var(--input-fg);
+        border: 1px solid var(--input-dark);
+        border-bottom: 1px solid var(--input-light);
+        border-right: 1px solid var(--input-light);
+        padding: 2px 6px;
+        font-family: inherit;
+        font-size: inherit;
+        outline: none;
+}
+input:not([type='button'], [type='submit'], [type='reset'], [type='checkbox'], [type='radio'], [type='range'])::selection,
+textarea::selection,
+.input::selection {
+        background-color: var(--input-fg);
+        color: var(--input-bg);
+}
+input:not([type='button'], [type='submit'], [type='reset'], [type='checkbox'], [type='radio'], [type='range']):disabled,
+input:not([type='button'], [type='submit'], [type='reset'], [type='checkbox'], [type='radio'], [type='range']).disabled,
+textarea:disabled,
+textarea.disabled,
+.input:disabled,
+.input.disabled {
+        color: var(--input-dark);
+        text-shadow: 1px 1px 0 var(--input-light);
+}
+
+select[multiple],
+select[size]:not([size='1']) {
+        padding: 0;
+        background: var(--button-active-bg);
+        color: var(--button-active-fg);
+        border: 2px solid var(--button-light);
+        border-top: 2px solid var(--button-dark);
+        border-left: 2px solid var(--button-dark);
+}
+select[multiple] > option,
+select[size]:not([size='1']) > option {
+        padding: 2px 6px;
+}
+select[multiple] > option:checked,
+select[size]:not([size='1']) > option:checked {
+        background-color: #ffffff;
+        color: #000000;
+}
+select[multiple]:focus,
+select[size]:not([size='1']):focus {
+        outline: none;
+}
+select[multiple]:focus > option:checked,
+select[size]:not([size='1']):focus > option:checked {
+        outline: 2px solid var(--focus);
+        outline-offset: -2px;
+}
+
+select:not([size]),
+select[size='1'],
+select:not([size]):disabled:active,
+select[size='1']:disabled:active {
+        -moz-appearance: none;
+        -webkit-appearance: none;
+        appearance: none;
+        background-color: var(--button-bg);
+        background-image: url(select.svg);
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        color: var(--button-fg);
+        border: 1px solid var(--button-light);
+        border-bottom: 1px solid var(--button-dark);
+        border-right: 1px solid var(--button-dark);
+        padding: 2px 25px 2px 4px;
+}
+select:not([size]):focus,
+select[size='1']:focus,
+select:not([size]):disabled:active:focus,
+select[size='1']:disabled:active:focus {
+        outline: 1px solid var(--focus);
+}
+
+select:not([size]):disabled,
+select[size='1']:disabled,
+select:not([size]):disabled:active,
+select[size='1']:disabled:active {
+        color: var(--button-dark);
+        text-shadow: 1px 1px 0 var(--button-light);
+}
+
+select:not([size]):active,
+select[size='1']:active {
+        background-color: var(--button-active-bg);
+        color: var(--button-active-fg);
+        border: 1px solid var(--button-light);
+        border-top: 1px solid var(--button-dark);
+        border-left: 1px solid var(--button-dark);
+}
+
+input[type='checkbox'],
+input[type='checkbox']:checked:active,
+input[type='checkbox']:disabled:active {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background: var(--button-bg);
+        color: var(--button-fg);
+        border: 1px solid var(--button-light);
+        border-bottom: 1px solid var(--button-dark);
+        border-right: 1px solid var(--button-dark);
+        width: 12px;
+        height: 12px;
+        border-radius: 0;
+}
+
+input[type='checkbox']:checked,
+input[type='checkbox']:active,
+input[type='checkbox']:checked:disabled:active {
+        background: var(--button-active-bg) url(checkmark.svg);
+        color: var(--button-active-fg);
+        border: 1px solid var(--button-light);
+        border-top: 1px solid var(--button-dark);
+        border-left: 1px solid var(--button-dark);
+}
+
+input[type='checkbox']:disabled + label,
+input[type='radio']:disabled + label {
+        color: var(--button-dark);
+        text-shadow: 1px 1px 0 var(--button-light);
+}
+
+input[type='radio'],
+input[type='radio']:checked:active,
+input[type='radio']:disabled:active {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-color: var(--button-bg);
+        color: var(--button-fg);
+        border: 1px solid var(--button-light);
+        border-bottom: 1px solid var(--button-dark);
+        border-right: 1px solid var(--button-dark);
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+}
+
+input[type='radio']:checked,
+input[type='radio']:active,
+input[type='radio']:checked:disabled:active {
+        background-color: var(--button-active-bg);
+        color: var(--button-active-fg);
+        border: 1px solid var(--button-light);
+        border-top: 1px solid var(--button-dark);
+        border-left: 1px solid var(--button-dark);
+}
+
+input[type='radio']:checked::after,
+input[type='radio']:active::after {
+        content: '';
+        display: block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--focus);
+        margin-top: 2px;
+        margin-left: 2px;
+}
+
+input[type='radio']:disabled:not(:checked):active::after {
+        display: none;
+}
+
+input[type='radio']:focus + label,
+input[type='checkbox']:focus + label {
+        position: relative;
+}
+input[type='radio']:focus + label::after,
+input[type='checkbox']:focus + label::after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: calc(var(--spacing) - 1px);
+        right: 0;
+        bottom: 0;
+        border: 1px solid var(--focus);
+}
+
+input[type='radio']:focus,
+input[type='checkbox']:focus {
+        outline: none;
+}
+
+label > input[type='radio']:focus,
+label > input[type='checkbox']:focus {
+        outline: 1px solid var(--focus);
+        outline-offset: 1px;
+}
+
+input[type='range'] {
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+        height: 17px;
+}
+input[type='range']:focus {
+        outline: 2px solid var(--focus);
+}
+input[type='range']::-moz-range-track {
+        height: 15px;
+        background: var(--button-bg);
+        border: 1px solid var(--button-dark);
+        border-right-color: var(--button-light);
+        border-bottom-color: var(--button-light);
+}
+input[type='range']::-moz-range-thumb {
+        border-radius: 0;
+        height: 13px;
+        width: 28px;
+        background: var(--button-bg);
+        background-image: linear-gradient(to right, var(--button-dark), var(--button-dark) 50%, var(--button-light) 50%, var(--button-light));
+        background-size: 2px 13px;
+        background-repeat: no-repeat;
+        background-position: center top;
+        border: 1px solid var(--button-light);
+        border-right-color: var(--button-dark);
+        border-bottom-color: var(--button-dark);
+}
+input[type='range']::-webkit-slider-runnable-track {
+        height: 15px;
+        background: var(--button-bg);
+        border: 1px solid var(--button-dark);
+        border-right-color: var(--button-light);
+        border-bottom-color: var(--button-light);
+}
+input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        border-radius: 0;
+        height: 13px;
+        width: 28px;
+        background: var(--button-bg);
+        background-image: linear-gradient(to right, var(--button-dark), var(--button-dark) 50%, var(--button-light) 50%, var(--button-light));
+        background-size: 2px 13px;
+        background-repeat: no-repeat;
+        background-position: center top;
+        border: 1px solid var(--button-light);
+        border-right-color: var(--button-dark);
+        border-bottom-color: var(--button-dark);
+}
+
+progress,
+.progress-bar {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background: var(--button-bg);
+        border: 1px solid var(--button-dark);
+        border-bottom: 1px solid var(--button-light);
+        border-right: 1px solid var(--button-light);
+        height: 16px;
+}
+
+.progress-bar {
+        position: relative;
+        overflow: hidden;
+}
+.progress-bar:not([aria-valuenow])::after,
+.progress-bar > .progress-bar-value {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        background: var(--button-active-bg);
+}
+.progress-bar:not([aria-valuenow])::after {
+        width: 50%;
+        animation: 1s infinite linear indeterminate;
+}
+
+progress::-webkit-progress-bar {
+        background: var(--button-bg);
+}
+
+progress::-webkit-progress-value {
+        background: var(--button-active-bg);
+}
+
+progress::-moz-progress-bar {
+        background: var(--button-active-bg);
+}
+
+progress:indeterminate::-moz-progress-bar {
+        width: 50%;
+        animation: 1s infinite linear indeterminate;
+}
+
+progress:not([value])::-webkit-progress-value {
+        width: 50%;
+        animation: 1s infinite linear indeterminate;
+}
+
+@keyframes indeterminate {
+        from {
+                margin-left: -50%;
+        }
+        to {
+                margin-left: 100%;
+        }
+}
+.window,
+.dialog,
+.menu {
+        background: var(--title-bar-bg);
+        border: 2px solid var(--title-bar-light);
+        border-bottom: 2px solid var(--title-bar-dark);
+        border-right: 2px solid var(--title-bar-dark);
+        position: relative;
+        padding: 2px;
+}
+
+.window.active,
+.window:focus-within,
+.dialog.active,
+.dialog:focus-within,
+.menu {
+        background: var(--title-bar-active-bg);
+        border-color: var(--title-bar-active-light);
+        border-bottom-color: var(--title-bar-active-dark);
+        border-right-color: var(--title-bar-active-dark);
+}
+
+.title-bar {
+        background: var(--title-bar-bg);
+        color: var(--title-bar-fg);
+        border-top: 1px solid var(--title-bar-dark);
+        border-left: 1px solid var(--title-bar-dark);
+        border-right: 1px solid var(--title-bar-light);
+        display: flex;
+        flex-direction: row;
+}
+
+.title-bar-text {
+        text-align: center;
+        border: 1px solid var(--title-bar-light);
+        border-bottom: 1px solid var(--title-bar-dark);
+        border-right: 1px solid var(--title-bar-dark);
+        padding: 2px var(--padding);
+        flex-grow: 1;
+        cursor: default;
+}
+
+.title-bar-buttons {
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: row;
+}
+
+.title-bar-buttons button {
+        flex-shrink: 0;
+        background-color: transparent;
+        border: 1px solid var(--title-bar-light);
+        border-bottom: 1px solid var(--title-bar-dark);
+        border-right: 1px solid var(--title-bar-dark);
+        width: 26px;
+        background-repeat: no-repeat;
+        background-position: center center;
+}
+
+.title-bar-buttons button:active,
+.title-bar-text:active {
+        background-color: transparent;
+        border-color: var(--title-bar-dark);
+        border-bottom-color: var(--title-bar-light);
+        border-right-color: var(--title-bar-light);
+        outline: none;
+}
+
+.title-bar-buttons button[data-close] {
+        background-image: url(close.svg);
+}
+
+.title-bar-buttons button[data-minimize] {
+        background-image: url(minimize.svg);
+}
+
+.title-bar-buttons button[data-maximize] {
+        background-image: url(maximize.svg);
+}
+
+.maximized .title-bar-buttons button[data-maximize] {
+        background-image: url(restore.svg);
+}
+
+.window.active > .title-bar,
+.window:focus-within > .title-bar,
+.dialog.active > .title-bar,
+.dialog:focus-within > .title-bar,
+.menu > .title-bar,
+.title-bar.active {
+        background: var(--title-bar-active-bg);
+        color: var(--title-bar-active-fg);
+        border-top-color: var(--title-bar-active-dark);
+        border-left-color: var(--title-bar-active-dark);
+        border-right-color: var(--title-bar-active-light);
+}
+
+.window.active > .title-bar .title-bar-text,
+.window.active > .title-bar .title-bar-buttons button,
+.window:focus-within > .title-bar .title-bar-text,
+.window:focus-within > .title-bar .title-bar-buttons button,
+.dialog.active > .title-bar .title-bar-text,
+.dialog.active > .title-bar .title-bar-buttons button,
+.dialog:focus-within > .title-bar .title-bar-text,
+.dialog:focus-within > .title-bar .title-bar-buttons button,
+.menu.active > .title-bar .title-bar-text,
+.menu.active > .title-bar .title-bar-buttons button,
+.menu:focus-within > .title-bar .title-bar-text,
+.menu:focus-within > .title-bar .title-bar-buttons button,
+.title-bar.active .title-bar-text,
+.title-bar.active .title-bar-buttons button {
+        border-color: var(--title-bar-active-light);
+        border-bottom-color: var(--title-bar-active-dark);
+        border-right-color: var(--title-bar-active-dark);
+}
+
+.window.active > .title-bar .title-bar-buttons button:active,
+.window:focus-within > .title-bar .title-bar-buttons button:active,
+.window.active > .title-bar .title-bar-text:active,
+.window:focus-within > .title-bar .title-bar-text:active,
+.dialog.active > .title-bar .title-bar-buttons button:active,
+.dialog:focus-within > .title-bar .title-bar-buttons button:active,
+.dialog.active > .title-bar .title-bar-text:active,
+.dialog:focus-within > .title-bar .title-bar-text:active,
+.menu.active > .title-bar .title-bar-buttons button:active,
+.menu:focus-within > .title-bar .title-bar-buttons button:active,
+.menu.active > .title-bar .title-bar-text:active,
+.menu:focus-within > .title-bar .title-bar-text:active,
+.title-bar.active .title-bar-buttons button:active,
+.title-bar.active .title-bar-text:active {
+        border-color: var(--title-bar-active-dark);
+        border-bottom-color: var(--title-bar-active-light);
+        border-right-color: var(--title-bar-active-light);
+}
+
+.window-body,
+.dialog-body {
+        background: var(--button-bg);
+        color: var(--button-fg);
+        border-left: 1px solid var(--button-dark);
+        border-bottom: 1px solid var(--button-light);
+        border-right: 1px solid var(--button-light);
+}
+
+.window.active > .window-body,
+.window:focus-within > .window-body,
+.dialog.active > .dialog-body,
+.dialog:focus-within > .dialog-body {
+        background: var(--button-bg);
+        border-left-color: var(--title-bar-active-dark);
+        border-bottom-color: var(--title-bar-active-light);
+        border-right-color: var(--title-bar-active-light);
+}
+
+.window-body:first-child,
+.dialog-body:first-child {
+        border-top: 1px solid var(--title-bar-active-dark);
+}
+
+.window-body > [role='menubar'],
+.dialog-body > [role='menubar'] {
+        padding-left: calc(var(--margin) - 4px);
+        padding-right: calc(var(--margin) - 4px);
+}
+
+.window-body > :not([role='menubar']),
+.dialog-body > :not([role='menubar']) {
+        background: var(--button-bg);
+        border: 1px solid var(--button-light);
+        border-bottom-color: var(--button-dark);
+        border-right-color: var(--button-dark);
+}
+
+[role='menu'],
+[role='menubar'] {
+        color: var(--button-fg);
+        background-color: var(--button-bg);
+        border: 1px solid var(--button-light);
+        border-right-color: var(--button-dark);
+        border-bottom-color: var(--button-dark);
+}
+[role='menu'] li,
+[role='menubar'] li {
+        border: 1px solid transparent;
+        padding: 1px 3px;
+}
+[role='menu'] li:focus,
+[role='menubar'] li:focus {
+        outline: none;
+}
+[role='menu'] li:focus-within,
+[role='menubar'] li:focus-within {
+        border: 1px solid var(--button-dark);
+        border-right-color: var(--button-light);
+        border-bottom-color: var(--button-light);
+        background-color: var(--button-active-bg);
+}
+[role='menu'] li:focus-within > ul,
+[role='menu'] li:focus-within > .menu,
+[role='menubar'] li:focus-within > ul,
+[role='menubar'] li:focus-within > .menu {
+        display: block;
+}
+[role='menu'] li[aria-disabled],
+[role='menubar'] li[aria-disabled] {
+        color: var(--button-dark);
+        text-shadow: 1px 1px 0 var(--button-light);
+        border-color: transparent;
+        background-color: var(--button-bg);
+}
+
+.menu > [role='menu'] {
+        border-top: 0;
+        border-left-color: var(--title-bar-active-dark);
+        border-right-color: var(--title-bar-active-light);
+        border-bottom-color: var(--title-bar-active-light);
+        box-shadow:
+                inset 1px 1px 0 var(--button-light),
+                inset -1px -1px 0 var(--button-dark);
+        padding: 1px;
+}
+
+[role='menu'] li {
+        padding: 1px 3px 1px 19px;
+}
+[role='menu'] li[data-shortcut]::after {
+        float: right;
+        content: attr(data-shortcut);
+        display: block;
+        margin-left: 4px;
+}
+[role='menu'] li > ul,
+[role='menu'] li > .menu {
+        left: 100%;
+        margin: 0;
+        top: -1px;
+        margin-left: 2px;
+        min-width: 200px;
+}
+[role='menu'] li[role='separator'] {
+        border-top: 1px solid var(--button-dark);
+        border-bottom: 1px solid var(--button-light);
+        height: 0;
+        padding: 0;
+}
+[role='menu'] li[role='checkbox']::before {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 50%;
+        margin-top: -4px;
+        display: block;
+        width: 8px;
+        height: 8px;
+        box-shadow:
+                inset 1px 1px var(--button-dark),
+                inset -1px -1px var(--button-light);
+}
+[role='menu'] li[role='checkbox'][aria-checked='true']::after {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 50%;
+        margin-top: -4px;
+        display: block;
+        width: 8px;
+        height: 8px;
+        background: currentColor;
+        -webkit-mask-image: url(checkmark.svg);
+        -webkit-mask-repeat: no-repeat;
+        -webkit-mask-size: 8px 8px;
+        mask-image: url(checkmark.svg);
+        mask-repeat: no-repeat;
+        mask-size: 8px 8px;
+}
+[role='menu'] li[role='radio']::before {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 50%;
+        margin-top: -4px;
+        display: block;
+        width: 8px;
+        height: 8px;
+        box-shadow:
+                inset 1px 1px var(--button-dark),
+                inset -1px -1px var(--button-light);
+        border-radius: 50%;
+}
+[role='menu'] li[role='radio'][aria-checked='true']::after {
+        content: '';
+        position: absolute;
+        left: 5px;
+        top: 50%;
+        margin-top: -3px;
+        display: block;
+        width: 6px;
+        height: 6px;
+        background: currentColor;
+        border-radius: 50%;
+}
+[role='menu'] li[aria-haspopup='true'] {
+        background-image: url(arrow-right.svg);
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+}
+
+[role='menubar'] > li > ul,
+[role='menubar'] > li > .menu {
+        left: 0;
+        top: 100%;
+        margin-left: -1px;
+        margin-top: 1px;
+        min-width: 200px;
+}
+[role='menubar'] > li.help-menu {
+        margin-left: auto;
+}
+[role='menubar'] > li.help-menu > ul,
+[role='menubar'] > li.help-menu > .menu {
+        right: 0;
+        left: auto;
+}
+
+.dialog,
+[role='menu'],
+[role='menubar'] {
+        --button-bg: var(--dialog-button-bg);
+        --button-fg: var(--dialog-button-fg);
+        --button-active-bg: var(--dialog-button-active-bg);
+        --button-active-fg: var(--dialog-button-active-fg);
+        --button-dark: var(--dialog-button-dark);
+        --button-light: var(--dialog-button-light);
+        --input-bg: var(--dialog-input-bg);
+        --input-fg: var(--dialog-input-fg);
+        --input-dark: var(--dialog-input-dark);
+        --input-light: var(--dialog-input-light);
+}
+
+.tabs > menu {
+        display: flex;
+        flex-direction: row;
+}
+
+.tabs > menu > button {
+        border-bottom: 0;
+        min-width: 0;
+        background-color: var(--button-bg);
+}
+
+.tabs > menu > button:focus,
+.tabs > menu > button:active {
+        border-bottom: 0;
+}
+
+.tabs > menu > button[aria-selected='true'] {
+        margin-bottom: -1px;
+        padding-bottom: 3px;
+        box-shadow: none;
+        z-index: 1;
+}
+
+.tabs > [role='tabpanel'] {
+        background: var(--button-bg);
+        border: 1px solid var(--button-light);
+        border-bottom-color: var(--button-dark);
+        border-right-color: var(--button-dark);
+}
+
+.list {
+        background: var(--button-active-bg);
+        color: var(--button-active-fg);
+        border: 2px solid var(--button-light);
+        border-top: 2px solid var(--button-dark);
+        border-left: 2px solid var(--button-dark);
+        overflow: auto;
+        cursor: default;
+}
+
+.list > [role='option'] {
+        padding: 2px 6px 2px 6px;
+        white-space: nowrap;
+}
+
+.list > [role='option'][aria-selected='true'] {
+        background-color: #ffffff;
+        color: #000000;
+}
+
+.list > [role='option']:focus {
+        outline: 2px solid var(--focus);
+        outline-offset: -2px;
+}
+
+.icon-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, 128px);
+        flex-direction: row;
+        flex-wrap: wrap;
+}
+
+.icon-grid > .icon {
+        flex: 0 0 128px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin: 4px;
+        outline: none;
+}
+
+.icon-grid > .icon > img {
+        border-top: 2px solid transparent;
+        border-left: 2px solid transparent;
+        border-right: 2px solid transparent;
+        margin-bottom: -2px;
+        background-color: var(--button-active-bg);
+        z-index: 1;
+}
+
+.icon-grid > .icon > .icon-label {
+        text-align: left;
+        border: 2px solid transparent;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 100%;
+        min-width: 38px;
+}
+
+.icon-grid > .icon:focus > img {
+        border-color: var(--focus);
+}
+
+.icon-grid > .icon:focus > .icon-label {
+        border-color: var(--focus);
+}
+
+.icon-grid > .icon[aria-selected='true'] > img {
+        background-color: #ffffff;
+        color: #000000;
+}
+
+.icon-grid > .icon[aria-selected='true'] > .icon-label {
+        background-color: #ffffff;
+        color: #000000;
+}
+
+.detailed {
+        width: 100%;
+        border-spacing: 0;
+}
+
+.detailed th {
+        text-align: left;
+        font-weight: normal;
+        background-color: var(--button-bg);
+        color: var(--button-fg);
+        border: 1px solid var(--button-dark);
+        border-top: 1px solid var(--button-light);
+        border-left: 1px solid var(--button-light);
+        padding: 2px 6px 2px 6px;
+        white-space: nowrap;
+}
+.detailed th[role='button'] {
+        user-select: none;
+}
+.detailed th[role='button']:focus {
+        outline: 1px solid var(--focus);
+        outline-offset: 0;
+}
+.detailed th[role='button']:active {
+        background-color: var(--button-active-bg);
+        color: var(--button-active-fg);
+        border: 1px solid var(--button-light);
+        border-top: 1px solid var(--button-dark);
+        border-left: 1px solid var(--button-dark);
+}
+
+.detailed tr {
+        outline: none;
+}
+
+.detailed tr:focus {
+        outline: 2px solid var(--focus);
+        outline-offset: -2px;
+}
+
+.detailed tr[aria-selected='true'] {
+        background-color: #ffffff;
+        color: #000000;
+}
+
+.detailed .icon:focus {
+        outline-offset: -2px;
+        outline: 2px solid var(--focus);
+}
+
+.detailed .icon[aria-selected='true'] {
+        background-color: #ffffff;
+        color: #000000;
+}
+
+.detailed td {
+        padding: 2px 6px 2px 6px;
+        white-space: nowrap;
+}
+
+.detailed .icon {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        outline: none;
+        margin-left: -4px;
+}
+
+.detailed td.icon {
+        display: flex;
+}
+
+.detailed .icon > img {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+}
+
+.detailed .icon > .icon-label {
+        text-align: center;
+        padding: 1px 3px 1px 0;
+}
+
+.detailed thead {
+        position: sticky;
+        top: 0;
+}
+
+.list ul[role='tree'] {
+        margin: 1px 2px 3px;
+}
+.list ul[role='tree'] li {
+        position: relative;
+        list-style-type: none;
+}
+.list ul[role='tree'] li > details {
+        margin: 0;
+        display: block;
+}
+.list ul[role='tree'] li > details > summary {
+        margin: 0;
+        display: flex;
+        align-items: center;
+}
+.list ul[role='tree'] li > details > summary::before {
+        content: '';
+        display: block;
+        border: 1px solid var(--button-light);
+        border-bottom: 1px solid var(--button-dark);
+        border-right: 1px solid var(--button-dark);
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background-color: var(--button-bg);
+        background-image: url(expand.svg);
+        background-repeat: no-repeat;
+        background-position: 2px 2px;
+        top: 5px;
+        left: 20px;
+}
+.list ul[role='tree'] li > details[open] > summary::before {
+        background-image: url(collapse.svg);
+}
+.list ul[role='tree'] li > details > ul {
+        margin-left: -12px;
+}
+.list ul[role='tree'] li > details > ul::before {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 21px;
+        left: 27px;
+        height: 4px;
+        border-left: 2px solid currentColor;
+}
+.list ul[role='tree'] li > details::after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 12px;
+        left: 5px;
+        width: 15px;
+        border-bottom: 2px solid currentColor;
+}
+.list ul[role='tree'] > li > details {
+        margin-left: 22px;
+}
+.list ul[role='tree'] > li > details > summary::before {
+        left: 2px;
+}
+.list ul[role='tree'] > li > details > ul::before {
+        left: 9px;
+}
+.list ul[role='tree'] > li > details::after {
+        display: none;
+}
+.list ul[role='tree'] .icon {
+        display: inline-flex;
+        flex-direction: row;
+        align-items: center;
+        outline: none;
+}
+.list ul[role='tree'] .icon > img {
+        width: 16px;
+        height: 16px;
+        margin-right: 1px;
+}
+.list ul[role='tree'] .icon > .icon-label {
+        text-align: center;
+        padding: 1px 3px;
+}
+.list ul[role='tree'] [role='treeitem'] {
+        display: inline-flex;
+        outline: none;
+}
+.list ul[role='tree'] [role='treeitem']:not(.icon) {
+        padding: 1px;
+}
+.list ul[role='tree'] [role='treeitem']:focus {
+        outline: 2px solid var(--focus);
+        outline-offset: -2px;
+}
+.list ul[role='tree'] [role='treeitem'][aria-selected='true'] {
+        background-color: #ffffff;
+        color: #000000;
+}
+.list ul[role='tree'] ul {
+        margin-left: 8px;
+        padding-left: 10px;
+}
+.list ul[role='tree'] ul li {
+        margin-left: -15px;
+        padding-left: 40px;
+}
+.list ul[role='tree'] ul li::before {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 4px;
+        bottom: 0;
+        border-left: 2px solid currentColor;
+}
+.list ul[role='tree'] ul li:last-child::before {
+        bottom: initial;
+        height: 13px;
+}
+.list ul[role='tree'] ul li:last-child::after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 12px;
+        left: 5px;
+        width: 15px;
+        border-bottom: 2px solid currentColor;
+}
+
+/* Patch Delphine */
+/* -------------- */
+
+label[data-delphine-component='TCheckBox'] {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+}
+
+label[data-delphine-component='TCheckBox'] > input[type='checkbox'] {
+        position: static !important;
+        opacity: 1 !important;
+        appearance: none;
+        -webkit-appearance: none;
+        width: 13px;
+        height: 13px;
+        margin: 0;
+        background: var(--button-highlight);
+        box-shadow: var(--border-field);
+}
+
+label[data-delphine-component='TCheckBox'] > input[type='checkbox']:checked::after {
+        content: '';
+        display: block;
+        width: 7px;
+        height: 4px;
+        border-left: 2px solid black;
+        border-bottom: 2px solid black;
+        transform: rotate(-45deg);
+        margin-left: 3px;
+        margin-top: 2px;
+}
+
+.delphine-form {
+        background-color: #c0c0c0;
+}
+
+.delphine-popup-menu {
+        position: fixed;
+        z-index: 100000;
+        min-width: 160px;
+        padding: 4px;
+        background: #f0f0f0;
+        border: 1px solid #666;
+        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.delphine-popup-menu[hidden] {
+        display: none;
+}
+
+.delphine-popup-menu .menu-item {
+        padding: 4px 24px 4px 8px;
+        cursor: default;
+        white-space: nowrap;
+        user-select: none;
+}
+
+.delphine-popup-menu .menu-item:hover {
+        background: #0060c0;
+        color: white;
+}
+
+.delphine-popup-menu .menu-separator {
+        height: 1px;
+        margin: 4px 2px;
+        background: #aaa;
 }

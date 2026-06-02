@@ -3,10 +3,11 @@
 
 //import { defineVuePlugin } from '@vcl/VuePlugin';
 import type { ComponentSchema } from '@vcl/IComponent';
-import { TFrame, TMetaFrame } from '@vcl/Frame';
+import { TFrame, TMetaFrame } from '@vcl/palettes/standard/TFrame';
 //import type { IForm } from '@vcl/IForm';
 import { TForm } from '@vcl/Form';
-import { TButton, TControl } from '@vcl';
+import { TControl } from '@vcl';
+import { TButton } from '@vcl/palettes/standard/TButton';
 import type { PropSpec } from '@vcl/IComponent';
 //import dformSource from './HelloFrame.dform?raw';
 //import dformSource from './HelloFrame.dform?raw';

@@ -160,10 +160,6 @@ input[type='reset'] {
         padding: 0 12px;
 }
 
-.delphine-panel {
-        box-shadow: var(--border-sunken-outer), var(--border-sunken-inner);
-}
-
 button.default,
 input[type='submit'].default,
 input[type='reset'].default {
@@ -1024,6 +1020,10 @@ table > tbody > tr > * {
 /* Patch Delphine */
 /* -------------- */
 
+.delphine-panel {
+        box-shadow: var(--border-sunken-outer), var(--border-sunken-inner);
+}
+
 label[data-delphine-component='TCheckBox'] {
         display: inline-flex;
         align-items: center;
@@ -1056,36 +1056,4 @@ label[data-delphine-component='TCheckBox'] > input[type='checkbox']:checked::aft
 
 .delphine-form {
         background-color: #c0c0c0;
-}
-
-.delphine-popup-menu {
-        position: fixed;
-        z-index: 100000;
-        min-width: 160px;
-        padding: 4px;
-        background: #f0f0f0;
-        border: 1px solid #666;
-        box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.25);
-}
-
-.delphine-popup-menu[hidden] {
-        display: none;
-}
-
-.delphine-popup-menu .menu-item {
-        padding: 4px 24px 4px 8px;
-        cursor: default;
-        white-space: nowrap;
-        user-select: none;
-}
-
-.delphine-popup-menu .menu-item:hover {
-        background: #0060c0;
-        color: white;
-}
-
-.delphine-popup-menu .menu-separator {
-        height: 1px;
-        margin: 4px 2px;
-        background: #aaa;
 }

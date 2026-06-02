@@ -5,66 +5,6 @@ import { mergeFormSource, splitFormSource } from '../dformSource';
 
 // ****************************** Interface from Delphine Designer to the Code Editor *****************************************
 
-/*
-function buildHandlerName(model: any, eventName: string): string {
-        const attrs = model.getAttributes?.() ?? {};
-        const compName = attrs['data-delphine-name'] ?? 'component';
-
-        return `${compName}_${eventName.toLowerCase()}`;
-}
-
-export function openOrCreateHandler(editor: any, model: any, eventName: string) {
-        if (!model) return;
-
-        const attrs = model.getAttributes?.() ?? {};
-        const attrName = `data-delphine-${eventName}`;
-
-        let handlerName = attrs[attrName];
-
-        // 1️⃣ si pas défini → générer
-        if (!handlerName || handlerName.trim() === '') {
-                handlerName = buildHandlerName(model, eventName);
-
-                model.setAttributes({
-                        ...attrs,
-                        [attrName]: handlerName
-                });
-        }
-
-        // 2️⃣ récupérer le code actuel
-        const code = getCurrentCode(); // ⚠️ à brancher chez vous
-
-        // 3️⃣ chercher handler
-        const pos = findHandlerPosition(code, handlerName);
-
-        let newCode = code;
-        let targetPos = pos;
-
-        // 4️⃣ si absent → créer
-        if (pos === null) {
-                newCode = createHandler(code, handlerName);
-                targetPos = newCode.length;
-        }
-
-        // 5️⃣ envoyer au code editor
-        updateCode(newCode); // ⚠️ à brancher
-        revealPosition(targetPos); // ⚠️ à brancher
-}
-        
-
-function findHandlerPosition(code: string, handlerName: string): number | null {
-        const regex = new RegExp(`function\\s+${handlerName}\\s*\\(`);
-        const match = code.match(regex);
-
-        return match ? (match.index ?? null) : null;
-}
-
-
-function createHandler(code: string, handlerName: string): string {
-        return code + `\n\nexport function ${handlerName}(sender: TObject): void {\n` + `        // TODO: ${handlerName}\n` + `}\n`;
-}
-        */
-
 function getCompanionTypescriptUri(dformUri: vscode.Uri): vscode.Uri {
         const fsPath = dformUri.fsPath;
 

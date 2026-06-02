@@ -13,6 +13,9 @@
                 "skipLibCheck": true,
                 "types": ["vite/client"],
 
+                "useDefineForClassFields": false,
+                "experimentalDecorators": true,
+
                 "baseUrl": ".",
                 "paths": {
                         "@vcl": ["../../src/vcl/index.ts"],

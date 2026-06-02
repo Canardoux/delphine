@@ -21,14 +21,15 @@
 
 import { TMetaclass } from './Oops';
 import { TForm } from './Form';
-import { TTypeRegistry } from './TypeRegistry';
-import { registerBuiltins } from './RegisterVcl';
+import { TTypeRegistry, registerPalettes } from './TypeRegistry';
+//import { registerBuiltins } from './RegisterVcl';
 import { getApplication, setApplication } from './IApplication';
 import type { IApplication, TLoadedUnit } from './IApplication';
 import type { IControl, IMetaControl } from './IControl';
 import { TMetaControl } from './Control';
 import type { IMetaComponent } from './IComponent';
 import { parseDformSource } from './dformSource';
+//import { registerStandard } from './palettes/standard/standardPalette';
 
 //export TheApplication : TApplication | null = null;
 
@@ -41,6 +42,7 @@ export type TApplicationConfig = {
                 density?: 'compact' | 'normal' | 'spacious';
                 fontScale?: number;
         };
+        palettes?: string[];
 };
 
 export class TMetaApplication extends TMetaclass {
@@ -152,7 +154,10 @@ export class TApplication implements IApplication {
                 //this.appConfig = appConfig;
                 setApplication(this);
                 this.typeRegistry = new TTypeRegistry();
-                registerBuiltins(this.typeRegistry);
+                //registerPalettes(this.typeRegistry);
+                //const enabledPalettes = appConfig.palettes ?? ['standard'];
+
+                //await registerPalettes(typeRegistry, enabledPalettes);
 
                 //registerBuiltins(this.types);
         }
@@ -374,6 +379,9 @@ export class TApplication implements IApplication {
         }
 
         async registerRuntimeTypes() {
+                const enabledPalettes = this.appConfig?.palettes ?? [];
+                await registerPalettes(this.typeRegistry!, enabledPalettes);
+
                 const frames = this.appConfig?.frames ?? [];
                 for (const frame of frames) {
                         const loaded = await this.loadDformUnit(`/src/frames`, frame.className);

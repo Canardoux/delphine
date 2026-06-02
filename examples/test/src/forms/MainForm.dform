@@ -67,6 +67,34 @@
         height: 100px;
 }
 
+#ibu0n {
+        background-image: unset;
+        background-repeat: unset;
+        background-position-x: unset;
+        background-position-y: unset;
+        background-attachment: unset;
+        background-size: unset;
+        background-color: rgb(17, 225, 88);
+        border-top-width: 0px;
+        border-right-width: 0px;
+        border-bottom-width: 0px;
+        border-left-width: 0px;
+        border-top-style: solid;
+        border-right-style: solid;
+        border-bottom-style: solid;
+        border-left-style: solid;
+        border-top-color: red;
+        border-right-color: red;
+        border-bottom-color: red;
+        border-left-color: red;
+        border-image-source: initial;
+        border-image-slice: initial;
+        border-image-width: initial;
+        border-image-outset: initial;
+        border-image-repeat: initial;
+        color: yellow;
+}
+
 #idhc {
         color: rgb(1, 1, 1);
 }
@@ -87,9 +115,30 @@
         height: 0px;
 }
 
+#iz194 {
+        border-top-width: 0px;
+        border-right-width: 0px;
+        border-bottom-width: 0px;
+        border-left-width: 0px;
+        border-top-style: solid;
+        border-right-style: solid;
+        border-bottom-style: solid;
+        border-left-style: solid;
+        border-top-color: green;
+        border-right-color: green;
+        border-bottom-color: green;
+        border-left-color: green;
+        border-image-source: initial;
+        border-image-slice: initial;
+        border-image-width: initial;
+        border-image-outset: initial;
+        border-image-repeat: initial;
+}
+
 #izlxi {
-        width: 848px;
+        width: 898px;
         height: 152px;
+        color: red;
 }
 
 #MainForm {
@@ -115,6 +164,7 @@
         padding-right: 0px;
         padding-bottom: 0px;
         padding-left: 0px;
+        width: 866px;
 }
 
 #mypanel1 {
@@ -293,6 +343,19 @@ body {
                 >
                         Win7
                 </button>
+                <button
+                        data-delphine-component="TButton"
+                        data-delphine-name="Motif"
+                        data-delphine-popupmenu=""
+                        data-delphine-onclick="Motif_onclick"
+                        data-delphine-ondblclick=""
+                        data-delphine-oncontextpopup=""
+                        data-delphine-caption="Motif"
+                        id="iyccw"
+                        class="delphine-control delphine-button"
+                >
+                        Motif
+                </button>
         </div>
         <button
                 data-delphine-component="TButton"
@@ -325,6 +388,58 @@ body {
                 class="delphine-control delphine-button"
         >
                 Delphine buttonx caption
+        </button>
+        <lit-checkbox
+                data-delphine-component="TLitCheckbox"
+                data-delphine-name="LitCheckbox"
+                data-delphine-popupmenu=""
+                data-delphine-onclick="LitCheckbox_onclick"
+                data-delphine-ondblclick=""
+                data-delphine-oncontextpopup=""
+                data-delphine-caption="THE CAPTION FROM GRAPESJS"
+                id="ibu0n"
+                class="delphine-control delphine-litcheckbox"
+        >
+                The Caption!!!
+        </lit-checkbox>
+        <button
+                data-delphine-component="TButton"
+                data-delphine-name="ButtonEnabled"
+                data-delphine-popupmenu=""
+                data-delphine-onclick="ButtonEnabled_onclick"
+                data-delphine-ondblclick=""
+                data-delphine-oncontextpopup=""
+                data-delphine-caption="ButtonEnabled"
+                id="i56x3"
+                class="delphine-control delphine-button"
+        >
+                ButtonEnabled
+        </button>
+        <button
+                data-delphine-component="TButton"
+                data-delphine-name="ButtonChecked"
+                data-delphine-popupmenu=""
+                data-delphine-onclick="ButtonChecked_onclick"
+                data-delphine-ondblclick=""
+                data-delphine-oncontextpopup=""
+                data-delphine-caption="ButtonChecked"
+                id="idyb9"
+                class="delphine-control delphine-button"
+        >
+                ButtonChecked
+        </button>
+        <button
+                data-delphine-component="TButton"
+                data-delphine-name="ChangeColor"
+                data-delphine-popupmenu=""
+                data-delphine-onclick="ChangeColor_onclick"
+                data-delphine-ondblclick=""
+                data-delphine-oncontextpopup=""
+                data-delphine-caption="ChangeColor"
+                id="iz194"
+                class="delphine-control delphine-button"
+        >
+                ChangeColor
         </button>
         <div
                 data-delphine-component="TPanel"
@@ -390,7 +505,7 @@ body {
                 <div class="menu-item">Quit</div>
         </div>
 </div>
-<delphine-nonvisual data-delphine-component="TNonVisualComponents" height="100" data-delphine-onclick="" data-delphine-name="">
+<delphine-nonvisual data-delphine-component="TNonVisualComponents" height="100" data-delphine-onclick="" data-delphine-name="" id="i0p8j">
         <h3 id="ivqrn">Non visual components</h3>
         <div data-delphine-component="TPopupMenu" data-delphine-name="PopupMenu1" id="itfx9">
                 TOTO

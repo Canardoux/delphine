@@ -1,9 +1,14 @@
-import { TForm, TControl, TButton, TColor, TApplication, TPanel, TPluginHost, TCheckBox } from '@vcl';
+import { TForm, TControl, TColor, TApplication, TPluginHost } from '@vcl';
+import { TButton } from '@vcl/palettes/standard/TButton';
+import { TPanel } from '@vcl/palettes/standard/TPanel';
 import { getApplication } from '@vcl/IApplication';
+import { TCheckBox } from '@vcl/palettes/standard/TCheckBox';
+import { TLitCheckbox } from '@vcl/palettes/lit/TLitCheckBox';
+//import std from '@vcl/palettes/standard/index';
 
 //import './MainForm.css';
 import { HelloFrame } from '../frames/HelloFrame';
-import { THostFrame } from '@vcl/Frame';
+import { THostFrame } from '@vcl/palettes/standard/TFrame';
 
 export default class MainForm extends TForm {
         buttona_onclick(_ev: Event | null, _sender: TControl) {
@@ -131,12 +136,45 @@ export default class MainForm extends TForm {
                 console.log('Button1 context popup!!!!'); // TODO: handle Button1_oncontextpopup
         }
 
-        Button1_onclick(_ev: Event | null, _sender: TControl) {
+        Motif_onclick(_ev: Event | null, _sender: TControl) {
                 // TODO: handle Button1_onclick
-                console.log('Button1 clicked!!!!');
+                console.log('Motif clicked!!!!');
+                const app = getApplication();
+                app!.setTheme('motif');
         }
 
         button1_ondblclick(_ev: Event | null, _sender: TControl) {
                 // TODO: handle button1_ondblclick
+        }
+
+        Button1_onclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle Button1_onclick
+        }
+
+        ButtonEnabled_onclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle ButtonEnabled_onclick
+                const btn = this.componentRegistry.get<TLitCheckbox>('LitCheckbox')!;
+                btn.enabled = !btn?.enabled;
+                console.log(` enabled: ${btn.enabled}`);
+        }
+
+        ButtonChecked_onclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle ButtonChecked_onclick
+                const btn = this.componentRegistry.get<TLitCheckbox>('LitCheckbox')!;
+                btn.checked = !btn?.checked;
+                console.log(` checked: ${btn.checked}`);
+        }
+
+        LitCheckbox_onclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle LitCheckbox_onclick
+                const btn = this.componentRegistry.get<TLitCheckbox>('LitCheckbox')!;
+                console.log(`LitCheckbox enabled: ${btn.enabled}`);
+                console.log(`LitCheckbox checked: ${btn.checked}`);
+        }
+
+        ChangeColor_onclick(_ev: Event | null, _sender: TControl) {
+                // TODO: handle ChangeColor_onclick
+                const btn = this.componentRegistry.get<TLitCheckbox>('LitCheckbox')!;
+                btn.color = TColor.rgb(255, 0, 255);
         }
 }

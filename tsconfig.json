@@ -9,6 +9,9 @@
                 "noUnusedLocals": false,
                 "types": ["node", "vscode"],
 
+                "useDefineForClassFields": false,
+                "experimentalDecorators": true,
+
                 "strict": true,
                 "sourceMap": true,
                 "esModuleInterop": true,

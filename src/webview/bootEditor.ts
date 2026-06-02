@@ -1,5 +1,5 @@
-import { TTypeRegistry } from '../vcl/TypeRegistry.js';
-import { registerBuiltins } from '../vcl/RegisterVcl.js';
+import { TTypeRegistry, registerPalettes, allPalettes } from '../vcl/TypeRegistry.js';
+//import { registerBuiltins } from '../vcl/RegisterVcl.js';
 import { registerDelphineComponentsFromRegistry, showDelphineTraitTab, showCurrentDelphineTraitTab, keepTypeRegistry } from './delphineGrapesBridge.js';
 
 type DelphineInboundMessage =
@@ -367,7 +367,7 @@ function cssEscape(value: string): string {
                 .replace(/#/g, '\\#');
 }
 
-function grapesJSEditor(grapes: any): void {
+async function grapesJSEditor(grapes: any): Promise<void> {
         const editor = grapes.init({
                 container: '#gjs',
                 height: '100vh',
@@ -795,7 +795,7 @@ function grapesJSEditor(grapes: any): void {
         }
 
         const typeRegistry = new TTypeRegistry();
-        registerBuiltins(typeRegistry);
+        await registerPalettes(typeRegistry, allPalettes);
         registerDelphineComponentsFromRegistry(editor, typeRegistry);
         keepTypeRegistry(typeRegistry);
         flushPendingDirectMessages();

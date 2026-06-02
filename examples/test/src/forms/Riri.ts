@@ -1,5 +1,6 @@
-import { TForm, TControl, TButton, TColor, TApplication } from '@vcl';
+import { TForm, TControl, TColor, TApplication } from '@vcl';
 import { getApplication } from '@vcl/IApplication';
+import { TButton } from '@vcl/palettes/standard/TButton';
 
 //import './Riri.css';
 
