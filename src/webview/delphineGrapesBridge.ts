@@ -60,13 +60,6 @@ export function showDelphineTraitTab(editor: any, model: any, tab: 'properties' 
 }
 
 let currentTraitTab: 'properties' | 'events' = 'properties';
-//function updateTraitButtons(editor: any) {
-//const propsBtn = editor.Panels.getButton('options', 'delphine-properties');
-//const eventsBtn = editor.Panels.getButton('options', 'delphine-events');
-
-//propsBtn?.set('active', currentTraitTab === 'properties');
-//eventsBtn?.set('active', currentTraitTab === 'events');
-//}
 
 function setTraitTab(editor: any, model: any, tab: 'properties' | 'events') {
         currentTraitTab = tab;
@@ -140,33 +133,6 @@ function customizeOptionsPanel(editor: Editor): void {
                         },
                         attributes: { title: 'Events' }
                 }
-                /*
-                {
-                        id: 'delphine-reload',
-
-                        label: '🔄',
-
-                        attributes: { title: 'Reload Designer' },
-
-                        command: () => {
-                                location.reload();
-                        }
-                }
-                        */
-
-                /*
-                {
-                        id: 'delphine-devtools',
-
-                        label: '🛠',
-
-                        attributes: { title: 'Open DevTools' },
-
-                        command: () => {
-                                postToVsCode({ type: 'delphine:devtools' });
-                        }
-                }
-                        */
         ]);
 }
 

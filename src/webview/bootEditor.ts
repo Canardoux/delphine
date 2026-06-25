@@ -1,3 +1,5 @@
+import { getApplication } from '../vcl/IApplication.js';
+import { TApplication } from '../vcl/Application.js';
 import { TTypeRegistry, registerPalettes, allPalettes } from '../vcl/TypeRegistry.js';
 //import { registerBuiltins } from '../vcl/RegisterVcl.js';
 import { registerDelphineComponentsFromRegistry, showDelphineTraitTab, showCurrentDelphineTraitTab, keepTypeRegistry } from './delphineGrapesBridge.js';
@@ -20,6 +22,10 @@ type DelphineInboundMessage =
                   type: 'delphine:theme';
                   theme: string;
                   themeCss: string;
+          }
+        | {
+                  type: 'app:config';
+                  config: any;
           };
 
 type DelphineWindow = Window &
@@ -385,6 +391,7 @@ async function grapesJSEditor(grapes: any): Promise<void> {
         //addThemeSelector(editor);
 
         let dirtyTimer: number | undefined;
+        let app: TApplication = new TApplication('MainApp');
 
         function markDirty(_editor: any, _reason: string) {
                 if (!canSendOutbound()) {
@@ -455,21 +462,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                 return null;
         }
 
-        // function selectComponentByName(editor: any, componentName: string): void {
-        //         if (!componentName) return;
-
-        //         const found = editor.getWrapper().find(`[data-delphine-name="${cssEscape(componentName)}"]`)[0];
-
-        //         if (!found) return;
-
-        //         isSelectingFromHost = true;
-
-        //         editor.select(found);
-
-        //         setTimeout(() => {
-        //                 isSelectingFromHost = false;
-        //         }, 0);
-        // }
         function applyThemeToDesigner(editor: any, themeName: string, themeCss: string): void {
                 const frame = editor.Canvas.getFrameEl();
                 const doc = frame?.contentDocument || frame?.contentWindow?.document;
@@ -492,26 +484,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
                 console.log('[Delphine] theme CSS injected', themeName, themeCss.length);
         }
-        // function applyThemeToDesigner(editor: any, theme: string): void {
-        //         const frame = editor.Canvas.getFrameEl();
-        //         const doc = frame?.contentDocument;
-        //         if (!doc) return;
-
-        //         const themeId = 'delphine-current-theme';
-
-        //         let link = doc.getElementById(themeId) as HTMLLinkElement | null;
-
-        //         if (!link) {
-        //                 link = doc.createElement('link');
-        //                 link!.id = themeId;
-        //                 link!.rel = 'stylesheet';
-        //         }
-
-        //         link!.href = `/themes/${theme}.css`;
-        //         link!.setAttribute('data-delphine-theme', theme);
-
-        //         doc.head.appendChild(link);
-        // }
 
         function loadDocument(html: string, css: string): void {
                 const selectedKey = getSelectedComponentKey(editor);
@@ -597,7 +569,7 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                                 console.warn('[select] NOT FOUND:', componentName);
                                 break;
                         }
-                        case 'delphine:theme':
+                        case 'delphine:theme': {
                                 currentThemeName = payload.theme ?? 'flat';
                                 currentThemeCss = payload.themeCss ?? '';
 
@@ -608,6 +580,14 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
                                 applyThemeToDesigner(editor, currentThemeName, currentThemeCss);
                                 break;
+                        }
+                        case 'app:config': {
+                                const config = payload.config;
+                                app.appConfig = config;
+                                console.log('[Delphine] app:config received', config);
+                                // !!!!!!!!!!!!! // await app.registerFrames(typeRegistry!);
+                                break;
+                        }
                 }
         };
 
@@ -698,28 +678,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
                 const eventName = getDefaultEventName(componentClass);
                 openEventHandler(editor, model, eventName);
-
-                /*
-                const attrName = `data-delphine-${eventName}`;
-
-                let handlerName = attrs[attrName];
-
-                if (!handlerName || String(handlerName).trim() === '') {
-                        handlerName = `${componentName}_${eventName}`;
-
-                        model.setAttributes({
-                                ...attrs,
-                                [attrName]: handlerName
-                        });
-                }
-
-                postToVsCode({
-                        type: 'delphine:open-handler',
-                        componentName,
-                        eventName,
-                        handlerName
-                });
-                */
         }
 
         function getDefaultEventName(componentClass: string): string {
@@ -794,10 +752,16 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                 }
         }
 
+        //const app = new TApplication('AppForGrapesJS');
+        //await app.readConfig(); !!! ne marche pas, car on ne peut pas faire d'import dynamique dans un module ESM
         const typeRegistry = new TTypeRegistry();
-        await registerPalettes(typeRegistry, allPalettes);
-        registerDelphineComponentsFromRegistry(editor, typeRegistry);
-        keepTypeRegistry(typeRegistry);
+        await registerPalettes(typeRegistry!, allPalettes);
+        //await app.registerFrames(typeRegistry!);
+
+        // const app = getApplication() as TApplication;
+        // await registerFrames(typeRegistry);
+        registerDelphineComponentsFromRegistry(editor, typeRegistry!);
+        keepTypeRegistry(typeRegistry!);
         flushPendingDirectMessages();
 
         editor.on('component:update', () => {
@@ -1005,6 +969,7 @@ async function main(): Promise<void> {
                 installDirectHostReceiver();
                 installKeyboardShortcuts();
                 postToVsCode({ type: 'bootEditor:ready' });
+                postToVsCode({ type: 'app:get-config' });
         } catch (e) {
                 console.error(`[boot ${bootInstanceId}] FAIL`, e);
                 postToVsCode({

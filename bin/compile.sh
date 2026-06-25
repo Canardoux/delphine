@@ -18,7 +18,7 @@ esbuild src/webview/bootEditor.ts \
   --outfile=media/webview/bootEditor.bundle.js
 
 echo "=== build: example test (vite) ==="
-pushd examples/test >/dev/null
+pushd examples/testframe >/dev/null
 
 # Installe si nécessaire (utile si vous nettoyez node_modules parfois)
 if [ ! -d node_modules ]; then

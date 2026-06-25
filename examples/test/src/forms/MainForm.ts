@@ -75,9 +75,10 @@ export default class MainForm extends TForm {
                 const panel = this.componentRegistry.get<TPanel>('myPanel');
                 if (!panel) {
                         console.warn('myPanel not found in registry');
-                        return;
+                        //return;
+                } else {
+                        panel.backgroundColor = TColor.rgb(28, 188, 28);
                 }
-                panel!.backgroundColor = TColor.rgb(28, 188, 28);
 
                 const hostFrame = this.componentRegistry.get<THostFrame>('myframeplugin');
                 const frame = hostFrame!.getFrame() as HelloFrame;

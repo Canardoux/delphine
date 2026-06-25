@@ -22,20 +22,16 @@
 import { TMetaclass } from './Oops';
 import { TForm } from './Form';
 import { TTypeRegistry, registerPalettes } from './TypeRegistry';
-//import { registerBuiltins } from './RegisterVcl';
-import { getApplication, setApplication } from './IApplication';
 import type { IApplication, TLoadedUnit } from './IApplication';
+import { setApplication } from './IApplication';
 import type { IControl, IMetaControl } from './IControl';
 import { TMetaControl } from './Control';
 import type { IMetaComponent } from './IComponent';
-import { parseDformSource } from './dformSource';
-//import { registerStandard } from './palettes/standard/standardPalette';
-
-//export TheApplication : TApplication | null = null;
+import { parseDformSource } from './DformSource';
 
 export type TApplicationConfig = {
         mainForm?: string;
-        forms?: string[];
+        forms?: any[];
         frames?: any[];
         ui?: {
                 theme?: string;
@@ -51,9 +47,6 @@ export class TMetaApplication extends TMetaclass {
         protected constructor(superClass: TMetaclass, name: string) {
                 super(superClass, name);
         }
-        //getMetaclass(): TMetaApplication {
-        //return TMetaApplication.metaclass;
-        //}
 }
 
 export class TApplication implements IApplication {
@@ -61,21 +54,12 @@ export class TApplication implements IApplication {
         currentForm: TForm | null = null;
         mainForm: TForm | null = null;
         protected appName: string;
-        protected appConfig: TApplicationConfig | null = null;
+        appConfig: TApplicationConfig | null = null;
         private formStack: TForm[] = [];
         private handlingBrowserPop = false;
-
-        //getMetaclass(): TMetaApplication {
-        //return TMetaApplication.metaclass;
-        //}
         private forms: Map<string, TForm> = new Map<string, TForm>();
         private loadedUnits = new Map<string, TLoadedUnit>();
-
         private _theme: string | null = null;
-
-        // get theme(): string {
-        //         return this._theme;
-        // }
 
         set theme(value: string) {
                 this.setTheme(value);
@@ -106,13 +90,6 @@ export class TApplication implements IApplication {
                 // Important: keep the theme last in <head>
                 document.head.appendChild(link);
         }
-
-        // theme = 'flat';
-
-        // setTheme(theme: string) {
-        //         this.theme = theme;
-        //         applyTheme(theme);
-        // }
 
         private async loadDformUnit(basePath: string, unitName: string): Promise<TLoadedUnit> {
                 const formPath = `${basePath}/${unitName}.dform`;
@@ -150,16 +127,10 @@ export class TApplication implements IApplication {
         }
 
         constructor(appName: string) {
+                debugger;
                 this.appName = appName;
-                //this.appConfig = appConfig;
                 setApplication(this);
                 this.typeRegistry = new TTypeRegistry();
-                //registerPalettes(this.typeRegistry);
-                //const enabledPalettes = appConfig.palettes ?? ['standard'];
-
-                //await registerPalettes(typeRegistry, enabledPalettes);
-
-                //registerBuiltins(this.types);
         }
 
         async readConfig() {
@@ -176,21 +147,11 @@ export class TApplication implements IApplication {
         }
 
         getClass(type: string): IMetaComponent | undefined {
-                //if (!this.typeRegistry) {
-                //        this.typeRegistry = new TComponentTypeRegistry();
-                //        registerBuiltins(this.typeRegistry);
-                //}
-
                 return this.typeRegistry?.get(type);
         }
 
-        //getForms(): readonly TForm[] {
-        //return this.forms;
-        //}
-
         getFormByName<T extends TForm = TForm>(name: string): T | undefined {
                 return this.forms.get(name) as T;
-                //return this.forms.find((f) => f.name === name) as T | undefined;
         }
 
         protected registerForm(form: TForm): void {
@@ -205,9 +166,7 @@ export class TApplication implements IApplication {
                 let form = this.getFormByName('formName');
                 if (!form) {
                         form = await this.createFormByName(formName);
-                        // this.registerForm(form);
                 }
-                //form?.show();
                 this.showForm(form);
         }
 
@@ -220,24 +179,9 @@ export class TApplication implements IApplication {
 
         async replaceForm(formName: string) {
                 const me = this.currentForm;
-                //form?.show();
                 this.createAndShow(formName);
                 this.destroy(me);
-                //const previousForm = this.forms.findIndex((element) => element.name == formName);
-                //this.forms[previousForm] = undefined;
         }
-
-        /*
-        replaceForm(form: TForm): void {
-                const old = this.currentForm;
-
-                this.activateForm(form);
-
-                if (old) {
-                        old.destroy();
-                }
-        }
-                */
 
         showForm(form: TForm): void {
                 console.log('form.elem =', form.elem);
@@ -258,8 +202,6 @@ export class TApplication implements IApplication {
                 if (!host) {
                         throw new Error(`Form ${form.name} has no host`);
                 }
-
-                //host.hidden = false;
 
                 const focusTarget = form.elem.querySelector<HTMLElement>('[autofocus], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])');
                 focusTarget?.focus();
@@ -291,7 +233,6 @@ export class TApplication implements IApplication {
 
                 if (!form) {
                         form = await this.createFormByName(name);
-                        // this.registerForm(form);
                 }
 
                 this.pushForm(form);
@@ -367,10 +308,6 @@ export class TApplication implements IApplication {
                         history.replaceState({ form: this.mainForm!.name }, '', url);
                         this.setTheme(this.appConfig?.ui?.theme ?? 'win95');
                         this.run();
-                        //if (this.mainForm) {
-                        //} else {
-                        //this.autoStart();
-                        //}
                 });
         }
 
@@ -378,23 +315,25 @@ export class TApplication implements IApplication {
                 this.mainForm?.show();
         }
 
-        async registerRuntimeTypes() {
-                const enabledPalettes = this.appConfig?.palettes ?? [];
-                await registerPalettes(this.typeRegistry!, enabledPalettes);
-
+        async registerFrames(typeRegistry: TTypeRegistry) {
                 const frames = this.appConfig?.frames ?? [];
                 for (const frame of frames) {
                         const loaded = await this.loadDformUnit(`/src/frames`, frame.className);
                         this.registerLoadedUnit(frame.tagName, loaded);
-                        this.typeRegistry?.register(loaded.metaclass as TMetaControl);
+                        typeRegistry?.register(loaded.metaclass as TMetaControl);
                 }
         }
-        async createAutoForms() {
-                const formNames = this.appConfig?.forms ?? [];
 
-                for (const formName of formNames) {
-                        const form = await this.createFormByName(formName);
-                        //this.registerForm(form);
+        async registerRuntimeTypes() {
+                const enabledPalettes = this.appConfig?.palettes ?? [];
+                await registerPalettes(this.typeRegistry!, enabledPalettes);
+                await this.registerFrames(this.typeRegistry!);
+        }
+        async createAutoForms() {
+                const dforms = this.appConfig?.forms ?? [];
+
+                for (const f of dforms) {
+                        const form = await this.createFormByName(f.name);
                 }
         }
 

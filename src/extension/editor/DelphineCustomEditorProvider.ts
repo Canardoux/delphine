@@ -306,15 +306,20 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
         //         return 'win95'; // ??? !!!
         // }
 
-        async readThemeFromAppJson(dformUri: vscode.Uri): Promise<string> {
+        private getAppJsonUri(dformUri: vscode.Uri): vscode.Uri | null {
                 const workspaceFolder = vscode.workspace.getWorkspaceFolder(dformUri);
-                if (!workspaceFolder) return 'flat';
+                if (!workspaceFolder) return null;
 
-                const appJsonUri = vscode.Uri.joinPath(workspaceFolder.uri, 'app.json');
+                return vscode.Uri.joinPath(workspaceFolder.uri, 'app.json');
+        }
+
+        async readThemeFromAppJson(dformUri: vscode.Uri): Promise<string> {
+                const appJsonUri = this.getAppJsonUri(dformUri);
+                if (!appJsonUri) return 'flat';
 
                 try {
                         const bytes = await vscode.workspace.fs.readFile(appJsonUri);
-                        const text = new TextDecoder('utf-8').decode(bytes);
+                        const text = new TextDecoder().decode(bytes);
                         const config = JSON.parse(text);
 
                         return config?.ui?.theme ?? 'flat';
@@ -324,16 +329,14 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
         }
 
         async writeThemeToAppJson(dformUri: vscode.Uri, theme: string): Promise<void> {
-                const workspaceFolder = vscode.workspace.getWorkspaceFolder(dformUri);
-                if (!workspaceFolder) return;
-
-                const appJsonUri = vscode.Uri.joinPath(workspaceFolder.uri, 'app.json');
+                const appJsonUri = this.getAppJsonUri(dformUri);
+                if (!appJsonUri) return;
 
                 let config: any = {};
 
                 try {
                         const bytes = await vscode.workspace.fs.readFile(appJsonUri);
-                        config = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+                        config = JSON.parse(new TextDecoder().decode(bytes));
                 } catch {
                         config = {};
                 }
@@ -342,6 +345,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                 config.ui.theme = theme;
 
                 const text = JSON.stringify(config, null, 2) + '\n';
+
                 await vscode.workspace.fs.writeFile(appJsonUri, new TextEncoder().encode(text));
         }
 
@@ -367,6 +371,24 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
 
                         themeCss
                 });
+        }
+
+        async sendConfigToWebview(webviewPanel: vscode.WebviewPanel, dformUri: vscode.Uri): Promise<void> {
+                const appJsonUri = this.getAppJsonUri(dformUri);
+                if (!appJsonUri) return;
+
+                try {
+                        const bytes = await vscode.workspace.fs.readFile(appJsonUri);
+                        const text = new TextDecoder().decode(bytes);
+                        const config = JSON.parse(text);
+                        console.log('[Delphine/ext] sending app:config to webview', config);
+                        webviewPanel.webview.postMessage({
+                                type: 'app:config',
+                                config
+                        });
+                } catch {
+                        return;
+                }
         }
 
         async resolveCustomTextEditor(document: vscode.TextDocument, webviewPanel: vscode.WebviewPanel, _token: vscode.CancellationToken): Promise<void> {
@@ -462,9 +484,7 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
 
                                         webviewPanel.webview.postMessage({
                                                 type: 'delphine:theme',
-
                                                 theme,
-
                                                 themeCss
                                         });
 
@@ -474,16 +494,11 @@ export class DelphineCustomEditorProvider implements vscode.CustomTextEditorProv
                                         await this.writeThemeToAppJson(document.uri, msg.theme);
                                         await this.sendThemeToWebview(msg.theme, webviewPanel);
                                         return;
-                                // const theme = await this.readThemeFromAppJson(document.uri);
-                                // const themeUri = webviewPanel.webview.asWebviewUri(vscode.Uri.joinPath(DelphineCustomEditorProvider._context.extensionUri, 'media', 'themes', `${theme}.css`));
 
-                                // webviewPanel.webview.postMessage({
-                                //         type: 'delphine:theme',
-                                //         themeUrl: themeUri.toString()
-                                // });
-
-                                // await postThemeToWebview();
-                                // return;
+                                case 'app:get-config':
+                                        console.log('[Delphine/ext] app:get-config received');
+                                        await this.sendConfigToWebview(webviewPanel, document.uri);
+                                        return;
                         }
                 });
 

@@ -175,13 +175,16 @@ export class BuildComponentTree {
 
                 const cls = type != null ? getApplication()?.getClass(type) : null;
 
-                if (!cls) return null;
+                if (!cls) {
+                        console.warn(`Component class not found for type "${type}"`);
+                        return null;
+                }
 
                 let child = null;
                 // The TForm are already created by the user.
                 if (!cls.isAForm()) {
                         const metaComp = cls as TMetaComponent;
-                        child = metaComp.create(name!, form, parent); // ------- The instance variable is created HERE!
+                        child = metaComp.create(name!, form, parent); // <-------------- The instance variable is created HERE! ------------------
                         if (cls.isACompositeControl()) {
                                 const comp = child as any as ICompositeControl;
                                 form.registerFrame(name!, comp);

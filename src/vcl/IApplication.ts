@@ -23,6 +23,8 @@ import { TMetaclass } from './Oops';
 import type { IControl, IMetaControl } from './IControl';
 import type { IForm } from './IForm';
 import type { IMetaComponent } from './IComponent';
+import { TTypeRegistry } from './TypeRegistry';
+//import { assert } from 'console';
 
 export type TLoadedUnit = {
         name: string;
@@ -40,6 +42,7 @@ export interface IApplication {
         getLoadedUnit(name: string): TLoadedUnit | undefined;
         applyTheme(): void;
         setTheme(theme: string): void;
+        registerFrames(typeRegistry: TTypeRegistry): Promise<void>;
 }
 
 //export const TheApplication: IApplication | null = null;
@@ -51,5 +54,8 @@ export function getApplication(): IApplication | null {
 }
 
 export function setApplication(app: IApplication): void {
+        if (_application !== null) {
+                throw new Error('Application already set');
+        }
         _application = app;
 }

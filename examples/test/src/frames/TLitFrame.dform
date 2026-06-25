@@ -1,0 +1,59 @@
+<delphine version="1.0" class="HelloFrame" name="MainForm"></delphine>
+
+<style>
+* {
+        box-sizing: border-box;
+}
+
+#ipo9 {
+        background-color: rgb(228, 175, 175);
+}
+
+body {
+        margin: 0;
+}
+
+body {
+        margin-top: 0px;
+        margin-right: 0px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+}
+</style>
+
+<template>
+<div
+        data-delphine-props='{
+                "name": "hello-frame"
+        }'
+        id="hello-frame"
+        data-delphine-component="hello-frame"
+        data-delphine-name="hello-frame"
+        data-delphine-oncreate="onMyCreate"
+>
+        <h2 id="ipo9">Frame</h2>
+        👋 Message!
+        <button
+                data-delphine-component="TButton"
+                id="button-changeMessage"
+                data-delphine-caption="Change message"
+                data-delphine-name="button-changeMessage"
+                data-delphine-onclick="changeMessage_onclick"
+                data-delphine-ondblclick=""
+                class="delphine-button"
+        >
+                Change message
+        </button>
+        <button
+                data-delphine-component="TButton"
+                id="myframeButton"
+                data-delphine-caption="Delphine HTML caption"
+                data-delphine-name="myframeButton"
+                data-delphine-onclick="myframeButton_onclick"
+                data-delphine-ondblclick=""
+                class="delphine-button"
+        >
+                Delphine HTML caption
+        </button>
+</div>
+</template>

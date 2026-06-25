@@ -21,24 +21,15 @@
 
 import { TMetaObject, TObject } from './Oops';
 import { TMetaComponent } from './Component';
-import type { IMetaComponent } from './IComponent';
+import { getApplication } from './IApplication';
+import { TApplication } from './Application';
+import type { IComponent, IMetaComponent } from './IComponent';
 import type { ComponentSchema } from './IComponent';
+import type { TForm } from './Form';
 import { register } from './palettes/standard/standardPalette';
+import { TMetaControl } from './Control';
 
 export const allPalettes = ['standard', 'lit' /*, 'additional', 'menus'*/];
-
-/*
-export class TMetaTypeRegistry extends TMetaObject {
-        static readonly metaclass: TMetaTypeRegistry = new TMetaTypeRegistry(TMetaObject.metaclass, 'TComponentTypeRegistry');
-        protected constructor(superClass: TMetaObject, name: string) {
-                super(superClass, name);
-                // et vous changez juste le nom :
-        }
-        //getMetaclass(): TMetaComponentTypeRegistry {
-        //return TMetaComponentTypeRegistry.metaclass;
-        //}
-}
-        */
 
 export class TTypeRegistry /*extends TObject*/ {
         // We store heterogeneous metas, so we keep them as TMetaComponent<any>.
@@ -85,6 +76,20 @@ const paletteLoaders: Record<string, () => Promise<PaletteModule>> = {
         // additional: () => import('./palettes/additional/additionalPalette'),
         // menus: () => import('./palettes/menus/menusPalette'),
 };
+
+// export async function registerFrames(typeRegistry: TTypeRegistry, frames: { tagName: string; className: string }[]) {
+//         for (const frame of frames) {
+//                 //const loaded = await this.loadDformUnit(`/src/frames`, frame.className);
+//                 //this.registerLoadedUnit(frame.tagName, loaded);
+//                 //const palette = await loader();
+//                 //console.log('[Delphine] registerPalettes BEGIN', paletteName);
+//                 //await palette.register(typeRegistry);
+//                 //console.log('[Delphine] registerPalettes END', paletteName, typeRegistry);
+//                                         //const loaded = await this.loadDformUnit(`/src/frames`, frame.className);
+//                                         this.registerLoadedUnit(frame.tagName, loaded);
+//                                         typeRegistry?.register(loaded.metaclass as TMetaControl);
+//         }
+// }
 
 export async function registerPalettes(typeRegistry: TTypeRegistry, enabledPalettes: string[]) {
         for (const paletteName of enabledPalettes) {

@@ -37,7 +37,7 @@ import type { ICompositeControl, IMetaCompositeControl } from './ICompositeContr
 import { TComponentRegistry } from './ComponentRegistry';
 import { TControl } from './Control';
 import { BuildComponentTree } from './BuildComponentTree';
-import { EventManager } from './event';
+import { EventManager } from './Event';
 import { TComponent } from './Component';
 //import type { UIPluginInstance } from './ICompositeControl';
 //import type { Json } from './IComponent';

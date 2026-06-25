@@ -135,10 +135,23 @@
         border-image-repeat: initial;
 }
 
-#izlxi {
-        width: 898px;
-        height: 152px;
-        color: red;
+#izlxixxx {
+        height: 172px;
+        width: 749px;
+}
+
+#izlxiYBBB {
+        height: 204px;
+}
+
+#izlxiYYY {
+        height: 160px;
+        width: 721px;
+}
+
+#izlxizzz {
+        height: 180px;
+        width: 722px;
 }
 
 #MainForm {
@@ -146,10 +159,15 @@
         padding-right: 0px;
         padding-bottom: 0px;
         padding-left: 0px;
+        color: rgb(1, 1, 1);
 }
 
 #MainForm {
         color: rgb(1, 1, 128);
+}
+
+#mylitframe {
+        color: rgb(1, 1, 1);
 }
 
 #mypanel {
@@ -443,67 +461,140 @@ body {
         </button>
         <div
                 data-delphine-component="TPanel"
-                data-delphine-name="Panel"
+                data-delphine-name="PanelVue"
                 data-delphine-onclick=""
-                id="izlxi"
+                id="izlxizzz"
                 data-delphine-ondblclick=""
                 data-delphine-popupmenu=""
                 data-delphine-oncontextpopup=""
                 class="delphine-control delphine-panel"
-        ></div>
-        <h1 id="igfu" data-delphine-onclick="" data-delphine-caption="Caption" data-delphine-name="Component1">Bonjour</h1>
-        <h1 id="igfu-2" data-delphine-onclick="" data-delphine-caption="Caption" data-delphine-name="Component1">Toto</h1>
-        MIMI
-        <div
-                data-delphine-component="THostFrame"
-                id="myframeplugin"
-                data-delphine-name="myframeplugin"
-                data-delphine-message="Bonjour depuis Delphine!!!"
-                data-delphine-props='{
-            "message": "Hello depuis Delphine",
-            "count": 3
-          }'
-                data-delphine-frame="hello-frame"
-                data-delphine-onframeevent="myframe_onFrameEvent"
-                data-delphine-onclick=""
-                data-delphine-caption="Caption"
-                data-delphine-ondblclick=""
-                data-delphine-popupmenu=""
-                data-delphine-oncontextpopup=""
         >
-                MY-FRAME-PLUGIN
+                MY-VUE-PLUGIN
+
+                <div
+                        id="myvueplugin"
+                        data-delphine-name="myvueplugin"
+                        data-delphine-component="hello-vue"
+                        data-delphine-message="Bonjour Vue depuis Delphine!!!"
+                        data-delphine-props='{
+                                        "message": "Hello Vue depuis Delphine",
+                                        "count": 3,
+                                        "enabled": true
+                                        }'
+                ></div>
         </div>
         <div
                 data-delphine-component="TPanel"
-                id="mypanel"
-                data-delphine-name="myPanel"
-                data-delphine-onclick="myPanel_onclick"
-                data-delphine-caption="Caption"
+                data-delphine-name="PanelSvelte"
+                data-delphine-onclick=""
+                id="izlxixxx"
                 data-delphine-ondblclick=""
                 data-delphine-popupmenu=""
                 data-delphine-oncontextpopup=""
                 class="delphine-control delphine-panel"
         >
-                <button
-                        data-delphine-component="TButton"
-                        data-delphine-caption="sub-btn1"
-                        data-delphine-name="sub-btn1"
-                        data-delphine-onclick="subBtn1_onclick"
-                        id="igqcr"
+                MY-SVELTE-PLUGIN
+                <div
+                        id="mysvelteplugin"
+                        data-delphine-name="mysvelteplugin"
+                        data-delphine-component="hello-svelte"
+                        data-delphine-message="Bonjour Svelte depuis Delphine!!!"
+                        data-delphine-props='{
+                                        "message": "Hello Svelte depuis Delphine",
+                                        "count": 3,
+                                        "enabled": true
+                                        }'
+                ></div>
+        </div>
+        <div
+                data-delphine-component="TPanel"
+                data-delphine-name="PanelFrame"
+                data-delphine-onclick=""
+                id="izlxiYYY"
+                data-delphine-ondblclick=""
+                data-delphine-popupmenu=""
+                data-delphine-oncontextpopup=""
+                class="delphine-control delphine-panel"
+        >
+                MY-FRAME-PLUGIN
+
+                <div
+                        data-delphine-component="THostFrame"
+                        id="myframeplugin"
+                        data-delphine-name="myframeplugin"
+                        data-delphine-message="Bonjour depuis Delphine!!!"
+                        data-delphine-props='{
+                        "message": "Hello depuis Delphine",
+                        "count": 3
+                        }'
+                        data-delphine-frame="hello-frame"
+                        data-delphine-onframeevent="myframe_onFrameEvent"
+                        data-delphine-onclick=""
+                        data-delphine-caption="Caption"
                         data-delphine-ondblclick=""
                         data-delphine-popupmenu=""
                         data-delphine-oncontextpopup=""
-                        class="delphine-button"
-                >
-                        sub-btn1
-                </button>
+                ></div>
         </div>
-        <div data-delphine-component="TPopupMenu" id="popup-menu" data-delphine-name="PopupMenu3" hidden class="delphine-popup-menu">
-                <div class="menu-item">Open</div>
-                <div class="menu-item">Save</div>
-                <div class="menu-separator"></div>
-                <div class="menu-item">Quit</div>
+        <div
+                data-delphine-component="TPanel"
+                data-delphine-name="PanelLitFrame"
+                data-delphine-onclick=""
+                id="izlxiYBBB"
+                data-delphine-ondblclick=""
+                data-delphine-popupmenu=""
+                data-delphine-oncontextpopup=""
+                class="delphine-control delphine-panel"
+        >
+                MY-LIT-FRAME
+
+                <lit-frame
+                        data-delphine-component="THostFrame"
+                        id="mylitframe"
+                        data-delphine-name="mylitframe"
+                        data-delphine-msg="Bonjour depuis Delphine!!!"
+                        data-delphine-props='{
+                        "msg": "Hello depuis Delphine",
+                        "nbrclicked": 3
+                        }'
+                        data-delphine-onframeevent="myframe_onFrameEvent"
+                        data-delphine-onclick=""
+                        data-delphine-popupmenu=""
+                        data-delphine-ondblclick=""
+                        data-delphine-oncontextpopup=""
+                ></lit-frame>
         </div>
+</div>
+<div
+        data-delphine-component="TPanel"
+        id="mypanel"
+        data-delphine-name="myPanel"
+        data-delphine-onclick="myPanel_onclick"
+        data-delphine-caption="Caption"
+        data-delphine-ondblclick=""
+        data-delphine-popupmenu=""
+        data-delphine-oncontextpopup=""
+        class="delphine-control delphine-panel"
+>
+        <button
+                data-delphine-component="TButton"
+                data-delphine-caption="sub-btn1"
+                data-delphine-name="sub-btn1"
+                data-delphine-onclick="subBtn1_onclick"
+                id="igqcr"
+                data-delphine-ondblclick=""
+                data-delphine-popupmenu=""
+                data-delphine-oncontextpopup=""
+                class="delphine-button"
+        >
+                sub-btn1
+        </button>
+</div>
+<div data-delphine-component="TPopupMenu" id="popup-menu" data-delphine-name="PopupMenu3" hidden class="delphine-popup-menu">
+        <div class="menu-item">Open</div>
+        <div class="menu-item">Save</div>
+        <div class="menu-separator"></div>
+        <div class="menu-item">Quit</div>
 </div>
 <delphine-nonvisual data-delphine-component="TNonVisualComponents" height="100" data-delphine-onclick="" data-delphine-name="" id="i0p8j">
         <h3 id="ivqrn">Non visual components</h3>
@@ -513,8 +604,8 @@ body {
                 <div data-delphine-caption="Save" data-delphine-onclick="PopupMenu1Save_onclick" class="menu-item">Save</div>
                 <div class="menu-separator"></div>
                 <div data-delphine-caption="First" data-delphine-onclick="PopupMenu1First_onclick" class="menu-item submenu">First</div>
-                <div data-delphine-caption="Sub1" data-delphine-onclick="PopupMenu1FirstSub1_onclick" class="menu-item">Sub1</div>
-                <div data-delphine-caption="Sub2" data-delphine-onclick="PopupMenu1FirstSub2_onclick" class="menu-item">Sub2</div>
+                <div data-delphine-caption="SubMenu1" data-delphine-onclick="PopupMenu1FirstSub1_onclick" class="menu-item">Sub1</div>
+                <div data-delphine-caption="SubMenu2" data-delphine-onclick="PopupMenu1FirstSub2_onclick" class="menu-item">Sub2</div>
         </div>
         <div data-delphine-component="TPopupMenu" data-delphine-name="PopupMenu2" id="itfx9-2">
                 ZOZO
