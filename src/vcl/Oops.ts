@@ -79,3 +79,22 @@ export function dumpObject(obj: any) {
 }
 
 export type UnknownRecord = Record<string, unknown>;
+
+// Debug.ts
+
+export function assert(condition: unknown, message: string): asserts condition {
+        if (!condition) {
+                debugger;
+                throw new Error(message);
+        }
+}
+
+export function unreachable(message = 'Unreachable code'): never {
+        debugger;
+        throw new Error(message);
+}
+
+export function todo(message = 'TODO'): never {
+        debugger;
+        throw new Error(message);
+}

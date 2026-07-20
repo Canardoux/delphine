@@ -1,4 +1,4 @@
-// RegisterVcl.ts
+// litPalette.ts
 
 /*
  * Copyright 2026 Canardoux.
@@ -19,12 +19,17 @@
  */
 
 import { TTypeRegistry } from '../../TypeRegistry';
-import { TMetaForm } from '../../Form';
-import { TMetaPluginHost } from '../../Plugin';
-import { TLitMetaCheckbox } from './TLitCheckBox';
-import { TMetaLitButton } from './TLitButton';
+import { registerLitCheckboxElement } from './TLitCheckBox';
+import { registerLitButtonElement } from './TLitButton';
+import { registerLitPanelElement } from './TLitPanel';
+//import { registerLitFrameElement } from './TLitFrame';
 
 export function register(types: TTypeRegistry) {
-        types.register(TLitMetaCheckbox.metaclass);
-        types.register(TMetaLitButton.metaclass);
+        //types.register(TLitMetaCheckbox.metaclass);
+        //types.register(TMetaLitButton.metaclass);
+        //types.register(TMetaLitPanel.metaclass);
+        registerLitPanelElement();
+        registerLitButtonElement();
+        registerLitCheckboxElement();
+        //registerLitFrameElement();
 }

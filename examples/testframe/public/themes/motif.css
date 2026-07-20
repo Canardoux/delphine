@@ -1,0 +1,72 @@
+/*
+ * Motif theme for Delphine.
+ *
+ * Derived from the previous Motif-style stylesheet used by Delphine.
+ */
+
+:root[data-theme='motif'] {
+        /* Base palette */
+        --text-color: #000000;
+        --surface: #aeb2c3;
+        --button-highlight: #dcdee5;
+        --button-face: #aeb2c3;
+        --button-shadow: #5d6069;
+        --window-frame: #5d6069;
+
+        --focus-color: #b24d7a;
+        --desktop-background: #63639c;
+
+        /* Typography */
+        --control-font-family: system-ui, sans-serif;
+        --control-font-size: 13px;
+        --control-text-color: var(--text-color);
+
+        /* Form and frame */
+        --form-background: var(--button-face);
+        --frame-background: var(--button-face);
+
+        /* Raised and lowered effects */
+        --motif-raised-shadow: inset 1px 1px var(--button-highlight), inset -1px -1px var(--button-shadow);
+
+        --motif-lowered-shadow: inset 1px 1px var(--button-shadow), inset -1px -1px var(--button-highlight);
+
+        /* Panel */
+        --panel-background: var(--button-face);
+        --panel-box-shadow: var(--motif-raised-shadow);
+        --panel-border-radius: 0;
+
+        /* Button */
+        --button-background: var(--button-face);
+        --button-box-shadow: var(--motif-raised-shadow);
+        --button-active-background: #9397a5;
+        --button-active-box-shadow: var(--motif-lowered-shadow);
+        --button-border-radius: 0;
+        --button-active-translate-y: 0px;
+        --button-active-content-x: 1px;
+        --button-active-content-y: 1px;
+
+        /* Checkbox */
+        --checkbox-background: var(--button-face);
+        --checkbox-disabled-background: var(--button-face);
+        --checkbox-box-shadow: var(--motif-raised-shadow);
+        --checkbox-check-color: var(--text-color);
+        --checkbox-disabled-check-color: var(--button-shadow);
+
+        /* Selection */
+        --selection-background: #000000;
+        --selection-color: #ffffff;
+
+        /* Popup menu */
+        --popup-background: var(--button-face);
+        --popup-color: var(--text-color);
+        --popup-border-color: var(--button-shadow);
+        --popup-hover-background: #000000;
+        --popup-hover-color: #ffffff;
+}
+
+html[data-theme='motif'],
+html[data-theme='motif'] body {
+        color: var(--text-color);
+        background: var(--form-background);
+        font-family: var(--control-font-family);
+}

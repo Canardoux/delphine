@@ -27,7 +27,7 @@ export class EventManager {
                 const propName = `on${eventType}`;
 
                 let el = targetElem.closest('[data-delphine-component]');
-                console.log(ev.composedPath());
+                //console.log(ev.composedPath());
                 if (!el) return;
 
                 let comp = this.getControlFromElement(form, el); // très important

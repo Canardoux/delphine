@@ -23,6 +23,6 @@ import type { IComponent } from './IComponent';
 import type { ICompositeControl } from './ICompositeControl';
 import type { IControl } from './IControl';
 
-export interface IForm extends ICompositeControl {
+export interface IForm {
         //getClass(type: string): IControl | undefined;
 }

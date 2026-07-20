@@ -5,23 +5,17 @@
                 {
                         "name": "MainForm",
                         "url": "./src/forms/MainForm.dform"
-                },
-                {
-                        "name": "Riri",
-                        "url": "./src/forms/Riri.dform"
                 }
         ],
         "frames": [
                 {
-                        "name": "LitFrame",
-                        "className": "TLitFrame",
+                        "name": "MyLitFrame",
+                        "className": "TMyLitFrame",
                         "type": "lit",
-                        "url": "./src/frames/LitFrame.ts",
-                        "tagName": "lit-frame",
-                        "module": "./dist/frames/LitFrame.js",
-
+                        "url": "./src/frames/TMyLitFrame.ts",
+                        "tagName": "mylit-frame",
+                        "module": "./dist/frames/TMyLitFrame.js",
                         "props": [],
-
                         "events": []
                 },
                 {
@@ -31,14 +25,32 @@
                         "url": "./src/frames/subframe.ts",
                         "tagName": "sub-frame",
                         "module": "./dist/frames/subframe.js",
-
                         "props": [],
-
+                        "events": []
+                },
+                {
+                        "name": "MainFrame",
+                        "className": "MainFrame",
+                        "type": "lit",
+                        "url": "./src/frames/MainFrame.ts",
+                        "tagName": "main-frame",
+                        "module": "./dist/frames/MainFrame.js",
+                        "props": [],
+                        "events": []
+                },
+                {
+                        "name": "RiriFrame",
+                        "className": "RiriFrame",
+                        "type": "lit",
+                        "url": "./src/frames/RiriFrame.ts",
+                        "tagName": "riri-frame",
+                        "module": "./dist/frames/RiriFrame.js",
+                        "props": [],
                         "events": []
                 }
         ],
         "ui": {
-                "theme": "win98",
+                "theme": "motif",
                 "density": "normal",
                 "fontScale": 1
         },

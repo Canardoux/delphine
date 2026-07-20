@@ -20,7 +20,7 @@
 
 // import { TMetaPluginHost } from '@vcl';
 import { TTypeRegistry } from '../../TypeRegistry';
-import { TMetaForm } from '../../Form';
+//import { TMetaForm } from '../../Form';
 import { TMetaPluginHost } from '../../Plugin';
 
 import { TMetaPopupMenu } from './TPopupMenu';
@@ -33,7 +33,7 @@ import { TMetaPanel } from './TPanel';
 export function register(types: TTypeRegistry) {
         types.register(TMetaButton.metaclass);
         types.register(TMetaPluginHost.metaclass);
-        types.register(TMetaForm.metaclass);
+        //types.register(TMetaForm.metaclass);
         types.register(TMetaPanel.metaclass);
         types.register(TMetaHostFrame.metaclass);
         types.register(TMetaFrame.metaclass);

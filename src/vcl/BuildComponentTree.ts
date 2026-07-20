@@ -7,6 +7,8 @@ import { getApplication } from './IApplication';
 import { TControl, TMetaControl, TColor, THandler } from './Control';
 import type { IPluginHost, TCompositeControl } from './CompositeControl';
 import type { ICompositeControl } from './ICompositeControl';
+import { TLitControlElement } from './LitControlElement';
+//import { TMetaLitFrame } from './palettes/lit/TLitFrame';
 
 export class BuildComponentTree {
         RESERVED_DATA_ATTRS = new Set<string>([
@@ -169,85 +171,174 @@ export class BuildComponentTree {
                 styleEl.textContent = cssText;
         }
 
-        createTree(el: Element, form: IForm, parent: TCompositeControl): TComponent | null {
-                const name = el.getAttribute('data-delphine-name');
-                const type = el.getAttribute('data-delphine-component');
-
-                const cls = type != null ? getApplication()?.getClass(type) : null;
-
-                if (!cls) {
-                        console.warn(`Component class not found for type "${type}"`);
-                        return null;
-                }
-
-                let child = null;
-                // The TForm are already created by the user.
-                if (!cls.isAForm()) {
-                        const metaComp = cls as TMetaComponent;
-                        child = metaComp.create(name!, form, parent); // <-------------- The instance variable is created HERE! ------------------
-                        if (cls.isACompositeControl()) {
-                                const comp = child as any as ICompositeControl;
-                                form.registerFrame(name!, comp);
-                                form = comp; // We pretend that we are the Form
-                        }
-                } else {
-                        child = parent;
-                }
-                if (!child) return null;
-                child.elem = el;
-
-                form.registerInstance(name!, child);
-
-                // We collect
-                this.parsePropsFromElement(child);
-
-                //child.syncDomFromProps();
-
-                (child as any).onAttachedToDom?.(); // ??? !!!
-
-                const maybeFrame = el.getAttribute('data-delphine-frame');
-
-                if (maybeFrame && maybeFrame != '') {
-                        //const frame = getApplication()?.getClass(maybeFrame);
-                        //const schema = frame?.getSchema();
-                        //child.elem.innerHTML = schema?.component;
-                        const app = getApplication();
-
-                        const loaded = app?.getLoadedUnit(maybeFrame);
-                        child.elem.innerHTML = loaded?.template ?? '';
-                        if (loaded?.style) {
-                                this.applyLoadedUnitStyle(maybeFrame, loaded.style);
-                        }
-                        debugger;
-                        app?.applyTheme(); // re-apply theme to let it cascade to the new content
-                }
-
-                // Done in the constructor //parent.children.push(child);
-                const maybePluginHost = child as unknown as IPluginHost;
-                if (maybePluginHost && typeof maybePluginHost.setPluginSpec === 'function') {
-                        //maybeHost.setPluginSpec(cls);
-                        //const plugin = el.getAttribute('data-delphine-plugin');
-                        const raw = el.getAttribute('data-delphine-props');
-                        const props = raw ? JSON.parse(raw) : {};
-
-                        maybePluginHost?.setPluginSpec!({ plugin: type, props });
-                        maybePluginHost?.mountPluginIfReady!();
-                }
-                parent?.children.push(child);
-
-                if (child.allowsChildren()) {
-                        el.querySelectorAll(':scope > [data-delphine-component]').forEach((el) => {
-                                //parent?.children.push(child);
-
-                                this.createTree(el, form, child as TCompositeControl); // RECURSION
-                                //if (el === root) return;
-                        });
-                }
-                return child;
-                //if (el === root) return; // No need to go higher in the hierachy
+        directDelphineChildren(el: Element): Element[] {
+                const hasShadowRoot = !!el.shadowRoot;
+                const _root = hasShadowRoot ? el.shadowRoot! : el;
+                return Array.from(_root.children).filter((child) => child instanceof Element && child.hasAttribute('data-delphine-component'));
         }
 
-        buildComponentTree(el: Element, form: IForm, parent: TCompositeControl): void {
-                this.createTree(el, form, parent);
+        async createTree(el: TLitControlElement, frame: any): Promise<Element | null> {
+                if ((el as any).updateComplete) {
+                        await (el as any).updateComplete;
+                }
+
+                const name = el.getAttribute('data-delphine-name');
+                const type = el.getAttribute('data-delphine-component');
+                //console.log('      processing ', name, type);
+
+                const children = this.directDelphineChildren(el);
+                if (children.length != 0) {
+                        // console.log(
+                        //         'scan',
+                        //         {
+                        //                 el,
+                        //                 tag: el.tagName,
+                        //                 name: name,
+                        //                 type: type,
+                        //                 hasShadowRoot: !!el.shadowRoot
+                        //         },
+                        //         children
+                        // );
+                        for (const childEl of children) {
+                                await this.createTree(childEl as TLitControlElement, frame);
+                        }
+                        // console.log('--- end scan', {
+                        //         el,
+                        //         tag: el.tagName,
+                        //         name: name,
+                        //         type: type
+                        // });
+                }
+
+                return el;
+        }
+
+        async buildComponentTree(el: Element, frame: Element): Promise<void> {
+                await this.createTree(el as TLitControlElement, frame);
+        }
+}
+
+// -----------------------------------------------------------------------------------------------------------
+
+// BuildComponentTree.ts
+
+type RegistryLike = {
+        registerComponent?: (name: string, el: Element) => void;
+        componentRegistry?: Map<string, Element>;
+};
+
+type DelphineElement = Element & {
+        readonly isDelphineComponent: true;
+};
+
+type DelphineFrameElement = DelphineElement &
+        RegistryLike & {
+                readonly isDelphineFrame: true;
+        };
+
+function isDelphineElement(el: Element): el is DelphineElement {
+        return (el as Partial<DelphineElement>).isDelphineComponent === true;
+}
+
+function isDelphineFrame(el: Element): el is DelphineFrameElement {
+        return (el as Partial<DelphineFrameElement>).isDelphineFrame === true;
+}
+
+function delphineNameOf(el: Element): string | null {
+        return el.getAttribute('data-delphine-name') ?? el.getAttribute('name') ?? null;
+}
+
+function registerInFrame(frame: RegistryLike, el: Element): void {
+        const name = delphineNameOf(el);
+        if (!name) return;
+
+        if (frame.registerComponent) {
+                frame.registerComponent(name, el);
+                return;
+        }
+
+        frame.componentRegistry?.set(name, el);
+}
+
+async function waitLitIfNeeded(el: Element): Promise<void> {
+        const maybeLit = el as Element & {
+                updateComplete?: Promise<unknown>;
+        };
+
+        if (maybeLit.updateComplete) {
+                await maybeLit.updateComplete;
+        }
+}
+
+/*
+ * Do not filter here.
+ *
+ * Ordinary HTML elements such as div, section or span may contain
+ * Delphine components and must therefore remain traversable.
+ */
+function directLightChildren(el: Element): Element[] {
+        return Array.from(el.children);
+}
+
+function directShadowChildren(el: Element): Element[] {
+        const root = el.shadowRoot;
+        if (!root) return [];
+
+        return Array.from(root.children);
+}
+
+function assignedSlotChildren(el: Element): Element[] {
+        const root = el.shadowRoot;
+        if (!root) return [];
+
+        const result: Element[] = [];
+
+        root.querySelectorAll('slot').forEach((slot) => {
+                result.push(...slot.assignedElements({ flatten: true }));
+        });
+
+        return result;
+}
+
+function directChildren(el: Element): Element[] {
+        return [...new Set([...directLightChildren(el), ...assignedSlotChildren(el), ...directShadowChildren(el)])];
+}
+
+export class ComponentTreeIndexer {
+        async indexFrame(root: Element, frame: RegistryLike): Promise<void> {
+                /*
+                 * Wait until the root frame has completed its Lit update,
+                 * but do not register the root frame in its own registry.
+                 */
+                await waitLitIfNeeded(root);
+
+                for (const child of directChildren(root)) {
+                        await this.indexElement(child, frame);
+                }
+        }
+
+        private async indexElement(el: Element, frame: RegistryLike): Promise<void> {
+                await waitLitIfNeeded(el);
+
+                /*
+                 * Register Delphine components only.
+                 * Ordinary HTML elements are traversed but not registered.
+                 */
+                if (isDelphineElement(el)) {
+                        registerInFrame(frame, el);
+                }
+
+                /*
+                 * A nested frame belongs to the current frame's registry,
+                 * but its internal components belong exclusively to its own
+                 * registry.
+                 */
+                if (isDelphineFrame(el)) {
+                        return;
+                }
+
+                for (const child of directChildren(el)) {
+                        await this.indexElement(child, frame);
+                }
         }
 }

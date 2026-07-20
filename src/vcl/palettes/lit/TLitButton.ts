@@ -18,92 +18,105 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { TControl, TMetaControl } from '../../Control';
-import { TMetaComponent } from '../../Component';
-import { TMetaContainer, TContainer } from '../../Container';
-import type { PropSpec } from '../../IComponent';
-import type { ComponentSchema } from '../../IComponent';
-import type { IForm } from '../../IForm';
-import type { IControl } from '../../IControl';
-import type { TMetaclass } from '../../Oops';
-import { TCompositeControl, TMetaCompositeControl } from '../../CompositeControl';
-import { TComponent } from '../../Component';
-//import { TForm } from './Form';
-import { LitElement, html } from 'lit';
-import { TLitMetaComponent, TLitComponent, TLitControlElement } from './lit';
+import { LitElement, html, css, type CSSResultGroup } from 'lit';
+import { TLitControlElement } from '../../LitControlElement';
+//import { win98Styles } from '../../Win98Theme';
 
-export class DelphineLitButton extends TLitControlElement {
-        static properties = {
+export class TLitButton extends TLitControlElement {
+        static override properties = {
+                ...TLitControlElement.properties,
+
                 caption: { type: String },
                 enabled: { type: Boolean }
         };
 
-        caption = 'Caption';
+        static override styles: CSSResultGroup = [
+                TLitControlElement.styles,
+                css`
+                        :host {
+                                display: inline-block;
+                                vertical-align: middle;
+                        }
+
+                        button {
+                                box-sizing: border-box;
+                                border: none;
+                                transform: translateY(0);
+
+                                min-width: 75px;
+                                min-height: 30px;
+                                padding: 0 12px;
+
+                                color: inherit;
+                                width: inherit;
+
+                                font-family: var(--control-font-family, Arial, sans-serif);
+
+                                font-size: var(--control-font-size, 11px);
+
+                                background: var(--button-background, ButtonFace);
+
+                                box-shadow: var(--button-box-shadow, none);
+
+                                border-radius: var(--button-border-radius, 0);
+                        }
+
+                        button:not(:disabled):active {
+                                background: var(--button-active-background, var(--button-background, ButtonFace));
+
+                                box-shadow: var(--button-active-box-shadow, var(--button-box-shadow, none));
+                                transform: translateY(var(--button-active-translate-y, 0));
+
+                                border-radius: var(--button-border-radius, 0);
+                        }
+
+                        button:not(:disabled):active .caption {
+                                transform: translate(var(--button-active-content-x, 0), var(--button-active-content-y, 0));
+                        }
+
+                        button .caption {
+                                display: inline-block;
+                        }
+
+                        button:focus-visible {
+                                outline: 1px dotted currentColor;
+                                outline-offset: -4px;
+                        }
+
+                        button:disabled {
+                                color: var(--button-shadow, GrayText);
+                        }
+                `
+        ];
+
+        caption = 'The Caption';
         enabled = true;
 
-        render() {
-                return html`<button ?disabled=${!this.enabled}>${this.caption}</button>`;
+        protected override render() {
+                return html`
+                        <button style=${this.getControlStyle()} ?disabled=${!this.enabled}>
+                                <span class="caption">${this.caption}</span>
+                        </button>
+                `;
         }
 }
-customElements.define('lit-button', DelphineLitButton);
+// customElements.define('lit-button', TLitButton);
 
-// export class TButton extends TControl {
-//         //getMetaclass() {
-//         //return TMetaControl.metaclass;
-//         //}
-
-//         htmlButton(): HTMLButtonElement {
-//                 return this.htmlElement! as HTMLButtonElement;
-//         }
-
-//         //_caption: string = '';
-//         //_enabled: boolean = true;
-//         /*
-//         protected get bprops(): ButtonProps {
-//                 return this.props as ButtonProps;
-//         }
-//                 */
-
-//         get caption(): string {
-//                 //return this._caption;
-//                 return (this.props.caption as string) ?? 'Caption';
-//         }
-//         set caption(caption: string) {
-//                 //this._caption = caption;
-//                 this.props.caption = caption;
-//                 const el = this.htmlElement;
-//                 if (!el) return;
-//                 el.textContent = this.caption;
-//         }
-
-//         get enabled(): boolean {
-//                 //return this._enabled ?? true;
-//                 return (this.props.enabled as boolean) ?? true;
-//         }
-//         set enabled(enabled) {
-//                 //this._enabled = enabled;
-//                 this.props.enabled = enabled;
-//                 this.htmlButton().disabled = !enabled;
-//         }
-
-//         constructor(name: string, form: IForm, parent: TControl) {
-//                 super(TMetaButton.metaclass, name, form, parent);
-//         }
-//         /*
-//         syncDomFromProps() {
-//                 const el = this.htmlElement;
-//                 if (!el) return;
-
-//                 el.textContent = this.caption;
-//                 this.htmlButton().disabled = !this.enabled;
-//                 super.syncDomFromProps();
-//         }
-//                 */
+// export class TMetaLitButton extends TLitMetaComponent {
+//         static metaclass = new TMetaLitButton(TLitMetaComponent.metaclass, 'TLitButton');
 // }
+// // --------------------------------------
 
-export class TMetaLitButton extends TLitMetaComponent {
-        static metaclass = new TMetaLitButton(TLitMetaComponent.metaclass, 'LitTButton');
+// export const delphineMeta = TMetaLitButton.metaclass;
+
+export function registerLitButtonElement() {
+        if (!customElements.get('lit-button')) {
+                customElements.define('lit-button', TLitButton);
+        }
 }
-// --------------------------------------
 
-export const delphineMeta = TMetaLitButton.metaclass;
+declare global {
+        interface HTMLElementTagNameMap {
+                'lit-button': TLitButton;
+        }
+}

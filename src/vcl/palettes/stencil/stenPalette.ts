@@ -19,7 +19,7 @@
  */
 
 import { TTypeRegistry } from '../../TypeRegistry';
-import { TMetaForm } from '../../Form';
+//import { TMetaForm } from '../../Form';
 import { TMetaPluginHost } from '../../Plugin';
 //import { TStenMetaCheckbox } from './TStenCheckBox';
 

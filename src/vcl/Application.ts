@@ -28,6 +28,8 @@ import type { IControl, IMetaControl } from './IControl';
 import { TMetaControl } from './Control';
 import type { IMetaComponent } from './IComponent';
 import { parseDformSource } from './DformSource';
+import { TLitFrame } from './palettes/lit/TLitFrame';
+//import '../themes/win98.css';
 
 export type TApplicationConfig = {
         mainForm?: string;
@@ -61,34 +63,96 @@ export class TApplication implements IApplication {
         private loadedUnits = new Map<string, TLoadedUnit>();
         private _theme: string | null = null;
 
+        get theme(): string {
+                return this._theme ?? this.appConfig?.ui?.theme ?? 'win98';
+        }
+
         set theme(value: string) {
                 this.setTheme(value);
         }
 
+        // setTheme(theme: string): void {
+        //         this._theme = theme;
+        //         this.applyTheme();
+        // }
+
         setTheme(theme: string): void {
                 this._theme = theme;
+
+                if (this.appConfig) {
+                        this.appConfig.ui ??= {};
+                        this.appConfig.ui.theme = theme;
+                }
+
                 this.applyTheme();
         }
 
+        // applyTheme(): void {
+        //         //document.documentElement.dataset.theme = this._theme ?? this._theme ?? 'win98';
+        //         // const themeId = 'delphine-current-theme';
+        //         // let link = document.getElementById(themeId) as HTMLLinkElement | null;
+        //         // const theme = this._theme || (this.appConfig?.ui?.theme ?? 'win95');
+        //         // if (!link) {
+        //         //         link = document.createElement('link');
+        //         //         link.id = themeId;
+        //         //         link.rel = 'stylesheet';
+        //         //         link.setAttribute('data-delphine-theme', theme);
+        //         //         document.head.appendChild(link);
+        //         // }
+        //         // link.href = `/themes/${theme}.css`;
+        //         // link.setAttribute('data-delphine-theme', theme);
+        //         // // Important: keep the theme last in <head>
+        //         // document.head.appendChild(link);
+
+        //         const theme = this._theme ?? this.appConfig?.ui?.theme ?? 'win98';
+
+        //         document.documentElement.dataset.theme = theme;
+
+        //         const themeId = 'delphine-current-theme';
+
+        //         let link = document.getElementById(themeId) as HTMLLinkElement | null;
+
+        //         if (!link) {
+        //                 link = document.createElement('link');
+        //                 link.id = themeId;
+        //                 link.rel = 'stylesheet';
+        //                 document.head.appendChild(link);
+        //         }
+
+        //         link.href = `/themes/${encodeURIComponent(theme)}.css`;
+
+        //         link.dataset.delphineTheme = theme;
+
+        //         /*
+
+        //  * Keep the theme after the other stylesheets so that its
+
+        //  * global rules take precedence when specificity is equal.
+
+        //  */
+
+        //         document.head.appendChild(link);
+        // }
+
         applyTheme(): void {
+                const theme = this.theme;
+
+                document.documentElement.dataset.theme = theme;
+
                 const themeId = 'delphine-current-theme';
 
                 let link = document.getElementById(themeId) as HTMLLinkElement | null;
-                const theme = this._theme || (this.appConfig?.ui?.theme ?? 'win95');
 
                 if (!link) {
                         link = document.createElement('link');
                         link.id = themeId;
                         link.rel = 'stylesheet';
-                        link.setAttribute('data-delphine-theme', theme);
                         document.head.appendChild(link);
                 }
 
-                link.href = `/themes/${theme}.css`;
-                link.setAttribute('data-delphine-theme', theme);
+                link.href = `/themes/${encodeURIComponent(theme)}.css`;
 
-                // Important: keep the theme last in <head>
-                document.head.appendChild(link);
+                link.dataset.delphineTheme = theme;
         }
 
         private async loadDformUnit(basePath: string, unitName: string): Promise<TLoadedUnit> {
@@ -118,6 +182,12 @@ export class TApplication implements IApplication {
                 return loaded;
         }
 
+        private async registerFrame(basePath: string, unitName: string): Promise<void> {
+                const srcPath = `${basePath}/${unitName}.ts`;
+                const mod = await import(srcPath);
+                mod.registerFrame();
+        }
+
         registerLoadedUnit(name: string, unit: TLoadedUnit): void {
                 this.loadedUnits.set(name, unit);
         }
@@ -127,7 +197,6 @@ export class TApplication implements IApplication {
         }
 
         constructor(appName: string) {
-                debugger;
                 this.appName = appName;
                 setApplication(this);
                 this.typeRegistry = new TTypeRegistry();
@@ -163,7 +232,7 @@ export class TApplication implements IApplication {
         }
 
         async createAndShow(formName: string) {
-                let form = this.getFormByName('formName');
+                let form = this.getFormByName(formName);
                 if (!form) {
                         form = await this.createFormByName(formName);
                 }
@@ -191,6 +260,10 @@ export class TApplication implements IApplication {
                         throw new Error(`Form ${form.name} has not been created`);
                 }
 
+                if (!form.elem.isConnected) {
+                        throw new Error(`Form ${form.name} is not mounted`);
+                }
+
                 if (this.currentForm === form) {
                         return;
                 }
@@ -198,12 +271,17 @@ export class TApplication implements IApplication {
                 this.currentForm?.hide();
                 this.currentForm = form;
 
-                const host = form.elem.parentElement;
-                if (!host) {
-                        throw new Error(`Form ${form.name} has no host`);
-                }
+                // const host = form.elem.parentElement;
+                // if (!host) {
+                //         throw new Error(`Form ${form.name} has no host`);
+                // }
 
-                const focusTarget = form.elem.querySelector<HTMLElement>('[autofocus], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])');
+                // const focusTarget = form.elem.querySelector<HTMLElement>('[autofocus], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])');
+                // focusTarget?.focus();
+                form.elem.hidden = false;
+
+                const focusTarget = form.elem.querySelector<HTMLElement>(['[autofocus]', 'button:not([disabled])', 'input:not([disabled])', 'select:not([disabled])', 'textarea:not([disabled])', '[href]', '[tabindex]:not([tabindex="-1"])'].join(', '));
+
                 focusTarget?.focus();
                 this.activateForm(form);
                 //form.onShown();
@@ -270,14 +348,24 @@ export class TApplication implements IApplication {
                 //old?.destroy();
         }
 
+        // private activateForm(form: TForm): void {
+        //         if (!form.elem) {
+        //                 throw new Error(`Form ${form.name} not created`);
+        //         }
+
+        //         const host = form.elem.parentElement;
+        //         if (host) host.hidden = false;
+
+        //         this.currentForm = form;
+        //         form.onShown();
+        // }
+
         private activateForm(form: TForm): void {
-                if (!form.elem) {
-                        throw new Error(`Form ${form.name} not created`);
+                if (!form.elem.isConnected) {
+                        throw new Error(`Form ${form.name} is not mounted`);
                 }
 
-                const host = form.elem.parentElement;
-                if (host) host.hidden = false;
-
+                form.elem.hidden = false;
                 this.currentForm = form;
                 form.onShown();
         }
@@ -306,7 +394,7 @@ export class TApplication implements IApplication {
                         const url = new URL(window.location.href);
                         url.searchParams.set('form', this.mainForm!.name);
                         history.replaceState({ form: this.mainForm!.name }, '', url);
-                        this.setTheme(this.appConfig?.ui?.theme ?? 'win95');
+                        this.setTheme(this.appConfig?.ui?.theme ?? 'win98');
                         this.run();
                 });
         }
@@ -318,9 +406,10 @@ export class TApplication implements IApplication {
         async registerFrames(typeRegistry: TTypeRegistry) {
                 const frames = this.appConfig?.frames ?? [];
                 for (const frame of frames) {
-                        const loaded = await this.loadDformUnit(`/src/frames`, frame.className);
-                        this.registerLoadedUnit(frame.tagName, loaded);
-                        typeRegistry?.register(loaded.metaclass as TMetaControl);
+                        await this.registerFrame(`/src/frames`, frame.className);
+                        //loaded.register();
+                        // this.registerLoadedUnit(frame.tagName, loaded);
+                        // typeRegistry?.register(loaded.metaclass as TMetaControl);
                 }
         }
 
@@ -372,29 +461,68 @@ export class TApplication implements IApplication {
                 styleEl.textContent = cssText;
         }
 
+        private getApplicationHost(): HTMLElement {
+                // const host = document.getElementById('app');
+                // if (!host) {
+                //         throw new Error('Missing application host element #app');
+                // }
+                // return host;
+                return document.body;
+        }
+
         protected async createFormByName(formName: string): Promise<TForm> {
                 const basePath = `/src/forms/${formName}`;
 
                 const module = await import(/* @vite-ignore */ `${basePath}.ts`);
 
-                const response = await fetch(`${basePath}.dform`);
-                if (!response.ok) {
-                        throw new Error(`Cannot load ${basePath}.dform`);
-                }
+                // const response = await fetch(`${basePath}.dform`);
+                // if (!response.ok) {
+                //         throw new Error(`Cannot load ${basePath}.dform`);
+                // }
 
-                const dformText = await response.text();
+                // const dformText = await response.text();
 
-                const html = this.extractTemplateFromDform(dformText);
-                const css = this.extractStyleFromDform(dformText);
+                // const html = this.extractTemplateFromDform(dformText);
+                // const css = this.extractStyleFromDform(dformText);
 
                 const FormClass = module.default ?? module[formName];
-                const form = new FormClass(formName);
+                if (!FormClass) {
+                        throw new Error(`Form class ${formName} was not exported by ${basePath}.ts`);
+                }
+                const form = new FormClass();
 
-                this.applyDformStyle(formName, css);
-                form.create(html);
+                // this.applyDformStyle(formName, css);
+                // await form.create(html);
+                form.mount(this.getApplicationHost());
+
+                // const host = document.getElementById('app');
+
+                // if (!host) {
+                //         throw new Error('Missing #app');
+                // }
+
+                // host.appendChild(form.elem);
+
                 this.registerForm(form);
-                this.applyTheme();
+                //this.applyTheme();
 
                 return form;
+        }
+
+        // Actually not used !
+        async createFrameByName(frameName: string): Promise<TLitFrame> {
+                const config = this.appConfig!.frames!.find((frame) => frame.name === frameName);
+
+                if (!config) {
+                        throw new Error(`Unknown frame: ${frameName}`);
+                }
+
+                const module = await import(/* @vite-ignore */ config.url);
+
+                const register = module.registerFrame ?? module.registerMainFrame;
+
+                register?.();
+
+                return document.createElement(config.tagName) as TLitFrame;
         }
 }

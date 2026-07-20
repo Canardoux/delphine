@@ -28,63 +28,64 @@ import type { ComponentSchema } from './IComponent';
 import type { IComponent } from './IComponent';
 import type { IMetaComponent } from './IComponent';
 import { TMetaCompositeControl, TCompositeControl } from './CompositeControl';
+import { TLitFrame } from './palettes/lit/TLitFrame';
 
-export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, IMetaControl {
-        static readonly metaclass: TMetaForm = new TMetaForm(TMetaCompositeControl.metaclass, 'TForm');
-        //getMetaClass() {
-        //return TMetaForm.metaclass;
-        //}
+// export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, IMetaControl {
+//         static readonly metaclass: TMetaForm = new TMetaForm(TMetaCompositeControl.metaclass, 'TForm');
+//         //getMetaClass() {
+//         //return TMetaForm.metaclass;
+//         //}
 
-        protected constructor(superClass: TMetaContainer, name: string) {
-                super(superClass, name);
-                // et vous changez juste le nom :
-        }
+//         protected constructor(superClass: TMetaContainer, name: string) {
+//                 super(superClass, name);
+//                 // et vous changez juste le nom :
+//         }
 
-        create(name: string, form: TForm, parent: TComponent) {
-                return new TForm(name);
-        }
+//         create(name: string, form: TForm, parent: TComponent) {
+//                 return new TForm(name);
+//         }
 
-        isAForm(): boolean {
-                return true;
-        }
+//         isAForm(): boolean {
+//                 return true;
+//         }
 
-        defProps(): PropSpec<any>[] {
-                return [
-                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
-                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
-                ];
-        }
+//         defProps(): PropSpec<any>[] {
+//                 return [
+//                         //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
+//                         //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
+//                 ];
+//         }
 
-        /*
-        getSchema(): ComponentSchema | null {
-                return {
-                        name: this.typeName,
-                        label: 'TForm',
-                        category: 'Standard Control',
-                        icon: undefined,
-                        component: this,
-                        isContainer: true,
-                        instanceName: 'Form',
-                        tagName: 'div',
-                        resizable: false,
+//         /*
+//         getSchema(): ComponentSchema | null {
+//                 return {
+//                         name: this.typeName,
+//                         label: 'TForm',
+//                         category: 'Standard Control',
+//                         icon: undefined,
+//                         component: this,
+//                         isContainer: true,
+//                         instanceName: 'Form',
+//                         tagName: 'div',
+//                         resizable: false,
 
-                        //hoverable: true,
-                        //layerable: true,
-                        //removable: false,
-                        //draggable: true,
-                        droppable: true,
-                        //copyable: false,
+//                         //hoverable: true,
+//                         //layerable: true,
+//                         //removable: false,
+//                         //draggable: true,
+//                         droppable: true,
+//                         //copyable: false,
 
-                        props: this.propSpecsToSchemaProps()
-                };
-        }
-                */
-        getSchema(): ComponentSchema | null {
-                return null;
-        }
-}
+//                         props: this.propSpecsToSchemaProps()
+//                 };
+//         }
+//                 */
+//         getSchema(): ComponentSchema | null {
+//                 return null;
+//         }
+// }
 
-export class TForm extends TCompositeControl implements IForm, IControl, IComponent {
+export class TForm implements IForm {
         //getMetaclass() {
         //return TMetaForm.metaclass;
         //}
@@ -92,14 +93,53 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
         //private _mounted = false;
         //protected _created = false;
         static forms = new Map<string, TForm>();
+        readonly name: string;
+        readonly frame: TLitFrame;
+        readonly elem: HTMLElement;
+
+        constructor(frame: TLitFrame, name: string) {
+                this.name = name;
+
+                this.frame = frame;
+
+                const host = document.createElement('div');
+
+                host.classList.add('delphine-form');
+
+                host.dataset.delphineForm = name;
+
+                host.hidden = true;
+
+                host.appendChild(frame);
+                TForm.forms.set(name, this);
+
+                this.elem = host;
+        }
+
+        // mount(parent: HTMLElement): void {
+        //         if (!this.elem.isConnected) {
+        //                 parent.appendChild(this.elem);
+        //         }
+        // }
+
+        // public mount(container: HTMLElement): void {
+        //         container.innerHTML = this.getHtml();
+        //         this.afterMount();
+        // }
 
         // Each Form has its own componentRegistry
 
         //typeRegistry: TComponentTypeRegistry | null = null;
-        constructor(name: string) {
-                super(TMetaForm.metaclass, name, null, null);
-                this.form = this;
-                TForm.forms.set(name, this);
+        // constructor(frame: TLitFrame, name: string) {
+        //         //super(TMetaForm.metaclass, name, null, null);
+        //         //this.form = this;
+        //         this.name = name;
+        //         this.elem = frame;
+        //TForm.forms.set(name, this);
+        //}
+
+        mount(parent: HTMLElement) {
+                if (!this.elem.isConnected) parent.appendChild(this.elem);
         }
 
         getName() {
@@ -111,19 +151,22 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
 
         //elem: Element | null = null;
 
+        // hide(): void {
+        //         if (!this.elem) {
+        //                 return;
+        //         }
+
+        //         const host = this.elem.parentElement;
+        //         if (host) {
+        //                 host.hidden = true;
+        //         }
+        // }
+
         hide(): void {
-                if (!this.elem) {
-                        return;
-                }
-
-                const host = this.elem.parentElement;
-                if (host) {
-                        host.hidden = true;
-                }
+                this.elem.hidden = true;
         }
-
         show(): void {
-                if (!this.elem || !this._created) {
+                if (!this.elem) {
                         throw new Error(`Form ${this.name} not created`);
                 }
 
@@ -145,8 +188,7 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
                         this.elem.remove();
                 }
 
-                this.elem = null;
-                this._created = false;
+                //this.elem = null;
         }
 
         onShown() {
@@ -159,16 +201,11 @@ export class TForm extends TCompositeControl implements IForm, IControl, ICompon
                 }
         }
 
-        public mount(container: HTMLElement): void {
-                container.innerHTML = this.getHtml();
-                this.afterMount();
-        }
-
         protected getHtml(): string {
                 return '<h1>Empty TForm</h1>';
         }
 
-        protected afterMount(): void {
-                // Default: do nothing
-        }
+        // protected afterMount(): void {
+        //         // Default: do nothing
+        // }
 }

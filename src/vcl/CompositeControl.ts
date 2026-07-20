@@ -193,7 +193,7 @@ export class TCompositeControl extends TContainer implements IControl, IComponen
          * then build the component tree from the injected HTML.
          */
         //create(htmlSource: string): void {
-        create(htmlSource: string, parent?: HTMLElement): void {
+        async create(htmlSource: string, parent?: HTMLElement): Promise<void> {
                 if (this._created) {
                         return;
                 }
@@ -221,12 +221,12 @@ export class TCompositeControl extends TContainer implements IControl, IComponen
 
                 // 4. Build Delphine component tree
                 this.componentRegistry.clear();
-                BuildComponentTree.singeleton.buildComponentTree(this.elem, this, this);
+                await BuildComponentTree.singeleton.buildComponentTree(this.elem, this.elem);
 
                 // 4.5 Remove the NonVisualComponents from the DOM since they are not real components and just metadata carriers
                 const nonVisualRoot = host.querySelector('delphine-nonvisual');
                 if (nonVisualRoot) {
-                        BuildComponentTree.singeleton.buildComponentTree(nonVisualRoot, this, this);
+                        await BuildComponentTree.singeleton.buildComponentTree(nonVisualRoot, this.elem);
                         for (const c of Array.from(this.children)) {
                                 console.log(c.name);
                         }
@@ -240,9 +240,6 @@ export class TCompositeControl extends TContainer implements IControl, IComponen
                 // 6. Mark as created, still hidden
                 this._mounted = true;
                 this._created = true;
-
-                console.log('created form root =', this.elem);
-                console.log('created form host =', this.elem?.parentElement);
 
                 // 7. Lifecycle hook
                 this.onCreate();

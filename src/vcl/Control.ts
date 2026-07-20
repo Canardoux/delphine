@@ -149,13 +149,6 @@ export class TControl extends TComponent implements IControl {
                 this.setHtmlStyleProp('color', color.s);
         }
 
-        /*
-        syncDomFromProps() {
-                const el = this.htmlElement;
-                if (!el) return;
-        }
-                */
-
         get backgroundColor(): TColor {
                 return new TColor(this.getHtmlStyleProp('background-color'));
         }
