@@ -1,20 +1,20 @@
-import { TForm, TControl, TColor, TApplication, TPluginHost } from '@vcl';
-import { TLitButton } from '@vcl/palettes/lit/TLitButton';
+import { TForm, TApplication } from '@vcl';
+import { TButton } from '@vcl/palettes/standard/TButton';
 import { TPanel } from '@vcl/palettes/standard/TPanel';
 import { getApplication } from '@vcl/IApplication';
 import { TCheckBox } from '@vcl/palettes/standard/TCheckBox';
-import { TLitFrame } from '@vcl/palettes/lit/TLitFrame';
+import { TFrame } from '@vcl/palettes/standard/TFrame';
 import { LitElement, html, css } from 'lit';
 
 //import std from '@vcl/palettes/standard/index';
 
 //import './MainForm.css';
-import { THostFrame } from '@vcl/palettes/standard/TFrame';
+//import { THostFrame } from '@vcl/palettes/standard/TFrame';
 import { registerMyLitFrame } from './TMyLitFrame';
 
-export default class RiriFrame extends TLitFrame {
+export default class RiriFrame extends TFrame {
         static properties = {
-                ...TLitFrame.properties
+                ...TFrame.properties
 
                 // msg: { type: String },
                 // subCounter: { type: Number, state: true },
@@ -32,9 +32,9 @@ export default class RiriFrame extends TLitFrame {
                 `;
         }
 
-        button1_onclick(_ev: Event | null, _sender: TControl) {
+        button1_onclick(_ev: Event | null, _sender: any) {
                 debugger;
-                const btn = this.getComponent<TLitButton>('button1');
+                const btn = this.getComponent<TButton>('button1');
                 if (!btn) {
                         console.warn('button1 not found in registry');
                         return;
@@ -47,9 +47,9 @@ export default class RiriFrame extends TLitFrame {
                 //app.replaceForm('MainForm');
         }
 
-        button2_onclick(_ev: Event | null, _sender: TControl) {
+        button2_onclick(_ev: Event | null, _sender: any) {
                 debugger;
-                const btn = this.getComponent<TLitButton>('button2');
+                const btn = this.getComponent<TButton>('button2');
                 if (!btn) {
                         console.warn('button2 not found in registry');
                         return;

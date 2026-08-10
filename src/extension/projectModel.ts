@@ -32,6 +32,27 @@ export type ResolvedUnit = {
         codeUri: vscode.Uri;
 };
 
+export interface DelphineAppConfig {
+        name?: string;
+
+        ui?: {
+                theme?: string;
+                density?: string;
+                fontScale?: number;
+        };
+
+        palettes?: string[];
+}
+
+export async function loadAppConfig(appRoot: vscode.Uri): Promise<DelphineAppConfig> {
+        const configUri = vscode.Uri.joinPath(appRoot, 'app.json');
+
+        const bytes = await vscode.workspace.fs.readFile(configUri);
+        const text = Buffer.from(bytes).toString('utf8');
+
+        return JSON.parse(text) as DelphineAppConfig;
+}
+
 export function normalizeToFileUri(input?: unknown): vscode.Uri | undefined {
         if (!input) {
                 return undefined;

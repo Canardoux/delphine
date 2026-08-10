@@ -21,20 +21,26 @@
 
 import { TMetaclass } from './Oops';
 import { TForm } from './Form';
-import { TTypeRegistry, registerPalettes } from './TypeRegistry';
-import type { IApplication, TLoadedUnit } from './IApplication';
+//import { registerPalettes } from './TypeRegistry';
+import type { IApplication } from './IApplication';
 import { setApplication } from './IApplication';
-import type { IControl, IMetaControl } from './IControl';
-import { TMetaControl } from './Control';
-import type { IMetaComponent } from './IComponent';
+//import type { IControl, IMetaControl } from './IControl';
+//import { TMetaControl } from './Control';
+//import type { IMetaComponent } from './IComponent';
 import { parseDformSource } from './DformSource';
-import { TLitFrame } from './palettes/lit/TLitFrame';
+import { registerRuntimePalettes } from './palettes/registerRuntimePalette';
+//import { TTypeRegistry } from './TypeRegistry';
+//import { TLitFrame } from './palettes/lit/TLitFrame';
 //import '../themes/win98.css';
 
 export type TApplicationConfig = {
         mainForm?: string;
-        forms?: any[];
-        frames?: any[];
+        forms?: { name: string; frame: string; autoCreate: boolean }[];
+        frames?: {
+                name: string;
+                className: string;
+                tagName: string;
+        }[];
         ui?: {
                 theme?: string;
                 density?: 'compact' | 'normal' | 'spacious';
@@ -52,7 +58,7 @@ export class TMetaApplication extends TMetaclass {
 }
 
 export class TApplication implements IApplication {
-        typeRegistry: TTypeRegistry | null = null;
+        //typeRegistry: TTypeRegistry | null = null;
         currentForm: TForm | null = null;
         mainForm: TForm | null = null;
         protected appName: string;
@@ -60,7 +66,7 @@ export class TApplication implements IApplication {
         private formStack: TForm[] = [];
         private handlingBrowserPop = false;
         private forms: Map<string, TForm> = new Map<string, TForm>();
-        private loadedUnits = new Map<string, TLoadedUnit>();
+        //private loadedUnits = new Map<string, TLoadedUnit>();
         private _theme: string | null = null;
 
         get theme(): string {
@@ -155,51 +161,45 @@ export class TApplication implements IApplication {
                 link.dataset.delphineTheme = theme;
         }
 
-        private async loadDformUnit(basePath: string, unitName: string): Promise<TLoadedUnit> {
-                const formPath = `${basePath}/${unitName}.dform`;
-                const srcPath = `${basePath}/${unitName}.ts`;
-                const mod = await import(srcPath);
+        // private async loadDformUnit(basePath: string, unitName: string): Promise<TLoadedUnit> {
+        //         const formPath = `${basePath}/${unitName}.dform`;
+        //         const srcPath = `${basePath}/${unitName}.ts`;
+        //         const mod = await import(srcPath);
 
-                if (!mod.delphineMeta) {
-                        throw new Error(`Missing delphineMeta export in ${srcPath}`);
-                }
-                const response = await fetch(formPath);
-                if (!response.ok) {
-                        throw new Error(`Cannot load ${formPath}`);
-                }
+        //         if (!mod.delphineMeta) {
+        //                 throw new Error(`Missing delphineMeta export in ${srcPath}`);
+        //         }
+        //         const response = await fetch(formPath);
+        //         if (!response.ok) {
+        //                 throw new Error(`Cannot load ${formPath}`);
+        //         }
 
-                const source = await response.text();
-                const parts = parseDformSource(source);
+        //         const source = await response.text();
+        //         const parts = parseDformSource(source);
 
-                const loaded: TLoadedUnit = {
-                        name: unitName,
-                        template: parts.template,
-                        style: parts.style,
-                        metaclass: mod.delphineMeta as IMetaControl
-                        //metaclass: metaclass
-                };
+        //         const loaded: TLoadedUnit = {
+        //                 name: unitName,
+        //                 template: parts.template,
+        //                 style: parts.style,
+        //                 metaclass: mod.delphineMeta as IMetaControl
+        //                 //metaclass: metaclass
+        //         };
 
-                return loaded;
-        }
+        //         return loaded;
+        // }
 
-        private async registerFrame(basePath: string, unitName: string): Promise<void> {
-                const srcPath = `${basePath}/${unitName}.ts`;
-                const mod = await import(srcPath);
-                mod.registerFrame();
-        }
+        // registerLoadedUnit(name: string, unit: TLoadedUnit): void {
+        //         this.loadedUnits.set(name, unit);
+        // }
 
-        registerLoadedUnit(name: string, unit: TLoadedUnit): void {
-                this.loadedUnits.set(name, unit);
-        }
-
-        getLoadedUnit(name: string): TLoadedUnit | undefined {
-                return this.loadedUnits.get(name);
-        }
+        // getLoadedUnit(name: string): TLoadedUnit | undefined {
+        //         return this.loadedUnits.get(name);
+        // }
 
         constructor(appName: string) {
                 this.appName = appName;
                 setApplication(this);
-                this.typeRegistry = new TTypeRegistry();
+                //this.typeRegistry = new TTypeRegistry();
         }
 
         async readConfig() {
@@ -215,9 +215,9 @@ export class TApplication implements IApplication {
                 this.appConfig = appConfig;
         }
 
-        getClass(type: string): IMetaComponent | undefined {
-                return this.typeRegistry?.get(type);
-        }
+        // getClass(type: string): IMetaComponent | undefined {
+        //         return this.typeRegistry?.get(type);
+        // }
 
         getFormByName<T extends TForm = TForm>(name: string): T | undefined {
                 return this.forms.get(name) as T;
@@ -386,8 +386,6 @@ export class TApplication implements IApplication {
                 });
         }
 
-        // By default we show() the main Form
-        // This method can be overriden in a user TApplication
         start() {
                 this.runWhenDomReady(() => {
                         this.installBrowserBackHandler();
@@ -403,7 +401,13 @@ export class TApplication implements IApplication {
                 this.mainForm?.show();
         }
 
-        async registerFrames(typeRegistry: TTypeRegistry) {
+        private async registerFrame(basePath: string, unitName: string): Promise<void> {
+                const srcPath = `${basePath}/${unitName}.ts`;
+                const mod = await import(srcPath);
+                mod.registerFrame();
+        }
+
+        async registerFrames() {
                 const frames = this.appConfig?.frames ?? [];
                 for (const frame of frames) {
                         await this.registerFrame(`/src/frames`, frame.className);
@@ -414,15 +418,15 @@ export class TApplication implements IApplication {
         }
 
         async registerRuntimeTypes() {
-                const enabledPalettes = this.appConfig?.palettes ?? [];
-                await registerPalettes(this.typeRegistry!, enabledPalettes);
-                await this.registerFrames(this.typeRegistry!);
+                await registerRuntimePalettes(this.appConfig!.palettes!);
+                await this.registerFrames();
         }
+
         async createAutoForms() {
                 const dforms = this.appConfig?.forms ?? [];
 
                 for (const f of dforms) {
-                        const form = await this.createFormByName(f.name);
+                        if (f.autoCreate) await this.createFormByName(f.name);
                 }
         }
 
@@ -470,26 +474,43 @@ export class TApplication implements IApplication {
                 return document.body;
         }
 
-        protected async createFormByName(formName: string): Promise<TForm> {
-                const basePath = `/src/forms/${formName}`;
-
-                const module = await import(/* @vite-ignore */ `${basePath}.ts`);
-
-                // const response = await fetch(`${basePath}.dform`);
-                // if (!response.ok) {
-                //         throw new Error(`Cannot load ${basePath}.dform`);
-                // }
-
-                // const dformText = await response.text();
-
-                // const html = this.extractTemplateFromDform(dformText);
-                // const css = this.extractStyleFromDform(dformText);
-
-                const FormClass = module.default ?? module[formName];
-                if (!FormClass) {
-                        throw new Error(`Form class ${formName} was not exported by ${basePath}.ts`);
+        protected getTagName(formName: string): string | null {
+                const forms = this.appConfig?.forms;
+                for (const x of forms!) {
+                        if (x.name == formName) {
+                                const frames = this.appConfig?.frames;
+                                const frame = x.frame;
+                                for (const y of frames!) {
+                                        if (y.name == frame) return y.tagName;
+                                }
+                        }
                 }
-                const form = new FormClass();
+                return null;
+        }
+
+        protected async createFormByName(formName: string): Promise<TForm> {
+                // const basePath = `/src/forms/${formName}`;
+
+                // const module = await import(/* @vite-ignore */ `${basePath}.ts`);
+
+                // // const response = await fetch(`${basePath}.dform`);
+                // // if (!response.ok) {
+                // //         throw new Error(`Cannot load ${basePath}.dform`);
+                // // }
+
+                // // const dformText = await response.text();
+
+                // // const html = this.extractTemplateFromDform(dformText);
+                // // const css = this.extractStyleFromDform(dformText);
+
+                // const FormClass = module.default ?? module[formName];
+                // if (!FormClass) {
+                //         throw new Error(`Form class ${formName} was not exported by ${basePath}.ts`);
+                // }
+                //const form = new FormClass();
+                const frameName = this.getTagName(formName);
+                if (frameName == null) throw new Error(`${frameName} not declared in app.config`);
+                const form = new TForm(frameName, formName);
 
                 // this.applyDformStyle(formName, css);
                 // await form.create(html);
@@ -507,22 +528,5 @@ export class TApplication implements IApplication {
                 //this.applyTheme();
 
                 return form;
-        }
-
-        // Actually not used !
-        async createFrameByName(frameName: string): Promise<TLitFrame> {
-                const config = this.appConfig!.frames!.find((frame) => frame.name === frameName);
-
-                if (!config) {
-                        throw new Error(`Unknown frame: ${frameName}`);
-                }
-
-                const module = await import(/* @vite-ignore */ config.url);
-
-                const register = module.registerFrame ?? module.registerMainFrame;
-
-                register?.();
-
-                return document.createElement(config.tagName) as TLitFrame;
         }
 }

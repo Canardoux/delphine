@@ -18,17 +18,17 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { TComponent } from './Component';
-import { TMetaContainer, TContainer } from './Container';
-import type { PropSpec } from './IComponent';
+//import { TComponent } from './Component';
+//import { TMetaContainer, TContainer } from './Container';
+//import type { PropSpec } from './IComponent';
 import type { IForm } from './IForm';
-import type { IMetaControl, IControl } from './IControl';
+//import type { IMetaControl, IControl } from './IControl';
 import { getApplication } from './IApplication';
-import type { ComponentSchema } from './IComponent';
-import type { IComponent } from './IComponent';
-import type { IMetaComponent } from './IComponent';
-import { TMetaCompositeControl, TCompositeControl } from './CompositeControl';
-import { TLitFrame } from './palettes/lit/TLitFrame';
+//import type { ComponentSchema } from './IComponent';
+//import type { IComponent } from './IComponent';
+//import type { IMetaComponent } from './IComponent';
+//import { TMetaCompositeControl, TCompositeControl } from './CompositeControl';
+import { TFrame } from './palettes/standard/TFrame';
 
 // export class TMetaForm extends TMetaCompositeControl implements IMetaComponent, IMetaControl {
 //         static readonly metaclass: TMetaForm = new TMetaForm(TMetaCompositeControl.metaclass, 'TForm');
@@ -94,11 +94,12 @@ export class TForm implements IForm {
         //protected _created = false;
         static forms = new Map<string, TForm>();
         readonly name: string;
-        readonly frame: TLitFrame;
+        readonly frame: TFrame;
         readonly elem: HTMLElement;
 
-        constructor(frame: TLitFrame, name: string) {
-                this.name = name;
+        constructor(frameName: string, formName: string) {
+                this.name = formName;
+                const frame = document.createElement(frameName) as TFrame;
 
                 this.frame = frame;
 
@@ -106,12 +107,12 @@ export class TForm implements IForm {
 
                 host.classList.add('delphine-form');
 
-                host.dataset.delphineForm = name;
+                host.dataset.delphineForm = formName;
 
                 host.hidden = true;
 
                 host.appendChild(frame);
-                TForm.forms.set(name, this);
+                TForm.forms.set(formName, this);
 
                 this.elem = host;
         }

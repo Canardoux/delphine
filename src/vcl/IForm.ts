@@ -19,9 +19,9 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { IComponent } from './IComponent';
-import type { ICompositeControl } from './ICompositeControl';
-import type { IControl } from './IControl';
+// import type { IComponent } from './IComponent';
+// import type { ICompositeControl } from './ICompositeControl';
+// import type { IControl } from './IControl';
 
 export interface IForm {
         //getClass(type: string): IControl | undefined;

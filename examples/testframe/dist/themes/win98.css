@@ -1,0 +1,69 @@
+/*
+ * Win98 theme for Delphine.
+ *
+ * Based on 98.css:
+ * Copyright (c) 2020 Jordan Scales
+ * https://github.com/jdan/98.css/blob/main/LICENSE
+ */
+
+:root[data-theme='win98'] {
+        /* Base colors */
+        --text-color: #222222;
+        --surface: #c0c0c0;
+        --button-highlight: #ffffff;
+        --button-face: #dfdfdf;
+        --button-shadow: #808080;
+        --window-frame: #0a0a0a;
+
+        --dialog-blue: #000080;
+        --dialog-blue-light: #1084d0;
+        --dialog-gray: #808080;
+        --dialog-gray-light: #b5b5b5;
+        --link-blue: #0000ff;
+
+        /* Borders */
+        --border-raised-outer: inset -1px -1px var(--window-frame), inset 1px 1px var(--button-highlight);
+
+        --border-raised-inner: inset -2px -2px var(--button-shadow), inset 2px 2px var(--button-face);
+
+        --border-sunken-outer: inset -1px -1px var(--button-highlight), inset 1px 1px var(--window-frame);
+
+        --border-sunken-inner: inset -2px -2px var(--button-face), inset 2px 2px var(--button-shadow);
+
+        --border-field: inset -1px -1px var(--button-highlight), inset 1px 1px var(--button-shadow), inset -2px -2px var(--button-face), inset 2px 2px var(--window-frame);
+
+        /* Delphine semantic variables */
+        --control-font-family: Arial, sans-serif;
+        --control-font-size: 11px;
+        --control-text-color: var(--text-color);
+
+        --form-background: var(--surface);
+        --frame-background: var(--surface);
+
+        --panel-background: var(--surface);
+        --panel-box-shadow: var(--border-raised-outer), var(--border-raised-inner);
+        --panel-border-radius: 6px;
+
+        --button-background: var(--surface);
+        --button-active-background: var(--surface);
+        --button-box-shadow: var(--border-raised-outer), var(--border-raised-inner);
+        --button-active-box-shadow: var(--border-sunken-outer), var(--border-sunken-inner);
+        --button-border-radius: 0;
+        --button-active-translate-y: 0px;
+        --button-active-content-x: 1px;
+        --button-active-content-y: 1px;
+
+        --checkbox-background: var(--button-highlight);
+        --checkbox-disabled-background: var(--surface);
+        --checkbox-box-shadow: var(--border-field);
+        --checkbox-check-color: var(--text-color);
+        --checkbox-disabled-check-color: var(--button-shadow);
+}
+
+html[data-theme='win98'],
+html[data-theme='win98'] body {
+        color: var(--text-color);
+        background: var(--form-background);
+        font-family: var(--control-font-family);
+        font-size: 12px;
+}

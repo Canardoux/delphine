@@ -17,6 +17,12 @@ esbuild src/webview/bootEditor.ts \
   --format=esm \
   --outfile=media/webview/bootEditor.bundle.js
 
+echo "=== build: designer canvas runtime ==="
+esbuild src/designer/canvas/designerRuntime.ts \
+  --bundle \
+  --format=iife \
+  --outfile=media/webview/designerRuntime.bundle.js
+  
 echo "=== build: example test (vite) ==="
 pushd examples/testframe >/dev/null
 

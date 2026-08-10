@@ -26,3 +26,5 @@ export async function loadFormCss(uri: vscode.Uri): Promise<string> {
         const source = await loadFormSource(uri);
         return extractDformStyle(source);
 }
+
+// extension/loadDelphineDocument.ts

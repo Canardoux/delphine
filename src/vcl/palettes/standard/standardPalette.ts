@@ -1,4 +1,4 @@
-// RegisterVcl.ts
+// standardPalette.ts.ts
 
 /*
  * Copyright 2026 Canardoux.
@@ -18,160 +18,29 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// import { TMetaPluginHost } from '@vcl';
-import { TTypeRegistry } from '../../TypeRegistry';
-//import { TMetaForm } from '../../Form';
-import { TMetaPluginHost } from '../../Plugin';
+import type { PaletteDefinition } from '../PaletteDefinition';
 
-import { TMetaPopupMenu } from './TPopupMenu';
-import { TMetaFrame, TMetaHostFrame } from './TFrame';
-import { TMetaLabel } from './TLabel';
-import { TMetaButton } from './TButton';
-import { TMetaCheckBox } from './TCheckBox';
-import { TMetaPanel } from './TPanel';
+export const standardPalette = {
+        name: 'standard',
 
-export function register(types: TTypeRegistry) {
-        types.register(TMetaButton.metaclass);
-        types.register(TMetaPluginHost.metaclass);
-        //types.register(TMetaForm.metaclass);
-        types.register(TMetaPanel.metaclass);
-        types.register(TMetaHostFrame.metaclass);
-        types.register(TMetaFrame.metaclass);
-        types.register(TMetaLabel.metaclass);
-        types.register(TMetaCheckBox.metaclass);
-        //types.register(TMetaNonVisualComponents.metaclass);
-        types.register(TMetaPopupMenu.metaclass);
-}
+        components: [
+                {
+                        type: 'TPanel',
 
-/*
-                                Dependencies
-                                ------------
+                        loadRuntime: () => import('./TPanel'),
+                        loadDesign: () => import('./TPanel.design')
+                },
+                {
+                        type: 'TButton',
 
+                        loadRuntime: () => import('./TButton'),
+                        loadDesign: () => import('./TButton.design')
+                },
+                {
+                        type: 'TCheckBox',
 
-Application
-        Oops
-        Form
-                Base
-                        IForm
-                        IControl
-                        Component
-                                Oops
-                                IForm
-                                IControl
-
-                Component
-                        Oops
-                        IForm
-                        IControl
-
-                Container
-                        Base
-                                IForm
-                                IControl
-                                Component
-                                        Oops
-                                        IForm
-                                        IControl
-
-                        Component
-                                Oops
-                                IForm
-                                IControl
-
-                        IForm
-
-                ComponentRegistry
-                        Oops
-                        Component
-                                Oops
-                                IForm
-                                IControl
-                        Base
-                                IForm
-                                IControl
-                                Component
-                                        Oops
-                                        IForm
-                                        IControl
-
-                        IForm
-
-                IForm
-                IApplication
-                        Oops
-                        IControl
-                                Oops
-
-
-        ComponentTypeRegistry
-                Oops
-                Component
-                        Oops
-                        IForm
-                        IControl
-                        
-        RegisterVcl
-
-                ComponentTypeRegistry
-                        Oops
-                        Component
-                                Oops
-                                IForm
-                                IControl
-
-                StrCtrls
-                        Base
-                                IForm
-                                IControl
-                                Component
-                                        Oops
-                                        IForm
-                                        IControl
-
-                        Container
-                                Base
-                                        IForm
-                                        IControl
-                                        Component
-                                                Oops
-                                                IForm
-                                                IControl
-
-                                Component
-                                IForm
-
-                        Component
-                                Oops
-                                IForm
-                                IControl
-
-                        IForm
-                        IControl
-
-                Form
-                        ...
-                Plugin
-                        Form
-                                ...
-                        Base
-                                IForm
-                                IControl
-                                Component
-                                        Oops
-                                        IForm
-                                        IControl
-
-
-
-                        Component
-                        Application
-                                ...
-                        IPlugin
-
-Document
-        Oops
-
-VuePlugin
-        Plugin
-        
-*/
+                        loadRuntime: () => import('./TCheckBox'),
+                        loadDesign: () => import('./TCheckBox.design')
+                }
+        ]
+} as const satisfies PaletteDefinition;

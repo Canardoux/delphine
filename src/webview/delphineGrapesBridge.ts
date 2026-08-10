@@ -1,24 +1,24 @@
 import type { Editor } from 'grapesjs';
-import type { TTypeRegistry } from '../vcl/TypeRegistry.js';
-import type { IMetaComponent, ComponentSchema } from '../vcl/IComponent.js';
-import type { PropSpec } from '../vcl/IComponent.js';
+//import type { TTypeRegistry } from '../vcl/TypeRegistry.js';
+//import type { IMetaComponent, ComponentSchema } from '../vcl/IComponent.js';
+//import type { PropSpec } from '../vcl/IComponent.js';
 
-let typeRegistry: TTypeRegistry;
-export function keepTypeRegistry(reg: TTypeRegistry) {
-        typeRegistry = reg;
-}
+// let typeRegistry: TTypeRegistry;
+// export function keepTypeRegistry(reg: TTypeRegistry) {
+//         typeRegistry = reg;
+// }
 
-export function registerDelphineComponentsFromRegistry(editor: Editor, typeRegistry: TTypeRegistry): void {
-        for (const meta of typeRegistry.getAll()) {
-                const schema = meta.getSchema?.();
-                if (!schema) continue;
+// export function registerDelphineComponentsFromRegistry(editor: Editor, typeRegistry: TTypeRegistry): void {
+//         for (const meta of typeRegistry.getAll()) {
+//                 const schema = meta.getSchema?.();
+//                 if (!schema) continue;
 
-                registerComponentType(editor, meta, schema);
-                registerBlock(editor, schema);
-        }
+//                 registerComponentType(editor, meta, schema);
+//                 registerBlock(editor, schema);
+//         }
 
-        customizeOptionsPanel(editor);
-}
+//         customizeOptionsPanel(editor);
+// }
 
 export function showCurrentDelphineTraitTab(editor: any, model: any) {
         showDelphineTraitTab(editor, model, currentTraitTab);
@@ -40,18 +40,18 @@ export function showDelphineTraitTab(editor: any, model: any, tab: 'properties' 
                 return;
         }
 
-        const meta = typeRegistry.get(componentName);
+        // const meta = typeRegistry.get(componentName);
 
-        if (!meta) {
-                console.warn('[Delphine] No Delphine metaclass for', componentName);
-                return;
-        }
+        // if (!meta) {
+        //         console.warn('[Delphine] No Delphine metaclass for', componentName);
+        //         return;
+        // }
 
-        const propSpecs = meta.allProps();
+        // const propSpecs = meta.allProps();
 
-        const traits = buildTraitsFromPropSpecs(editor, propSpecs, tab);
+        // const traits = buildTraitsFromPropSpecs(editor, propSpecs, tab);
 
-        model.set('traits', traits);
+        // model.set('traits', traits);
 
         editor.TraitManager.select(model);
         editor.TraitManager.render?.();
@@ -136,36 +136,36 @@ function customizeOptionsPanel(editor: Editor): void {
         ]);
 }
 
-function readPropFromAttrs(attrs: Record<string, any>, spec: PropSpec<any>): unknown {
-        const attrName = `data-delphine-${spec.name}`;
-        const raw = attrs[attrName];
+// function readPropFromAttrs(attrs: Record<string, any>, spec: PropSpec<any>): unknown {
+//         const attrName = `data-delphine-${spec.name}`;
+//         const raw = attrs[attrName];
 
-        switch (spec.kind) {
-                case 'boolean': {
-                        if (raw === undefined || raw === null || raw === '') {
-                                return spec.default ?? false;
-                        }
+//         switch (spec.kind) {
+//                 case 'boolean': {
+//                         if (raw === undefined || raw === null || raw === '') {
+//                                 return spec.default ?? false;
+//                         }
 
-                        return raw === true || raw === 'true' || raw === '1' || raw === 'on' || raw === 'yes';
-                }
+//                         return raw === true || raw === 'true' || raw === '1' || raw === 'on' || raw === 'yes';
+//                 }
 
-                case 'number': {
-                        if (raw === undefined || raw === null || raw === '') {
-                                return spec.default;
-                        }
+//                 case 'number': {
+//                         if (raw === undefined || raw === null || raw === '') {
+//                                 return spec.default;
+//                         }
 
-                        return Number(raw);
-                }
+//                         return Number(raw);
+//                 }
 
-                default: {
-                        if (raw === undefined || raw === null) {
-                                return spec.default;
-                        }
+//                 default: {
+//                         if (raw === undefined || raw === null) {
+//                                 return spec.default;
+//                         }
 
-                        return raw;
-                }
-        }
-}
+//                         return raw;
+//                 }
+//         }
+// }
 
 function findPopupMenus(editor: any): { id: string; name: string }[] {
         const wrapper = editor.DomComponents.getWrapper();
@@ -180,41 +180,41 @@ function findPopupMenus(editor: any): { id: string; name: string }[] {
                 .filter((m: any) => m.name);
 }
 
-function buildTraitsFromPropSpecs(editor: Editor, propSpecs: PropSpec<any>[], propOrEvent: 'properties' | 'events' = 'properties') {
-        const traits: any[] = [];
+// function buildTraitsFromPropSpecs(editor: Editor, propSpecs: PropSpec<any>[], propOrEvent: 'properties' | 'events' = 'properties') {
+//         const traits: any[] = [];
 
-        for (const spec of propSpecs) {
-                const isEvent = spec.kind === 'handler';
+//         for (const spec of propSpecs) {
+//                 const isEvent = spec.kind === 'handler';
 
-                if (propOrEvent === 'properties' && isEvent) continue;
-                if (propOrEvent === 'events' && !isEvent) continue;
+//                 if (propOrEvent === 'properties' && isEvent) continue;
+//                 if (propOrEvent === 'events' && !isEvent) continue;
 
-                if (spec.kind === 'popupMenu') {
-                        const popupMenus = findPopupMenus(editor);
+//                 if (spec.kind === 'popupMenu') {
+//                         const popupMenus = findPopupMenus(editor);
 
-                        traits.push({
-                                type: 'select',
+//                         traits.push({
+//                                 type: 'select',
 
-                                name: `data-delphine-${spec.name.toLowerCase()}`,
+//                                 name: `data-delphine-${spec.name.toLowerCase()}`,
 
-                                label: spec.grapes?.label ?? 'PopupMenu',
-                                changeProp: false,
+//                                 label: spec.grapes?.label ?? 'PopupMenu',
+//                                 changeProp: false,
 
-                                options: [{ id: '', name: '(none)' }, ...popupMenus]
-                        });
-                } else {
-                        traits.push({
-                                //type: spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind),
-                                type: spec.kind === 'handler' ? 'delphine-event' : (spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind)),
-                                name: spec.name,
-                                label: spec.grapes?.label ?? spec.name,
-                                changeProp: true
-                        });
-                }
-        }
+//                                 options: [{ id: '', name: '(none)' }, ...popupMenus]
+//                         });
+//                 } else {
+//                         traits.push({
+//                                 //type: spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind),
+//                                 type: spec.kind === 'handler' ? 'delphine-event' : (spec.grapes?.traitType ?? mapPropKindToTraitType(spec.kind)),
+//                                 name: spec.name,
+//                                 label: spec.grapes?.label ?? spec.name,
+//                                 changeProp: true
+//                         });
+//                 }
+//         }
 
-        return traits;
-}
+//         return traits;
+// }
 function normalizeComponentName(value: string): string {
         let name = value.trim();
 
@@ -263,242 +263,242 @@ function ensureUniqueComponentName(editor: any, model: any, wantedName: string):
         return candidate;
 }
 
-function registerComponentType(editor: Editor, meta: IMetaComponent, schema: ComponentSchema): void {
-        const typeId = `delphine-${schema.name}`;
-        const propSpecs = meta.getPropSpecs?.() ?? [];
+// function registerComponentType(editor: Editor, meta: IMetaComponent, schema: ComponentSchema): void {
+//         const typeId = `delphine-${schema.name}`;
+//         const propSpecs = meta.getPropSpecs?.() ?? [];
 
-        editor.DomComponents.addType(typeId, {
-                isComponent(el) {
-                        if (!(el instanceof HTMLElement)) return false;
+//         editor.DomComponents.addType(typeId, {
+//                 isComponent(el) {
+//                         if (!(el instanceof HTMLElement)) return false;
 
-                        const componentName = el.getAttribute('data-delphine-component');
-                        // if (componentName) {
-                        //         console.log('match candidate', componentName, schema);
-                        // }
-                        if (componentName === schema.name) {
-                                //console.log('[isComponent] matched', componentName);
-                                const delphineName = el.getAttribute('data-delphine-name');
-                                return { name: `${delphineName}(${componentName})`, type: typeId };
-                        }
-                        return false;
-                },
+//                         const componentName = el.getAttribute('data-delphine-component');
+//                         // if (componentName) {
+//                         //         console.log('match candidate', componentName, schema);
+//                         // }
+//                         if (componentName === schema.name) {
+//                                 //console.log('[isComponent] matched', componentName);
+//                                 const delphineName = el.getAttribute('data-delphine-name');
+//                                 return { name: `${delphineName}(${componentName})`, type: typeId };
+//                         }
+//                         return false;
+//                 },
 
-                model: {
-                        defaults: {
-                                name: schema.label ?? schema.name,
-                                tagName: schema.tagName,
+//                 model: {
+//                         defaults: {
+//                                 name: schema.label ?? schema.name,
+//                                 tagName: schema.tagName,
 
-                                attributes: {
-                                        ...(schema.attributes ?? {}),
-                                        'data-delphine-component': schema.name
-                                },
+//                                 attributes: {
+//                                         ...(schema.attributes ?? {}),
+//                                         'data-delphine-component': schema.name
+//                                 },
 
-                                resizable: schema.resizable ?? false,
-                                draggable: schema.draggable ?? true,
-                                droppable: schema.droppable ?? schema.isContainer ?? false,
+//                                 resizable: schema.resizable ?? false,
+//                                 draggable: schema.draggable ?? true,
+//                                 droppable: schema.droppable ?? schema.isContainer ?? false,
 
-                                delphineTraits: {
-                                        properties: buildTraitsFromPropSpecs(editor, propSpecs, 'properties'),
+//                                 delphineTraits: {
+//                                         properties: buildTraitsFromPropSpecs(editor, propSpecs, 'properties'),
 
-                                        events: buildTraitsFromPropSpecs(editor, propSpecs, 'events')
-                                }
-                        },
+//                                         events: buildTraitsFromPropSpecs(editor, propSpecs, 'events')
+//                                 }
+//                         },
 
-                        init(this: any) {
-                                const model = this;
+//                         init(this: any) {
+//                                 const model = this;
 
-                                let syncingName = false;
-                                const attrs = model.getAttributes?.() ?? {};
+//                                 let syncingName = false;
+//                                 const attrs = model.getAttributes?.() ?? {};
 
-                                // 1) Hydrate model props from DOM attributes
-                                // 1) Hydrate model props from DOM attributes or defaults
-                                for (const spec of propSpecs) {
-                                        const value = readPropFromAttrs(attrs, spec);
+//                                 // 1) Hydrate model props from DOM attributes
+//                                 // 1) Hydrate model props from DOM attributes or defaults
+//                                 for (const spec of propSpecs) {
+//                                         const value = readPropFromAttrs(attrs, spec);
 
-                                        if (value !== undefined) {
-                                                model.set(spec.name, value, { silent: true });
-                                        }
-                                }
+//                                         if (value !== undefined) {
+//                                                 model.set(spec.name, value, { silent: true });
+//                                         }
+//                                 }
 
-                                // 2) Listen trait/model changes
-                                for (const spec of propSpecs) {
-                                        if (!spec.grapes) continue;
+//                                 // 2) Listen trait/model changes
+//                                 for (const spec of propSpecs) {
+//                                         if (!spec.grapes) continue;
 
-                                        const traitEvent = `change:${spec.name}`;
-                                        model.on(traitEvent, () => {
-                                                if (spec.name === 'name' && syncingName) {
-                                                        return;
-                                                }
-                                                let value = model.get(spec.name);
-                                                if (spec.name === 'name') {
-                                                        const normalized = ensureUniqueComponentName(
-                                                                editor,
+//                                         const traitEvent = `change:${spec.name}`;
+//                                         model.on(traitEvent, () => {
+//                                                 if (spec.name === 'name' && syncingName) {
+//                                                         return;
+//                                                 }
+//                                                 let value = model.get(spec.name);
+//                                                 if (spec.name === 'name') {
+//                                                         const normalized = ensureUniqueComponentName(
+//                                                                 editor,
 
-                                                                model,
+//                                                                 model,
 
-                                                                normalizeComponentName(String(value ?? ''))
-                                                        );
+//                                                                 normalizeComponentName(String(value ?? ''))
+//                                                         );
 
-                                                        if (normalized !== value) {
-                                                                syncingName = true;
+//                                                         if (normalized !== value) {
+//                                                                 syncingName = true;
 
-                                                                try {
-                                                                        model.set(spec.name, normalized, { silent: true });
+//                                                                 try {
+//                                                                         model.set(spec.name, normalized, { silent: true });
 
-                                                                        value = normalized;
-                                                                } finally {
-                                                                        syncingName = false;
-                                                                }
-                                                        }
-                                                }
-                                                if (spec.grapes?.applyToModel) {
-                                                        spec.grapes.applyToModel(model, value);
-                                                } else {
-                                                        applyDefaultTraitToModel(model, spec, value);
-                                                }
+//                                                                         value = normalized;
+//                                                                 } finally {
+//                                                                         syncingName = false;
+//                                                                 }
+//                                                         }
+//                                                 }
+//                                                 if (spec.grapes?.applyToModel) {
+//                                                         spec.grapes.applyToModel(model, value);
+//                                                 } else {
+//                                                         applyDefaultTraitToModel(model, spec, value);
+//                                                 }
 
-                                                syncModelValueToAttributes(model, spec, value);
-                                        });
-                                }
+//                                                 syncModelValueToAttributes(model, spec, value);
+//                                         });
+//                                 }
 
-                                // 3) Initial render from hydrated values
-                                for (const spec of propSpecs) {
-                                        const value = model.get(spec.name);
-                                        if (value === undefined) continue;
+//                                 // 3) Initial render from hydrated values
+//                                 for (const spec of propSpecs) {
+//                                         const value = model.get(spec.name);
+//                                         if (value === undefined) continue;
 
-                                        if (spec.grapes?.applyToModel) {
-                                                spec.grapes.applyToModel(model, value);
-                                        } else {
-                                                applyDefaultTraitToModel(model, spec, value);
-                                        }
+//                                         if (spec.grapes?.applyToModel) {
+//                                                 spec.grapes.applyToModel(model, value);
+//                                         } else {
+//                                                 applyDefaultTraitToModel(model, spec, value);
+//                                         }
 
-                                        syncModelValueToAttributes(model, spec, value);
-                                }
-                        }
-                }
-        });
-        //registerDelphineEventTrait(editor);
-}
+//                                         syncModelValueToAttributes(model, spec, value);
+//                                 }
+//                         }
+//                 }
+//         });
+//         //registerDelphineEventTrait(editor);
+// }
 
-function escapeHtml(value: string): string {
-        return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
+// function escapeHtml(value: string): string {
+//         return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// }
 
-function delphineCssClass(schema: ComponentSchema): string {
-        return `delphine-control delphine-${schema.name.replace(/^T/, '').toLowerCase()}`;
-}
+// function delphineCssClass(schema: ComponentSchema): string {
+//         return `delphine-control delphine-${schema.name.replace(/^T/, '').toLowerCase()}`;
+// }
 
-function schemaToHtml(schema: ComponentSchema, isRoot = false): string {
-        const tag = schema.tagName ?? 'div';
+// function schemaToHtml(schema: ComponentSchema, isRoot = false): string {
+//         const tag = schema.tagName ?? 'div';
 
-        const attrs: Record<string, string> = {
-                ...(schema.attributes ?? {})
-        };
+//         const attrs: Record<string, string> = {
+//                 ...(schema.attributes ?? {})
+//         };
 
-        if (schema.component) {
-                attrs['data-delphine-component'] = schema.name;
-                attrs.class = [attrs.class, delphineCssClass(schema)].filter(Boolean).join(' ');
-        }
+//         if (schema.component) {
+//                 attrs['data-delphine-component'] = schema.name;
+//                 attrs.class = [attrs.class, delphineCssClass(schema)].filter(Boolean).join(' ');
+//         }
 
-        if (isRoot) {
-                attrs['data-delphine-name'] = schema.instanceName ?? schema.name;
-        }
+//         if (isRoot) {
+//                 attrs['data-delphine-name'] = schema.instanceName ?? schema.name;
+//         }
 
-        const attrText = Object.entries(attrs)
-                .map(([key, value]) => ` ${key}="${escapeHtml(String(value))}"`)
-                .join('');
+//         const attrText = Object.entries(attrs)
+//                 .map(([key, value]) => ` ${key}="${escapeHtml(String(value))}"`)
+//                 .join('');
 
-        const children = schema.components?.map((child) => schemaToHtml(child, false)).join('') ?? escapeHtml(schema.textContent ?? '');
+//         const children = schema.components?.map((child) => schemaToHtml(child, false)).join('') ?? escapeHtml(schema.textContent ?? '');
 
-        if (tag === 'input') {
-                return `<input${attrText}>`;
-        }
+//         if (tag === 'input') {
+//                 return `<input${attrText}>`;
+//         }
 
-        return `<${tag}${attrText}>${children}</${tag}>`;
-}
+//         return `<${tag}${attrText}>${children}</${tag}>`;
+// }
 
-function shortBlockLabel(schema: ComponentSchema): string {
-        return schema.label?.replace(/^T/, '') ?? schema.name.replace(/^T/, '');
-}
+// function shortBlockLabel(schema: ComponentSchema): string {
+//         return schema.label?.replace(/^T/, '') ?? schema.name.replace(/^T/, '');
+// }
 
-export type AssetResolver = (path: string) => string;
-export class DelphineGrapesBridge {
-        constructor(
-                private readonly editor: any,
+// export type AssetResolver = (path: string) => string;
+// export class DelphineGrapesBridge {
+//         constructor(
+//                 private readonly editor: any,
 
-                private readonly resolveAsset: AssetResolver
-        ) {}
+//                 private readonly resolveAsset: AssetResolver
+//         ) {}
 
-        icon(name: string): string {
-                return this.resolveAsset(`media/icons/${name}.png`);
-        }
-}
+//         icon(name: string): string {
+//                 return this.resolveAsset(`media/icons/${name}.png`);
+//         }
+// }
 
-function registerBlock(editor: Editor, schema: ComponentSchema): void {
-        //const iconUri = bridge.icon('button');
-        editor.BlockManager.add(`delphine-block-${schema.name}`, {
-                label: shortBlockLabel(schema), // Button, Panel, CheckBox
-                category: schema.category,
-                //media: schema.icon ?? '▣',
-                //media: `<img src="${iconUri}" class="delphine-block-icon" />`,
-                media: schema.icon ? schema.icon : '▣',
+// function registerBlock(editor: Editor, schema: ComponentSchema): void {
+//         //const iconUri = bridge.icon('button');
+//         editor.BlockManager.add(`delphine-block-${schema.name}`, {
+//                 label: shortBlockLabel(schema), // Button, Panel, CheckBox
+//                 category: schema.category,
+//                 //media: schema.icon ?? '▣',
+//                 //media: `<img src="${iconUri}" class="delphine-block-icon" />`,
+//                 media: schema.icon ? schema.icon : '▣',
 
-                content: schemaToHtml(schema, true)
-        });
-}
+//                 content: schemaToHtml(schema, true)
+//         });
+// }
 
-function mapPropKindToTraitType(kind: PropSpec<any>['kind']): string {
-        switch (kind) {
-                case 'boolean':
-                        return 'checkbox';
-                case 'number':
-                        return 'number';
-                default:
-                        return 'text';
-        }
-}
+// function mapPropKindToTraitType(kind: PropSpec<any>['kind']): string {
+//         switch (kind) {
+//                 case 'boolean':
+//                         return 'checkbox';
+//                 case 'number':
+//                         return 'number';
+//                 default:
+//                         return 'text';
+//         }
+// }
 
-function applyDefaultTraitToModel(model: any, spec: PropSpec<any>, value: unknown): void {
-        if (spec.name === 'caption') {
-                model.components(String(value ?? 'Caption'));
-                return;
-        }
-}
+// function applyDefaultTraitToModel(model: any, spec: PropSpec<any>, value: unknown): void {
+//         if (spec.name === 'caption') {
+//                 model.components(String(value ?? 'Caption'));
+//                 return;
+//         }
+// }
 
-function syncModelValueToAttributes(model: any, spec: PropSpec<any>, value: unknown): void {
-        const attrName = `data-delphine-${spec.name}`;
-        const attrs = { ...(model.getAttributes?.() ?? {}) };
+// function syncModelValueToAttributes(model: any, spec: PropSpec<any>, value: unknown): void {
+//         const attrName = `data-delphine-${spec.name}`;
+//         const attrs = { ...(model.getAttributes?.() ?? {}) };
 
-        if (spec.name === 'name') {
-                attrs['data-delphine-name'] = String(value ?? '');
-                model.setAttributes(attrs);
+//         if (spec.name === 'name') {
+//                 attrs['data-delphine-name'] = String(value ?? '');
+//                 model.setAttributes(attrs);
 
-                const componentClass = attrs['data-delphine-component'];
+//                 const componentClass = attrs['data-delphine-component'];
 
-                // Use a different GrapesJS internal display key if needed,
-                // but avoid setting the same "name" property again here.
-                model.set('label', componentClass ? `${value} (${componentClass})` : String(value ?? ''), {
-                        silent: true
-                });
+//                 // Use a different GrapesJS internal display key if needed,
+//                 // but avoid setting the same "name" property again here.
+//                 model.set('label', componentClass ? `${value} (${componentClass})` : String(value ?? ''), {
+//                         silent: true
+//                 });
 
-                return;
-        }
+//                 return;
+//         }
 
-        if (spec.kind === 'boolean') {
-                const boolValue = value === true || value === 'true' || value === 1 || value === '1' || value === 'on' || value === 'yes';
+//         if (spec.kind === 'boolean') {
+//                 const boolValue = value === true || value === 'true' || value === 1 || value === '1' || value === 'on' || value === 'yes';
 
-                const defaultValue = spec.default ?? false;
+//                 const defaultValue = spec.default ?? false;
 
-                if (boolValue === defaultValue) {
-                        delete attrs[attrName];
-                } else {
-                        attrs[attrName] = String(boolValue);
-                }
+//                 if (boolValue === defaultValue) {
+//                         delete attrs[attrName];
+//                 } else {
+//                         attrs[attrName] = String(boolValue);
+//                 }
 
-                model.setAttributes(attrs);
-                return;
-        }
+//                 model.setAttributes(attrs);
+//                 return;
+//         }
 
-        attrs[attrName] = String(value ?? '');
-        model.setAttributes(attrs);
-}
+//         attrs[attrName] = String(value ?? '');
+//         model.setAttributes(attrs);
+// }

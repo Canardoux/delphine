@@ -1,32 +1,33 @@
-import { defineVitestConfig } from '@stencil/vitest/config';
 import { playwright } from '@vitest/browser-playwright';
+import { defineConfig } from 'vitest/config';
 
-export default defineVitestConfig({
-  stencilConfig: './stencil.config.ts',
-  test: {
-    projects: [
-      // Unit tests - stencil environment for component logic
-      {
+export default defineConfig({
         test: {
-          name: 'unit',
-          include: ['src/**/*.unit.test.{ts,tsx}'],
-          environment: 'stencil',
-        },
-      },
-      // Component browser tests - real browser via Playwright
-      {
-        test: {
-          name: 'browser',
-          include: ['src/**/*.cmp.test.{ts,tsx}'],
-          setupFiles: ['./vitest-setup.ts'],
-          browser: {
-            enabled: true,
-            provider: playwright(),
-            headless: true,
-            instances: [{ browser: 'chromium' }],
-          },
-        },
-      },
-    ],
-  },
+                projects: [
+                        // Unit tests - Node environment
+                        {
+                                test: {
+                                        name: 'unit',
+                                        include: ['src/**/*.unit.test.{ts,tsx}'],
+                                        environment: 'node'
+                                }
+                        },
+                        // Component browser tests - real browser via Playwright
+                        {
+                                test: {
+                                        name: 'browser',
+                                        include: ['src/**/*.cmp.test.{ts,tsx}'],
+                                        browser: {
+                                                enabled: true,
+                                                provider: playwright(),
+                                                instances: [
+                                                        {
+                                                                browser: 'chromium'
+                                                        }
+                                                ]
+                                        }
+                                }
+                        }
+                ]
+        }
 });

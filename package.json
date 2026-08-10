@@ -102,6 +102,10 @@
                                 "title": "New Frame",
                                 "category": "Delphine",
                                 "icon": "$(new-file)"
+                        },
+                        {
+                                "command": "delphine.openDesigner",
+                                "title": "Delphine: Open Designer"
                         }
                 ],
                 "customEditors": [
@@ -252,26 +256,25 @@
                 "test": "node ./out/test/runTest.js"
         },
         "devDependencies": {
+                "@types/jsdom": "^28.0.3",
                 "@types/node": "^20.0.0",
                 "@types/vscode": "^1.90.0",
                 "@typescript-eslint/eslint-plugin": "^8.0.0",
                 "@typescript-eslint/parser": "^8.0.0",
+                "@vitest/browser-playwright": "^4.0.0",
                 "eslint": "^9.0.0",
+                "playwright": "^1.52.0",
                 "svelte": "^5.55.0",
                 "typescript": "^5.4.0",
-                "@stencil/core": "^4.27.1 || ^5.0.0-0",
-                "@stencil/vitest": "^1.8.3",
-                "@vitest/browser-playwright": "^4.0.0",
-                "playwright": "^1.52.0",
                 "vitest": "^4.0.0"
         },
         "dependencies": {
                 "grapesjs": "^0.22.14",
+                "jsdom": "^29.1.1",
                 "lit": "^3.3.3",
                 "madge": "^8.0.0",
                 "parse5": "^8.0.0",
                 "prettier": "^3.8.1",
-                "stencil": "^0.0.5",
                 "toto": "^0.0.2",
                 "vue": "^3.5.29"
         }

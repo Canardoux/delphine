@@ -4,7 +4,13 @@
         "forms": [
                 {
                         "name": "MainForm",
-                        "url": "./src/forms/MainForm.dform"
+                        "frame": "MainFrame",
+                        "autoCreate": true
+                },
+                {
+                        "name": "RiriForm",
+                        "frame": "RiriFrame",
+                        "autoCreate": true
                 }
         ],
         "frames": [
@@ -50,11 +56,11 @@
                 }
         ],
         "ui": {
-                "theme": "motif",
+                "theme": "win98",
                 "density": "normal",
                 "fontScale": 1
         },
-        "palettes": ["standard", "lit"],
+        "palettes": ["standard", "additional"],
         "plugins": [
                 {
                         "id": "hello-vue",

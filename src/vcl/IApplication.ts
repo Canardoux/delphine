@@ -20,29 +20,29 @@
  */
 
 import { TMetaclass } from './Oops';
-import type { IControl, IMetaControl } from './IControl';
+// import type { IControl, IMetaControl } from './IControl';
 import type { IForm } from './IForm';
-import type { IMetaComponent } from './IComponent';
-import { TTypeRegistry } from './TypeRegistry';
+//import type { IMetaComponent } from './IComponent';
+//import { TTypeRegistry } from './TypeRegistry';
 //import { assert } from 'console';
 
-export type TLoadedUnit = {
-        name: string;
-        template: string;
-        style: string;
-        metaclass: IMetaControl;
-};
+// export type TLoadedUnit = {
+//         name: string;
+//         template: string;
+//         style: string;
+//         metaclass: IMetaControl;
+// };
 
 export interface IApplication {
         run(): void;
         initialize(): Promise<void>;
         showForm(form: IForm): void;
 
-        getClass(type: string): IMetaComponent | undefined;
-        getLoadedUnit(name: string): TLoadedUnit | undefined;
+        //getClass(type: string): IMetaComponent | undefined;
+        //getLoadedUnit(name: string): TLoadedUnit | undefined;
         applyTheme(): void;
         setTheme(theme: string): void;
-        registerFrames(typeRegistry: TTypeRegistry): Promise<void>;
+        //registerFrames(typeRegistry: TTypeRegistry): Promise<void>;
 }
 
 //export const TheApplication: IApplication | null = null;

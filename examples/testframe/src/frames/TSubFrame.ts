@@ -1,73 +1,61 @@
 import { html, css, type CSSResultGroup } from 'lit';
-import { TLitButton } from '@vcl/palettes/lit/TLitButton';
-import { TLitCheckbox } from '@vcl/palettes/lit/TLitCheckBox';
-import { TLitFrame } from '@vcl/palettes/lit/TLitFrame';
-import { TLitPanel } from '@vcl/palettes/lit/TLitPanel';
+import { TButton } from '@vcl/palettes/standard/TButton';
+import { TCheckBox } from '@vcl/palettes/standard/TCheckBox';
+import { TFrame } from '@vcl/palettes/standard/TFrame';
+import { TPanel } from '@vcl/palettes/standard/TPanel';
+import { TLitControlElement } from '@vcl/LitControlElement';
 
-export class DelphineSubFrame extends TLitFrame {
+export class DelphineSubFrame extends TFrame {
         static properties = {
-                ...TLitFrame.properties,
-
+                ...TFrame.properties,
+                // <delphine:properties>
                 msg: { type: String },
                 numberClicked: { type: Number }
+                // </delphine:properties>
         };
 
         msg = 'Caption';
         numberClicked = 50;
 
         static override styles: CSSResultGroup = [
-                TLitFrame.styles,
+                TFrame.styles,
+                // <delphine:styles>
                 css`
-                        div {
+                        delphine-frame {
                                 color: green;
                         }
                 `
+                // </delphine:styles>
         ];
-
         render() {
+                return this.layout;
+        }
+
+        // <delphine:layout>
+        get layout() {
                 return html`
-                        <div id="sub-frameCCC" data-delphine-name="sub-frameCCC" data-delphine-oncreate="onMyCreate">
+                        <delphine-frame id="sub-frameCCC" data-delphine-name="subFrameCCC" data-delphine-oncreate="onMyCreate">
                                 MY-SUB-FRAME
-                                <lit-panel data-delphine-name="Panel1CCC" data-delphine-component="lit-panel">
+                                <lit-panel data-delphine-name="panel1CCC" data-delphine-component="lit-panel">
                                         <h2 id="ipo9">SUB Frame</h2>
                                         👋 Message: ${this.msg}
                                         <lit-button
-                                                data-delphine-component="TLitButton"
+                                                data-delphine-component="lit-button"
                                                 id="button-changeMessageCCC"
                                                 caption="Change messageCCC"
-                                                data-delphine-name="button-changeMessageCCC"
-                                                @click="${this.changeMessage_onclick}"
-                                                data-delphine-ondblclick=""
-                                                color="blue"
+                                                data-delphine-name="buttonChangeMessageCCC"
+                                                data-delphine-onclick="changeMessage_onclick"
+                                                color="cyan"
                                                 backgroundColor="pink"
                                                 class="delphine-control delphine-button"
                                         >
                                         </lit-button>
-                                        <lit-button
-                                                data-delphine-component="TLitButton"
-                                                id="button-incrementCCC"
-                                                color="cyan"
-                                                caption="Increment counterCCC"
-                                                data-delphine-name="button-incrementCCC"
-                                                @click="${this.increment_onclick}"
-                                                @dblclick="${(ev: Event) => {
-                                                        ev.stopPropagation();
-                                                        console.log('dblclick on button-incrementCCC');
-                                                }}"
-                                                @contextmenu="${(ev: Event) => {
-                                                        ev.stopPropagation();
-                                                        console.log('contextmenu on button-incrementCCC');
-                                                }}"
-                                                @contextpopup="${(ev: Event) => {
-                                                        ev.stopPropagation();
-                                                        console.log('contextpopup on button-incrementCCC');
-                                                }}"
-                                                class="delphine-control delphine-litbutton"
+                                        <lit-button data-delphine-component="lit-button" id="button-incrementCCC" caption="Increment counterCCC" data-delphine-name="buttonIncrementCCC" data-delphine-onclick="increment_onclick" class="delphine-control delphine-litbutton"
                                                 >Increment counter!!!</lit-button
                                         >
                                         <lit-checkbox
-                                                data-delphine-component="TLitCheckbox"
-                                                data-delphine-name="LitCheckboxCCC"
+                                                data-delphine-component="lit-checkbox"
+                                                data-delphine-name="litCheckboxCCC"
                                                 data-delphine-popupmenu=""
                                                 data-delphine-onclick="LitCheckbox_onclick"
                                                 data-delphine-ondblclick=""
@@ -80,25 +68,50 @@ export class DelphineSubFrame extends TLitFrame {
                                         </lit-checkbox>
                                         <p>Number of clicks: ${this.numberClicked}</p>
                                 </lit-panel>
-                        </div>
+                        </delphine-frame>
                 `;
         }
+        // </delphine:layout>
 
-        changeMessage_onclick(_ev: Event) {
-                debugger;
-                console.log('changeMessage_onclick');
-                _ev.stopPropagation();
-                this.msg = 'New Caption';
+        // <delphine:components>
+        // get subFrameCCC(): DelphineSubFrame {
+        //         return this.getComponent<DelphineSubFrame>('subFrameCCC')!;
+        // }
 
-                const btn3 = this.getComponent<TLitCheckbox>('LitCheckboxCCC');
-                btn3!.enabled = !btn3?.enabled;
-                const btn2 = this.getComponent<TLitCheckbox>('button-changeMessageCCC');
-                btn2!.caption = btn3?.enabled ? 'Enabled' : 'Disabled';
+        get buttonChangeMessageCCC(): TButton {
+                return this.getComponent<TButton>('buttonChangeMessageCCC')!;
         }
 
-        increment_onclick(_ev: Event) {
+        get buttonIncrementCCC(): TButton {
+                return this.getComponent<TButton>('buttonIncrementCCC')!;
+        }
+
+        get litCheckboxCCC(): TCheckBox {
+                return this.getComponent<TCheckBox>('litCheckboxCCC')!;
+        }
+
+        get panel1CCC(): TPanel {
+                return this.getComponent<TPanel>('panel1CCC')!;
+        }
+
+        // </delphine:components>
+
+        // <delphine:handlers>
+        changeMessage_onclick(_ev: Event, _sender: TLitControlElement) {
                 debugger;
-                _ev.stopPropagation();
+                console.log('changeMessage_onclick');
+                //_ev.stopPropagation();
+                this.msg = 'New Caption';
+
+                //const btn3 = this.getComponent<TCheckBox>('litCheckboxCCC');
+                this.litCheckboxCCC.enabled = !this.litCheckboxCCC.enabled;
+                //const btn2 = this.getComponent<TCheckBox>('button-changeMessageCCC');
+                this.buttonChangeMessageCCC.caption = this.litCheckboxCCC.enabled ? 'Enabled' : 'Disabled';
+        }
+
+        increment_onclick(_ev: Event, _sender: TLitControlElement) {
+                debugger;
+                //_ev.stopPropagation();
 
                 // Optionnel si vous voulez aussi bloquer les listeners en capture suivants
                 //_ev.stopImmediatePropagation();
@@ -112,36 +125,38 @@ export class DelphineSubFrame extends TLitFrame {
                         })
                 );
 
-                const btn = this.getComponent<TLitButton>('button-changeMessageCCC');
-                btn!.caption = 'New Caption';
+                //const btn = this.getComponent<TButton>('button-changeMessageCCC');
+                this.buttonChangeMessageCCC.caption = 'New Caption';
 
-                const btn2 = this.getComponent<TLitButton>('button-incrementCCC');
-                btn2!.caption = 'New Caption for btn2';
+                //const btn2 = this.getComponent<TButton>('button-incrementCCC');
+                this.buttonIncrementCCC.caption = 'New Caption for btn2';
 
-                console.log('Color before', btn!.color);
-                btn!.color = 'red';
-                btn!.width = '500px';
-                btn!.backgroundColor = 'yellow';
-                console.log('Color after', btn!.color);
+                this.buttonChangeMessageCCC.color = 'red';
+                this.buttonChangeMessageCCC.width = '500px';
+                this.buttonChangeMessageCCC.backgroundColor = 'yellow';
 
-                const panel = this.getComponent<TLitPanel>('Panel1CCC');
-                panel!.backgroundColor = 'lightblue';
-                panel!.color = 'red';
-                //btn!.style.setProperty('color', 'red');
-                //btn!.style.setProperty('width', '500px');
+                //const panel = this.getComponent<TPanel>('Panel1CCC');
+                //this.panel1CCC.backgroundColor = 'lightblue';
+                //this.panel1CCC.color = 'red';
 
-                const c = this.getComponent<DelphineSubFrame>('sub-frameCCC');
-                c?.style.setProperty('background-color', 'yellow');
-                const btn3 = this.getComponent<TLitCheckbox>('LitCheckboxCCC');
-                btn3!.checked = !btn3?.checked;
-                this.checkbox_onchange(new Event('change'));
+                //const c = this.getComponent<DelphineSubFrame>('sub-frameCCC');
+                //this.subFrameCCC.style.setProperty('background-color', 'yellow');
+                //this.style.color = 'magenta';
+                console.log('Color...', this.color);
+                this.color = 'orange';
+
+                //const btn3 = this.getComponent<TCheckBox>('LitCheckboxCCC');
+                this.litCheckboxCCC.checked = !this.litCheckboxCCC.checked;
+                this.checkbox_onchange(new Event('change')); // Lit does not call this automatically when changing the checked property programmatically
         }
 
         checkbox_onchange(_ev: Event) {
-                _ev.stopPropagation();
-                const btn = this.getComponent<TLitCheckbox>('LitCheckboxCCC');
-                btn!.caption = btn?.checked ? 'Checked' : 'Unchecked';
+                //_ev.stopPropagation();
+                //const btn = this.getComponent<TCheckBox>('LitCheckboxCCC');
+                this.litCheckboxCCC.caption = this.litCheckboxCCC.checked ? 'Checked' : 'Unchecked';
         }
+
+        // </delphine:handlers>
 }
 
 //

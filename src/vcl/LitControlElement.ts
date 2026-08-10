@@ -19,36 +19,15 @@
 import { LitElement, html, css, type CSSResultGroup } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { TControl, TMetaControl } from './Control';
-//import { win98Styles } from './Win98Theme';
-
-// --------------------------------------
-
-// export class TLitComponent extends TControl {}
-
-// export class TLitMetaComponent extends TMetaControl {
-//         static metaclass = new TLitMetaComponent(TMetaControl.metaclass, 'TLitMetaComponent');
-// }
 
 // --------------------------------------
 
 export abstract class TLitControlElement extends LitElement {
-        // static override styles = [
-        //         win98Styles,
-        //         css`
-        //                 button {
-        //                         color: inherit;
-        //                         width: inherit;
-        //                 }
-        //         `
-        // ];
-
         static override styles: CSSResultGroup = css`
                 :host {
                         box-sizing: border-box;
 
-                        color: var(--control-text-color, var(--text-color));
-
+                        color: var(--delphine-control-color, inherit);
                         font-family: var(--control-font-family, system-ui);
 
                         font-size: var(--control-font-size, 13px);
@@ -61,28 +40,23 @@ export abstract class TLitControlElement extends LitElement {
                 }
         `;
 
-        // static override styles: CSSResultGroup = [
-        //         win98Styles,
-
-        //         css`
-        //                 button {
-        //                         color: inherit;
-        //                         width: inherit;
-        //                 }
-        //         `
-        // ];
-
         readonly isDelphineComponent = true as const;
 
         static properties = {
                 color: { type: String },
                 backgroundColor: { type: String },
-                width: { type: String }
+                width: { type: String },
+                height: { type: String },
+                left: { type: Number },
+                top: { type: Number }
         };
 
         color = '';
         backgroundColor = '';
         width = '';
+        height = '';
+        left = 77; // TODO:
+        right = 77; // TODO:
 
         protected getControlStyle() {
                 return styleMap({

@@ -1,4 +1,4 @@
-// StdCtrls.ts
+// TLitPannel.ts
 
 /*
  * Copyright 2026 Canardoux.
@@ -18,67 +18,67 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { TControl, TMetaControl } from '../../Control';
-import { TMetaComponent } from '../../Component';
-import { TMetaContainer, TContainer } from '../../Container';
-import type { PropSpec } from '../../IComponent';
-import type { ComponentSchema } from '../../IComponent';
-import type { IForm } from '../../IForm';
-import type { IControl } from '../../IControl';
-import type { TMetaclass } from '../../Oops';
-import { TCompositeControl, TMetaCompositeControl } from '../../CompositeControl';
-import { TComponent } from '../../Component';
-//import { TForm } from './Form';
+// import { html } from 'lit';
+// import { TLitControlElement } from '../../lit';
 
-// --------------------------------------
+// export class TLitPanel extends TLitControlElement {
+//         static properties = {
+//                 ...TLitControlElement.properties
+//         };
+//         render() {
+//                 return html`<div data-delphine-component="lit-panel"><slot></slot></div>`;
+//         }
+// }
 
-export class TPanel extends TContainer {
-        constructor(name: string, form: IForm, parent: TControl) {
-                super(TMetaPanel.metaclass, name, form, parent);
+import { html, css, type CSSResultGroup } from 'lit';
+import { TLitControlElement } from '../../LitControlElement';
+
+export class TPanel extends TLitControlElement {
+        static properties = {
+                ...TLitControlElement.properties
+        };
+
+        static override styles: CSSResultGroup = [
+                TLitControlElement.styles,
+                css`
+                        :host {
+                                display: block;
+                                box-sizing: border-box;
+
+                                padding: 4px;
+
+                                background-color: var(--delphine-control-background-color, var(--panel-background, transparent));
+
+                                box-shadow: var(--panel-box-shadow, none);
+                                border-radius: var(--panel-border-radius, 0);
+                        }
+                `
+        ];
+
+        protected override updated(): void {
+                super.updated();
+                this.style.setProperty('--delphine-control-color', this.color || '');
+                this.style.setProperty('--delphine-control-background-color', this.backgroundColor || '');
+                this.style.width = this.width || '';
+
+                this.style.backgroundColor = this.backgroundColor;
+                this.style.color = this.color;
+                this.style.width = this.width;
+        }
+
+        render() {
+                return html`<slot></slot>`;
         }
 }
 
-export class TMetaPanel extends TMetaContainer {
-        static readonly metaclass = new TMetaPanel(TMetaContainer.metaclass, 'TPanel');
-
-        protected constructor(superClass: TMetaContainer, name: string) {
-                super(superClass, name);
+export function registerRuntime() {
+        if (!customElements.get('lit-panel')) {
+                customElements.define('lit-panel', TPanel);
         }
+}
 
-        create(name: string, form: IForm, parent: TControl): TPanel {
-                return new TPanel(name, form, parent);
-        }
-
-        defProps(): PropSpec<any>[] {
-                return [
-                        //{ name: 'caption', kind: 'string', apply: (o, v) => (o.caption = String(v)) },
-                        //{ name: 'enabled', kind: 'boolean', apply: (o, v) => (o.enabled = Boolean(v)) }
-                ];
-        }
-
-        getSchema(): ComponentSchema | null {
-                return {
-                        name: this.typeName,
-                        label: 'TPanel',
-                        category: 'Standard Control',
-                        //icon: '▭',
-                        icon: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
-<path d="M0 0 C11.88 0 23.76 0 36 0 C36 11.88 36 23.76 36 36 C24.12 36 12.24 36 0 36 C0 24.12 0 12.24 0 0 Z " fill="#E2EBF9" transform="translate(6,8)"/>
-</svg>`,
-                        component: TMetaPanel.metaclass,
-                        isContainer: true,
-                        instanceName: 'Panel',
-                        tagName: 'div',
-                        resizable: true,
-
-                        //hoverable: true,
-                        //layerable: true,
-                        //removable: true,
-                        //draggable: true,
-                        droppable: true,
-                        //copyable: true,
-
-                        props: this.propSpecsToSchemaProps()
-                };
+declare global {
+        interface HTMLElementTagNameMap {
+                'lit-panel': TPanel;
         }
 }

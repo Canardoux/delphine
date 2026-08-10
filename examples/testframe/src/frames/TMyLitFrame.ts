@@ -1,25 +1,25 @@
-import type { ComponentSchema } from '@vcl/IComponent';
-import { TFrame, TMetaFrame } from '@vcl/palettes/standard/TFrame';
+//import type { ComponentSchema } from '@vcl/IComponent';
+import { TFrame } from '@vcl/palettes/standard/TFrame';
 import { TForm } from '@vcl/Form';
-import { TControl } from '@vcl/Control';
+//import { TControl } from '@vcl/Control';
 import { TButton } from '@vcl/palettes/standard/TButton';
-import type { PropSpec } from '@vcl/IComponent';
+//import type { PropSpec } from '@vcl/IComponent';
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { TLitControlElement } from '@vcl/LitControlElement';
 //import { TMetaSubFrame } from './TSubFrame';
-import { TLitFrame } from '@vcl/palettes/lit/TLitFrame';
-import { TLitButton } from '@vcl/palettes/lit/TLitButton';
+//import { TFrame } from '@vcl/palettes/standard/TFrame';
+//import { TButton } from '@vcl/palettes/standard/TButton';
 //import { TColor } from '@vcl/Color';
 import { getApplication } from '@vcl/IApplication';
 import { TApplication } from '@vcl/Application';
-import { TLitCheckbox } from '@vcl/palettes/lit/TLitCheckBox';
-import { TLitPanel } from '@vcl/palettes/lit/TLitPanel';
+import { TCheckBox } from '@vcl/palettes/standard/TCheckBox';
+import { TPanel } from '@vcl/palettes/standard/TPanel';
 import { DelphineSubFrame } from './TSubFrame';
 
-export class DelphineMyLitFrame extends TLitFrame {
+export class DelphineMyLitFrame extends TFrame {
         static properties = {
-                ...TLitFrame.properties,
+                ...TFrame.properties,
 
                 msg: { type: String },
                 subCounter: { type: Number, state: true },
@@ -42,29 +42,9 @@ export class DelphineMyLitFrame extends TLitFrame {
 
         render() {
                 return html`
-                        <div
-                                id="hello-frameBBB"
-                                data-delphine-name="hello-frameBBB"
-                                data-delphine-oncreate="onMyCreateBBB"
-                                @click="${(ev: Event) => {
-                                        ev.stopPropagation();
-                                        console.log('click on hello-frameBBB');
-                                }}"
-                                @dblclick="${(ev: Event) => {
-                                        ev.stopPropagation();
-                                        console.log('dblclick on hello-frameBBB');
-                                }}"
-                                @contextmenu="${(ev: Event) => {
-                                        ev.stopPropagation();
-                                        console.log('contextmenu on hello-frameBBB');
-                                }}"
-                                @contextpopup="${(ev: Event) => {
-                                        ev.stopPropagation();
-                                        console.log('contextpopup on hello-frameBBB');
-                                }}"
-                        >
-                                <lit-panel data-delphine-name="Panel1BBB" data-delphine-component="lit-panel">
-                                        <h2 id="ipo9">Frame</h2>
+                        <div id="hello-frameBBB" data-delphine-name="hello-frameBBB" data-delphine-oncreate="onMyCreateBBB">
+                                <lit-panel data-delphine-name="Panel1BBB" id="Panel1BBB" data-delphine-component="lit-panel">
+                                        <h2 id="ipo99">Frame</h2>
                                         👋 Message: ${this.msg}
 
                                         <lit-button
@@ -72,7 +52,7 @@ export class DelphineMyLitFrame extends TLitFrame {
                                                 id="button-a"
                                                 caption="Show Riri"
                                                 data-delphine-name="showriri"
-                                                @click="${this.showriri_onclick}"
+                                                data-delphine-onclick="showriri_onclick"
                                                 data-delphine-ondblclick=""
                                                 data-delphine-popupmenu=""
                                                 data-delphine-oncontextpopup=""
@@ -84,7 +64,7 @@ export class DelphineMyLitFrame extends TLitFrame {
                                                 id="button-b"
                                                 caption="push Riri"
                                                 data-delphine-name="pushriri"
-                                                @click="${this.pushriri_onclick}"
+                                                data-delphine-onclick="pushriri_onclick"
                                                 data-delphine-ondblclick=""
                                                 data-delphine-popupmenu=""
                                                 data-delphine-oncontextpopup=""
@@ -95,7 +75,7 @@ export class DelphineMyLitFrame extends TLitFrame {
                                         <lit-button
                                                 data-delphine-component="TButton"
                                                 data-delphine-name="Modern"
-                                                @click="${this.modern_onclick}"
+                                                data-delphine-onclick="modern_onclick"
                                                 caption="Modern"
                                                 id="itiqa"
                                                 data-delphine-ondblclick=""
@@ -107,7 +87,7 @@ export class DelphineMyLitFrame extends TLitFrame {
                                         <lit-button
                                                 data-delphine-component="TButton"
                                                 data-delphine-name="Win95"
-                                                @click="${this.Win95_onclick}"
+                                                data-delphine-onclick="Win95_onclick"
                                                 caption="Win95"
                                                 id="ipm9k"
                                                 data-delphine-ondblclick=""
@@ -119,7 +99,7 @@ export class DelphineMyLitFrame extends TLitFrame {
                                         <lit-button
                                                 data-delphine-component="TButton"
                                                 data-delphine-name="Win98"
-                                                @click="${this.Win98_onclick}"
+                                                data-delphine-onclick="Win98_onclick"
                                                 caption="Win98"
                                                 data-delphine-ondblclick=""
                                                 id="i90r7"
@@ -131,7 +111,7 @@ export class DelphineMyLitFrame extends TLitFrame {
                                         <lit-button
                                                 data-delphine-component="TButton"
                                                 data-delphine-name="Cde"
-                                                @click="${this.cde_onclick}"
+                                                data-delphine-onclick="cde_onclick"
                                                 caption="Cde"
                                                 data-delphine-ondblclick=""
                                                 id="iimad"
@@ -143,7 +123,7 @@ export class DelphineMyLitFrame extends TLitFrame {
                                         <lit-button
                                                 data-delphine-component="TButton"
                                                 data-delphine-name="Motif"
-                                                @click="${this.Motif_onclick}"
+                                                data-delphine-onclick="Motif_onclick"
                                                 caption="Motif"
                                                 data-delphine-ondblclick=""
                                                 data-delphine-oncontextpopup=""
@@ -153,9 +133,9 @@ export class DelphineMyLitFrame extends TLitFrame {
                                         >
                                         </lit-button>
                                         <p>Number of clicks: ${this.subCounter}</p>
-                                        <lit-button data-delphine-component="TButton" data-delphine-name="incrementSubCounter" @click="${this.incrementSubCounter}" caption="Incr. Counter" id="fgju" class="delphine-control delphine-button"> </lit-button>
+                                        <lit-button data-delphine-component="TButton" data-delphine-name="incrementSubCounter" data-delphine-onclick="incrementSubCounter" caption="Incr. Counter" id="fgju" class="delphine-control delphine-button"> </lit-button>
                                         <p>myCounter: ${this.myCounter}</p>
-                                        <lit-button data-delphine-component="TButton" data-delphine-name="incrementMyCounter" @click="${this.incrementMyCounter}" caption="Incr. MyCounter" id="fgjuqd" class="delphine-control delphine-button"> </lit-button>
+                                        <lit-button data-delphine-component="TButton" data-delphine-name="incrementMyCounter" data-delphine-onclick="incrementMyCounter" caption="Incr. MyCounter" id="fgjuqd" class="delphine-control delphine-button"> </lit-button>
                                 </lit-panel>
 
                                 <sub-frame data-delphine-component="sub-frame" id="sub-frameBBB" data-delphine-name="sub-frameBBB" @counter-change="${this.counterChanged}" .numberClicked=${this.myCounter} data-delphine-oncreate="onMyCreate"></sub-frame>
@@ -184,22 +164,30 @@ export class DelphineMyLitFrame extends TLitFrame {
                 this.subCounter = subFrame!.numberClicked;
         }
 
-        showriri_onclick(_ev: Event | null, _sender: TControl) {
+        Panel1BBB_onclick(ev: Event): void {
+                console.log('helloframeBBB_onclick');
+        }
+
+        private helloframeBBB_onclick(ev: Event): void {
+                console.log('helloframeBBB_onclick');
+        }
+
+        showriri_onclick(_ev: Event | null, _sender: any) {
                 debugger;
-                const btn = this.componentRegistry.get('showriri') as TLitButton;
+                const btn = this.getComponent<TButton>('showriri');
                 if (!btn) {
                         console.warn('button-a not found in registry');
                         return;
                 }
                 btn!.color = 'rgb(255, 255, 2';
-                console.log('Button1 clicked!!!!');
+                console.log('showriri_onclick clicked!!!!');
                 const app = getApplication() as TApplication;
-                app.createAndShow('Riri');
+                app.createAndShow('RiriForm');
         }
 
-        pushriri_onclick(_ev: Event | null, _sender: TControl) {
+        pushriri_onclick(_ev: Event | null, _sender: any) {
                 debugger;
-                const btn = this.componentRegistry.get('pushriri') as TLitButton;
+                const btn = this.getComponent<TButton>('pushriri');
                 if (!btn) {
                         console.warn('button-b not found in registry');
                         return;
@@ -208,17 +196,17 @@ export class DelphineMyLitFrame extends TLitFrame {
                 btn!.caption = 'PUSH to Riri!';
                 console.log('Button2 clicked!!!!');
                 const app = getApplication() as TApplication;
-                app.createAndPushForm('Riri');
+                app.createAndPushForm('RiriForm');
         }
 
-        chk_onclick(_ev: Event | null, _sender: TControl) {
-                const btn = this.componentRegistry.get('chk3') as TLitCheckbox;
+        chk_onclick(_ev: Event | null, _sender: any) {
+                const btn = this.getComponent<TCheckBox>('chk3');
                 btn!.caption = btn?.checked ? 'Checked' : 'unchecked';
         }
 
-        mainForm_onclick(_ev: Event | null, _sender: TControl) {
+        mainForm_onclick(_ev: Event | null, _sender: any) {
                 console.log('Form clicked!!!!');
-                const panel = this.componentRegistry.get('myPanel') as TLitPanel;
+                const panel = this.getComponent<TPanel>('myPanel');
                 if (!panel) {
                         console.warn('myPanel not found in registry');
                         return;
@@ -226,8 +214,8 @@ export class DelphineMyLitFrame extends TLitFrame {
                 //panel!.backgroundColor = TColor.rgb(54, 127, 173);
         }
 
-        button1_onclick(_ev: Event | null, _sender: TControl) {
-                const btn = this.componentRegistry.get('button1') as TLitButton;
+        button1_onclick(_ev: Event | null, _sender: any) {
+                const btn = this.getComponent<TButton>('button1');
                 if (!btn) {
                         console.warn('button1 not found in registry');
                         return;
@@ -238,81 +226,71 @@ export class DelphineMyLitFrame extends TLitFrame {
                 console.log('Button1 clicked!!!!');
         }
 
-        zaza_onclick(_ev: Event | null, _sender: TControl) {
-                const btn = this.componentRegistry.get('buttonx') as TLitButton;
+        zaza_onclick(_ev: Event | null, _sender: any) {
+                const btn = this.getComponent<TButton>('buttonx');
                 btn!.color = 'rgb(0, 255, 0)';
                 console.log('zazaVue clicked!!!!');
         }
 
-        modern_onclick(_ev: Event | null, _sender: TControl) {
+        modern_onclick(_ev: Event | null, _sender: any) {
                 const app = getApplication();
                 app!.setTheme('modern');
         }
 
-        Win95_onclick(_ev: Event | null, _sender: TControl) {
+        Win95_onclick(_ev: Event | null, _sender: any) {
                 const app = getApplication();
                 app!.setTheme('win95');
         }
 
-        Win98_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle Win98_onclick
+        Win98_onclick(_ev: Event | null, _sender: any) {
                 const app = getApplication();
                 app!.setTheme('win98');
         }
 
-        cde_onclick(_ev: Event | null, _sender: TControl) {
+        cde_onclick(_ev: Event | null, _sender: any) {
                 const app = getApplication();
                 app!.setTheme('cde');
         }
 
-        Button1_ondblclick(_ev: Event | null, _sender: TControl) {
+        Button1_ondblclick(_ev: Event | null, _sender: any) {
                 console.log('Button1 double clicked!!!!');
         }
 
-        Button1_oncontextpopup(_ev: Event | null, _sender: TControl) {
+        Button1_oncontextpopup(_ev: Event | null, _sender: any) {
                 console.log('Button1 context popup!!!!'); // TODO: handle Button1_oncontextpopup
         }
 
-        Motif_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle Button1_onclick
+        Motif_onclick(_ev: Event | null, _sender: any) {
                 console.log('Motif clicked!!!!');
                 const app = getApplication();
                 app!.setTheme('motif');
         }
 
-        button1_ondblclick(_ev: Event | null, _sender: TControl) {
+        button1_ondblclick(_ev: Event | null, _sender: any) {
                 // TODO: handle button1_ondblclick
         }
 
-        Button1_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle Button1_onclick
+        ButtonEnabled_onclick(_ev: Event | null, _sender: any) {
+                const btn = this.getComponent<TCheckBox>('LitCheckbox');
+                btn!.enabled = !btn?.enabled;
+                console.log(` enabled: ${btn!.enabled}`);
         }
 
-        ButtonEnabled_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle ButtonEnabled_onclick
-                const btn = this.componentRegistry.get('LitCheckbox') as TLitButton;
-                btn.enabled = !btn?.enabled;
-                console.log(` enabled: ${btn.enabled}`);
+        ButtonChecked_onclick(_ev: Event | null, _sender: any) {
+                const btn = this.getComponent<TCheckBox>('LitCheckbox');
+                btn!.checked = !btn?.checked;
+                console.log(` checked: ${btn!.checked}`);
         }
 
-        ButtonChecked_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle ButtonChecked_onclick
-                const btn = this.componentRegistry.get('LitCheckbox') as TLitCheckbox;
-                btn.checked = !btn?.checked;
-                console.log(` checked: ${btn.checked}`);
+        LitCheckbox_onclick(_ev: Event | null, _sender: any) {
+                const btn = this.getComponent<TCheckBox>('LitCheckbox');
+                console.log(`LitCheckbox enabled: ${btn!.enabled}`);
+                console.log(`LitCheckbox checked: ${btn!.checked}`);
         }
 
-        LitCheckbox_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle LitCheckbox_onclick
-                const btn = this.componentRegistry.get('LitCheckbox') as TLitCheckbox;
-                console.log(`LitCheckbox enabled: ${btn.enabled}`);
-                console.log(`LitCheckbox checked: ${btn.checked}`);
-        }
-
-        ChangeColor_onclick(_ev: Event | null, _sender: TControl) {
-                // TODO: handle ChangeColor_onclick
-                const btn = this.componentRegistry.get('LitCheckbox') as TLitCheckbox;
-                btn.color = 'rgb(255, 0, 255)';
+        ChangeColor_onclick(_ev: Event | null, _sender: any) {
+                const btn = this.getComponent<TCheckBox>('LitCheckbox');
+                btn!.color = 'rgb(255, 0, 255)';
         }
 }
 //customElements.define('my-lit-frame', DelphineMyLitFrame);

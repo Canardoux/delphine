@@ -1,3 +1,5 @@
+// extension/extension.ts
+
 import { getPreviewUrlForUnit, disposeAllViteServers, runApp } from './ViteServerManager';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
@@ -12,6 +14,8 @@ import { normalizeToFileUri, resolveApp } from './projectModel';
 import { resolveUnit } from './projectModel';
 import { loadDoc } from './loadForm';
 import { parseDformSource } from './dformSource'; // ou le bon chemin chez vous
+import { loadDelphineFrame } from './loadDelphineFrame';
+import { loadAppConfig } from './projectModel';
 
 let activeRuntimePreviewUri: vscode.Uri | undefined;
 
@@ -192,6 +196,241 @@ iframe {
         });
 }
 
+function createNonce(): string {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz' + '0123456789';
+
+        let result = '';
+
+        for (let index = 0; index < 32; index++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+
+        return result;
+}
+
+function createDesignerHtml(webview: vscode.Webview, extensionUri: vscode.Uri): string {
+        const bootEditorUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'webview', 'bootEditor.bundle.js'));
+
+        const designerRuntimePath = vscode.Uri.joinPath(extensionUri, 'media', 'webview', 'designerRuntime.bundle.js').fsPath;
+
+        const designerRuntimeSource = fs.readFileSync(designerRuntimePath, 'utf8');
+
+        const grapesJsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'grapes.min.js'));
+
+        const grapesCssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'grapes.min.css'));
+
+        const nonce = createNonce();
+
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+
+        <meta
+                http-equiv="Content-Security-Policy"
+                content="
+                        default-src 'none';
+                        style-src ${webview.cspSource} 'unsafe-inline';
+                        script-src ${webview.cspSource} 'nonce-${nonce}' blob:;
+                        img-src ${webview.cspSource} data:;
+                "
+        >
+
+        <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1.0"
+        >
+
+        <link rel="stylesheet" href="${grapesCssUri}">
+
+        <style>
+                html,
+                body {
+                        height: 100%;
+                        margin: 0;
+                }
+
+                #gjs {
+                        height: 100%;
+                }
+        </style>
+</head>
+
+<body>
+        <div id="gjs"></div>
+
+        <script nonce="${nonce}" src="${grapesJsUri}"></script>
+
+        <script nonce="${nonce}">
+                window.__delphineDesignerRuntimeSource =
+                        ${JSON.stringify(designerRuntimeSource)};
+        </script>
+
+        <script
+                nonce="${nonce}"
+                type="module"
+                src="${bootEditorUri}">
+        </script>
+</body>
+</html>`;
+}
+
+// async function loadDelphineDocumentFromFrame(sourceUri: vscode.Uri): Promise<DelphineDocument> {
+//         const textDocument = await vscode.workspace.openTextDocument(sourceUri);
+
+//         const source = textDocument.getText();
+
+//         const loaded = await loadDoc(sourceUri);
+//         const document = parseHtmlFragment(loaded.template, {
+//                 frameName: path.basename(sourceUri.fsPath, '.ts'),
+//                 designRegistry: null as any // TODO: Provide the actual design registry here
+//         });
+//         return document;
+
+//         // return parseDelphineFrameSource(source, {
+//         //         sourceUri
+//         // });
+// }
+
+async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.Uri): Promise<void> {
+        // const panel = vscode.window.createWebviewPanel('delphineDesigner', 'Delphine Designer', vscode.ViewColumn.One, {
+        //         enableScripts: true,
+        //         retainContextWhenHidden: true,
+
+        //         localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')]
+        // });
+        //const document = await loadDelphineDocumentFromFrame(sourceUri);
+
+        const panel = vscode.window.createWebviewPanel(
+                'delphineDesigner',
+
+                `Delphine Designer — ${path.basename(sourceUri.fsPath)}`,
+
+                vscode.ViewColumn.One,
+
+                {
+                        enableScripts: true,
+
+                        retainContextWhenHidden: true,
+
+                        localResourceRoots: [
+                                vscode.Uri.joinPath(
+                                        context.extensionUri,
+
+                                        'media'
+                                )
+                        ]
+                }
+        );
+
+        panel.webview.onDidReceiveMessage(
+                async (message: unknown) => {
+                        if (typeof message !== 'object' || message === null || !('type' in message)) {
+                                return;
+                        }
+
+                        const payload = message as { type: string };
+
+                        console.log('[Delphine Designer host]', payload);
+                        console.log(
+                                '========== DELPHINE MESSAGE ==========',
+
+                                payload.type,
+
+                                payload
+                        );
+                        switch (payload.type) {
+                                case 'bootEditor:ready':
+                                        console.log('[Delphine] Designer WebView ready');
+                                        break;
+
+                                case 'app:get-config':
+                                        await panel.webview.postMessage({
+                                                type: 'app:config',
+
+                                                config: {
+                                                        palettes: ['standard'] // TODO:
+                                                }
+                                        });
+                                        break;
+
+                                case 'log':
+                                        console.log('[Delphine WebView]', message);
+                                        break;
+
+                                case 'delphine:get-theme': {
+                                        console.log('[Delphine host] delphine:get-theme received');
+
+                                        const app = resolveApp(sourceUri);
+
+                                        if (!app) {
+                                                throw new Error(`Unable to resolve the Delphine app for "${sourceUri.fsPath}".`);
+                                        }
+                                        const config = await loadAppConfig(app.rootDir);
+                                        const themeName = config.ui?.theme ?? 'flat'; // const themeName = 'motif';
+
+                                        const themePath = vscode.Uri.joinPath(app.rootDir, 'public', 'themes', `${themeName}.css`);
+                                        console.log('[Delphine host] loading theme:', themePath.fsPath);
+
+                                        try {
+                                                const bytes = await vscode.workspace.fs.readFile(themePath);
+
+                                                const themeCss = Buffer.from(bytes).toString('utf8');
+
+                                                console.log('[Delphine host] theme loaded:', themeName, themeCss.length);
+
+                                                await panel.webview.postMessage({
+                                                        type: 'delphine:theme',
+                                                        theme: themeName,
+                                                        themeCss
+                                                });
+
+                                                console.log('[Delphine host] delphine:theme sent');
+                                        } catch (error) {
+                                                console.error('[Delphine host] unable to load theme', themePath.fsPath, error);
+                                        }
+
+                                        break;
+                                }
+                                case 'delphine:design-ready': {
+                                        try {
+                                                const frame = await loadDelphineFrame(sourceUri);
+
+                                                console.log('[Delphine] Designer source', {
+                                                        sourceUri: sourceUri.toString(),
+                                                        sourceLength: frame.source.length,
+                                                        templateLength: frame.layoutHtml.length
+                                                });
+
+                                                await panel.webview.postMessage({
+                                                        type: 'html:update',
+                                                        frameName: frame.frameName,
+                                                        html: frame.layoutHtml,
+                                                        css: ''
+                                                });
+                                        } catch (error: unknown) {
+                                                const message = error instanceof Error ? error.message : String(error);
+
+                                                console.error('[Delphine] Failed to load frame layout.', error);
+
+                                                void vscode.window.showErrorMessage(`Unable to load Delphine layout: ${message}`);
+                                        }
+
+                                        break;
+                                }
+                        }
+                },
+                undefined,
+                context.subscriptions
+        );
+
+        panel.webview.html = createDesignerHtml(panel.webview, context.extensionUri);
+}
+
+function resolveCommandUri(input?: unknown): vscode.Uri | undefined {
+        return (input as any)?.unit?.sourceUri ?? (input as any)?.fileUri ?? resolveUnit(normalizeToFileUri(input))?.sourceUri ?? normalizeToFileUri(input) ?? vscode.window.activeTextEditor?.document.uri;
+}
+
 export function activate(context: vscode.ExtensionContext): void {
         console.log('[Delphine] registering projects provider');
         const delphineProvider = new DelphineTreeProvider();
@@ -255,6 +494,24 @@ export function activate(context: vscode.ExtensionContext): void {
 
                         await showTypescriptDocument(targetUri);
                 })
+        );
+
+        context.subscriptions.push(
+                vscode.commands.registerCommand(
+                        'delphine.openDesigner',
+
+                        async (input?: unknown) => {
+                                const targetUri = resolveCommandUri(input);
+
+                                if (!targetUri) {
+                                        void vscode.window.showErrorMessage('No Delphine frame selected');
+
+                                        return;
+                                }
+
+                                await openDesigner(context, targetUri);
+                        }
+                )
         );
 
         // ------------------------------------------------

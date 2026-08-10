@@ -1,0 +1,76 @@
+/* examples/testframe/public/themes/cde.css */
+
+:root[data-theme='cde'] {
+        /* CDE palette */
+        --text-color: #000000;
+        --surface: #c6b2a8;
+        --button-highlight: #e6ddd9;
+        --button-face: #c6b2a8;
+        --button-shadow: #6b605b;
+        --window-frame: #4f4f4f;
+
+        --focus-color: #eda870;
+        --desktop-background: #8998aa;
+
+        /* Typography */
+        --control-font-family: system-ui, sans-serif;
+        --control-font-size: 13px;
+        --control-text-color: var(--text-color);
+
+        /* Form and frame */
+        --form-background: var(--button-face);
+        --frame-background: var(--button-face);
+
+        /* Relief */
+        --cde-raised-shadow:
+                inset 1px 1px var(--button-highlight),
+                inset -1px -1px var(--button-shadow);
+
+        --cde-lowered-shadow:
+                inset 1px 1px var(--button-shadow),
+                inset -1px -1px var(--button-highlight);
+
+        /* Panel */
+        --panel-background: var(--button-face);
+        --panel-box-shadow: var(--cde-raised-shadow);
+        --panel-border-radius: 0;
+
+        /* Button */
+        --button-background: var(--button-face);
+        --button-active-background: #a8978e;
+
+        --button-box-shadow: var(--cde-raised-shadow);
+        --button-active-box-shadow: var(--cde-lowered-shadow);
+
+        --button-border-radius: 0;
+        --button-active-translate-y: 0;
+        --button-active-content-x: 1px;
+        --button-active-content-y: 1px;
+
+        /* Checkbox */
+        --checkbox-background: var(--button-face);
+        --checkbox-checked-background: #686f82;
+
+        --checkbox-box-shadow: var(--cde-raised-shadow);
+        --checkbox-checked-box-shadow: var(--cde-lowered-shadow);
+
+        --checkbox-border-radius: 0;
+        --checkbox-check-color: #ffffff;
+
+        --checkbox-disabled-background: var(--button-face);
+        --checkbox-disabled-check-color: var(--button-shadow);
+
+        /* Popup menu */
+        --popup-background: #4992a7;
+        --popup-color: #ffffff;
+        --popup-border-color: #244953;
+        --popup-hover-background: #3e7c8d;
+        --popup-hover-color: #ffffff;
+}
+
+html[data-theme='cde'],
+html[data-theme='cde'] body {
+        color: var(--text-color);
+        background: var(--form-background);
+        font-family: var(--control-font-family);
+}

@@ -1,222 +1,222 @@
 import type { UnknownRecord } from './Oops';
-import type { TComponent, TMetaComponent } from './Component';
-import type { PropSpec, PropKind } from './IComponent';
+//import type { TComponent, TMetaComponent } from './Component';
+//import type { PropSpec, PropKind } from './IComponent';
 
 import type { IForm } from './IForm';
 import { getApplication } from './IApplication';
-import { TControl, TMetaControl, TColor, THandler } from './Control';
-import type { IPluginHost, TCompositeControl } from './CompositeControl';
-import type { ICompositeControl } from './ICompositeControl';
+//import { TControl, TMetaControl, TColor, THandler } from './Control';
+//import type { IPluginHost, TCompositeControl } from './CompositeControl';
+//import type { ICompositeControl } from './ICompositeControl';
 import { TLitControlElement } from './LitControlElement';
 //import { TMetaLitFrame } from './palettes/lit/TLitFrame';
 
-export class BuildComponentTree {
-        RESERVED_DATA_ATTRS = new Set<string>([
-                'data-delphine-component',
-                'data-delphine-name',
-                'data-delphine-props',
-                'data-delphine-message' // add any meta/framework attrs you don't want treated as props
-        ]);
+// export class BuildComponentTree {
+//         RESERVED_DATA_ATTRS = new Set<string>([
+//                 'data-delphine-component',
+//                 'data-delphine-name',
+//                 'data-delphine-props',
+//                 'data-delphine-message' // add any meta/framework attrs you don't want treated as props
+//         ]);
 
-        static singeleton: BuildComponentTree = new BuildComponentTree();
+//         static singeleton: BuildComponentTree = new BuildComponentTree();
 
-        private convert(raw: string, kind: PropKind, defaultValue: unknown) {
-                if (typeof raw === 'string') {
-                        switch (kind) {
-                                case 'string':
-                                        return raw;
-                                case 'number':
-                                        return Number(raw);
-                                case 'boolean':
-                                        if (raw === null || raw === '') {
-                                                return defaultValue ?? false;
-                                        }
-                                        return raw === 'true' || raw === '1' || raw === 'on' || raw === 'yes';
-                                case 'color':
-                                        return new TColor(raw); // ou parse en TColor si vous avez
-                                case 'handler':
-                                        return new THandler(raw);
-                        }
-                }
-                return raw;
-        }
+//         private convert(raw: string, kind: PropKind, defaultValue: unknown) {
+//                 if (typeof raw === 'string') {
+//                         switch (kind) {
+//                                 case 'string':
+//                                         return raw;
+//                                 case 'number':
+//                                         return Number(raw);
+//                                 case 'boolean':
+//                                         if (raw === null || raw === '') {
+//                                                 return defaultValue ?? false;
+//                                         }
+//                                         return raw === 'true' || raw === '1' || raw === 'on' || raw === 'yes';
+//                                 case 'color':
+//                                         return new TColor(raw); // ou parse en TColor si vous avez
+//                                 case 'handler':
+//                                         return new THandler(raw);
+//                         }
+//                 }
+//                 return raw;
+//         }
 
-        // -------------------- Properties --------------------
+//         // -------------------- Properties --------------------
 
-        /**
-         * Find the nearest PropSpec for a prop name by walking meta inheritance:
-         * meta -> meta.superClass -> ...
-         * Uses caching for speed.
-         */
-        private resolveNearestPropSpec(meta: TMetaControl, propName: string): PropSpec<any> | null {
-                /*
-                        let perMeta = this._propSpecCache.get(meta);
-                        if (!perMeta) {
-                                perMeta = new Map<string, PropSpec<any> | null>();
-                                this._propSpecCache.set(meta, perMeta);
-                        }
-        
-                        if (perMeta.has(propName)) {
-                                return perMeta.get(propName)!;
-                        }
-                                */
+//         /**
+//          * Find the nearest PropSpec for a prop name by walking meta inheritance:
+//          * meta -> meta.superClass -> ...
+//          * Uses caching for speed.
+//          */
+//         private resolveNearestPropSpec(meta: TMetaControl, propName: string): PropSpec<any> | null {
+//                 /*
+//                         let perMeta = this._propSpecCache.get(meta);
+//                         if (!perMeta) {
+//                                 perMeta = new Map<string, PropSpec<any> | null>();
+//                                 this._propSpecCache.set(meta, perMeta);
+//                         }
 
-                // Walk up metaclass inheritance: child first (nearest wins)
-                let mc: TMetaControl | null = meta;
+//                         if (perMeta.has(propName)) {
+//                                 return perMeta.get(propName)!;
+//                         }
+//                                 */
 
-                while (mc) {
-                        if (typeof mc.defProps === 'function') {
-                                const defs = mc.defProps();
-                                for (const spec of defs) {
-                                        if (spec.name === propName) {
-                                                //perMeta.set(propName, spec);
-                                                return spec;
-                                        }
-                                }
-                        }
-                        mc = (mc.superClass as TMetaControl) ?? null;
-                }
+//                 // Walk up metaclass inheritance: child first (nearest wins)
+//                 let mc: TMetaControl | null = meta;
 
-                //perMeta.set(propName, null);
-                return null;
-        }
+//                 while (mc) {
+//                         if (typeof mc.defProps === 'function') {
+//                                 const defs = mc.defProps();
+//                                 for (const spec of defs) {
+//                                         if (spec.name === propName) {
+//                                                 //perMeta.set(propName, spec);
+//                                                 return spec;
+//                                         }
+//                                 }
+//                         }
+//                         mc = (mc.superClass as TMetaControl) ?? null;
+//                 }
 
-        private extractJsonProps(el: Element): UnknownRecord {
-                const raw = el.getAttribute('data-delphine-props');
-                if (!raw) return {};
+//                 //perMeta.set(propName, null);
+//                 return null;
+//         }
 
-                try {
-                        const parsed = JSON.parse(raw);
-                        // Only accept plain objects
-                        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-                                return parsed as UnknownRecord;
-                        }
-                        return {};
-                } catch (e) {
-                        console.error('Invalid JSON in data-delphine-props', raw, e);
-                        return {};
-                }
-        }
+//         private extractJsonProps(el: Element): UnknownRecord {
+//                 const raw = el.getAttribute('data-delphine-props');
+//                 if (!raw) return {};
 
-        private extractDataAttributes(el: Element): UnknownRecord {
-                const out: UnknownRecord = {};
+//                 try {
+//                         const parsed = JSON.parse(raw);
+//                         // Only accept plain objects
+//                         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+//                                 return parsed as UnknownRecord;
+//                         }
+//                         return {};
+//                 } catch (e) {
+//                         console.error('Invalid JSON in data-delphine-props', raw, e);
+//                         return {};
+//                 }
+//         }
 
-                // Iterate all attributes, keep only data-delphine-xxx (except reserved)
-                for (const attr of Array.from(el.attributes)) {
-                        const attrName = attr.name;
-                        if (!attrName.startsWith('data-delphine-')) continue;
-                        if (this.RESERVED_DATA_ATTRS.has(attrName)) continue;
+//         private extractDataAttributes(el: Element): UnknownRecord {
+//                 const out: UnknownRecord = {};
 
-                        const propName = attrName.slice('data-delphine-'.length);
-                        // Skip empty names
-                        if (!propName) continue;
+//                 // Iterate all attributes, keep only data-delphine-xxx (except reserved)
+//                 for (const attr of Array.from(el.attributes)) {
+//                         const attrName = attr.name;
+//                         if (!attrName.startsWith('data-delphine-')) continue;
+//                         if (this.RESERVED_DATA_ATTRS.has(attrName)) continue;
 
-                        out[propName] = attr.value;
-                }
+//                         const propName = attrName.slice('data-delphine-'.length);
+//                         // Skip empty names
+//                         if (!propName) continue;
 
-                return out;
-        }
-        private applyPropsFromSource(comp: TComponent, src: UnknownRecord, meta: TMetaControl) {
-                for (const [name, rawValue] of Object.entries(src)) {
-                        const spec = this.resolveNearestPropSpec(meta, name);
-                        if (!spec) continue; // Not a declared prop -> ignore
-                        const v: string = rawValue as string;
-                        // Note: data-delphine-xxx gives strings; data-delphine-props can give any JSON type.
-                        const value = this.convert(v, spec.kind, spec.default);
+//                         out[propName] = attr.value;
+//                 }
 
-                        //out[name] = value; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        //comp.setHtmlProp(name, value); // for convenience, setHtmlProp can be used by the component itself to react to prop changes.
-                        comp.setProp(name, value);
-                        spec.apply(comp, value);
-                }
-        }
-        /**
-         * Parse HTML attributes + JSON bulk into a plain object of typed props.
-         * - Reads JSON from data-delphine-props
-         * - Reads data-delphine-xxx attributes (excluding reserved ones)
-         * - For each candidate prop name, resolves the nearest PropSpec by walking metaclass inheritance.
-         * - Applies conversion based on spec.kind
-         * - data-delphine-xxx overrides data-delphine-props
-         */
-        private parsePropsFromElement(comp: TComponent) {
-                const el: Element | null = comp.elem;
+//                 return out;
+//         }
+//         private applyPropsFromSource(comp: TComponent, src: UnknownRecord, meta: TMetaControl) {
+//                 for (const [name, rawValue] of Object.entries(src)) {
+//                         const spec = this.resolveNearestPropSpec(meta, name);
+//                         if (!spec) continue; // Not a declared prop -> ignore
+//                         const v: string = rawValue as string;
+//                         // Note: data-delphine-xxx gives strings; data-delphine-props can give any JSON type.
+//                         const value = this.convert(v, spec.kind, spec.default);
 
-                if (!el) return;
+//                         //out[name] = value; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//                         //comp.setHtmlProp(name, value); // for convenience, setHtmlProp can be used by the component itself to react to prop changes.
+//                         comp.setProp(name, value);
+//                         spec.apply(comp, value);
+//                 }
+//         }
+//         /**
+//          * Parse HTML attributes + JSON bulk into a plain object of typed props.
+//          * - Reads JSON from data-delphine-props
+//          * - Reads data-delphine-xxx attributes (excluding reserved ones)
+//          * - For each candidate prop name, resolves the nearest PropSpec by walking metaclass inheritance.
+//          * - Applies conversion based on spec.kind
+//          * - data-delphine-xxx overrides data-delphine-props
+//          */
+//         private parsePropsFromElement(comp: TComponent) {
+//                 const el: Element | null = comp.elem;
 
-                // 1) Extract JSON bulk props from data-delphine-props
-                const jsonProps = this.extractJsonProps(el);
+//                 if (!el) return;
 
-                // 2) Extract data-delphine-xxx attributes (excluding reserved)
-                const dataAttrs = this.extractDataAttributes(el);
+//                 // 1) Extract JSON bulk props from data-delphine-props
+//                 const jsonProps = this.extractJsonProps(el);
 
-                // 3) Apply JSON first, then data-delphine-xxx overrides
-                this.applyPropsFromSource(comp, jsonProps, comp.getMetaclass() as TMetaControl);
-                this.applyPropsFromSource(comp, dataAttrs, comp.getMetaclass() as TMetaControl);
-        }
+//                 // 2) Extract data-delphine-xxx attributes (excluding reserved)
+//                 const dataAttrs = this.extractDataAttributes(el);
 
-        private applyLoadedUnitStyle(unitName: string, cssText: string): void {
-                if (!cssText.trim()) {
-                        return;
-                }
+//                 // 3) Apply JSON first, then data-delphine-xxx overrides
+//                 this.applyPropsFromSource(comp, jsonProps, comp.getMetaclass() as TMetaControl);
+//                 this.applyPropsFromSource(comp, dataAttrs, comp.getMetaclass() as TMetaControl);
+//         }
 
-                const styleId = `delphine-unit-style-${unitName}`;
+//         private applyLoadedUnitStyle(unitName: string, cssText: string): void {
+//                 if (!cssText.trim()) {
+//                         return;
+//                 }
 
-                let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
-                if (!styleEl) {
-                        styleEl = document.createElement('style');
-                        styleEl.id = styleId;
-                        document.head.appendChild(styleEl);
-                }
+//                 const styleId = `delphine-unit-style-${unitName}`;
 
-                styleEl.textContent = cssText;
-        }
+//                 let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
+//                 if (!styleEl) {
+//                         styleEl = document.createElement('style');
+//                         styleEl.id = styleId;
+//                         document.head.appendChild(styleEl);
+//                 }
 
-        directDelphineChildren(el: Element): Element[] {
-                const hasShadowRoot = !!el.shadowRoot;
-                const _root = hasShadowRoot ? el.shadowRoot! : el;
-                return Array.from(_root.children).filter((child) => child instanceof Element && child.hasAttribute('data-delphine-component'));
-        }
+//                 styleEl.textContent = cssText;
+//         }
 
-        async createTree(el: TLitControlElement, frame: any): Promise<Element | null> {
-                if ((el as any).updateComplete) {
-                        await (el as any).updateComplete;
-                }
+//         directDelphineChildren(el: Element): Element[] {
+//                 const hasShadowRoot = !!el.shadowRoot;
+//                 const _root = hasShadowRoot ? el.shadowRoot! : el;
+//                 return Array.from(_root.children).filter((child) => child instanceof Element && child.hasAttribute('data-delphine-component'));
+//         }
 
-                const name = el.getAttribute('data-delphine-name');
-                const type = el.getAttribute('data-delphine-component');
-                //console.log('      processing ', name, type);
+//         async createTree(el: TLitControlElement, frame: any): Promise<Element | null> {
+//                 if ((el as any).updateComplete) {
+//                         await (el as any).updateComplete;
+//                 }
 
-                const children = this.directDelphineChildren(el);
-                if (children.length != 0) {
-                        // console.log(
-                        //         'scan',
-                        //         {
-                        //                 el,
-                        //                 tag: el.tagName,
-                        //                 name: name,
-                        //                 type: type,
-                        //                 hasShadowRoot: !!el.shadowRoot
-                        //         },
-                        //         children
-                        // );
-                        for (const childEl of children) {
-                                await this.createTree(childEl as TLitControlElement, frame);
-                        }
-                        // console.log('--- end scan', {
-                        //         el,
-                        //         tag: el.tagName,
-                        //         name: name,
-                        //         type: type
-                        // });
-                }
+//                 const name = el.getAttribute('data-delphine-name');
+//                 const type = el.getAttribute('data-delphine-component');
+//                 //console.log('      processing ', name, type);
 
-                return el;
-        }
+//                 const children = this.directDelphineChildren(el);
+//                 if (children.length != 0) {
+//                         // console.log(
+//                         //         'scan',
+//                         //         {
+//                         //                 el,
+//                         //                 tag: el.tagName,
+//                         //                 name: name,
+//                         //                 type: type,
+//                         //                 hasShadowRoot: !!el.shadowRoot
+//                         //         },
+//                         //         children
+//                         // );
+//                         for (const childEl of children) {
+//                                 await this.createTree(childEl as TLitControlElement, frame);
+//                         }
+//                         // console.log('--- end scan', {
+//                         //         el,
+//                         //         tag: el.tagName,
+//                         //         name: name,
+//                         //         type: type
+//                         // });
+//                 }
 
-        async buildComponentTree(el: Element, frame: Element): Promise<void> {
-                await this.createTree(el as TLitControlElement, frame);
-        }
-}
+//                 return el;
+//         }
+
+//         async buildComponentTree(el: Element, frame: Element): Promise<void> {
+//                 await this.createTree(el as TLitControlElement, frame);
+//         }
+// }
 
 // -----------------------------------------------------------------------------------------------------------
 

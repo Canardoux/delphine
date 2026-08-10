@@ -19,7 +19,7 @@
  * along with Delphine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { TControl, TMetaControl, TColor, THandler } from './Control';
+//import { TControl, TMetaControl, TColor, THandler } from './Control';
 //import type { PropKind } from './Component';
 //import { PropSpec, ComponentSchema } from './IComponent';
 import type { IForm } from './IForm';
@@ -31,9 +31,10 @@ import { TMetaclass, TObject } from './Oops';
 //import type { IPluginHost } from './IPlugin';
 import { getApplication } from './IApplication';
 import type { IApplication } from './IApplication';
-import { TPluginHost } from './Plugin';
+import { TLitControlElement } from './LitControlElement';
+//import { TPluginHost } from './Plugin';
 
-export type ComponentFactory = (name: string, form: IForm, owner: TControl) => TControl;
+//export type ComponentFactory = (name: string, form: IForm, owner: TControl) => TControl;
 
 export class TMetaComponentRegistry extends TMetaclass {
         static readonly metaclass: TMetaComponentRegistry = new TMetaComponentRegistry(TMetaclass.metaclass, 'TComponentTypeRegistry');
@@ -46,25 +47,25 @@ export class TMetaComponentRegistry extends TMetaclass {
         //}
 }
 
-export class TComponentRegistry extends TObject {
+export class TComponentRegistry {
         //_toto: Toto = new Toto();
         //getMetaclass(): TMetaComponentRegistry {
         //return TMetaComponentRegistry.metaclass;
         //}
 
-        private instances = new Map<string, TControl>();
-        getInstances(): Map<string, TControl> {
+        private instances = new Map<string, TLitControlElement>();
+        getInstances(): Map<string, TLitControlElement> {
                 return this.instances;
         }
 
         constructor() {
-                super(TMetaComponentRegistry.metaclass);
+                //super(TMetaComponentRegistry.metaclass);
         }
 
-        registerInstance(name: string, c: TControl) {
+        registerInstance(name: string, c: TLitControlElement) {
                 this.instances.set(name, c);
         }
-        get<T extends TControl = TControl>(name: string): T | undefined {
+        get<T extends TLitControlElement = TLitControlElement>(name: string): T | undefined {
                 return this.instances.get(name) as T | undefined;
         }
 

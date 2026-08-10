@@ -18,11 +18,11 @@
  */
 
 //export * from './StdCtrls';
-export * from './Plugin';
-export * from './IPlugin';
-export * from './VuePlugin';
-export * from './Control';
+// export * from './Plugin';
+// export * from './IPlugin';
+// export * from './VuePlugin';
+// export * from './Control';
 export * from './Application';
 export * from './Form';
-export * from './Component';
+// export * from './Component';
 //export * from './RegisterVcl';

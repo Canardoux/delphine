@@ -1,0 +1,50 @@
+import type { DelphineDocument } from "./model";
+
+export const mainFrameDocument: DelphineDocument = {
+    version: 1,
+    frameName: "MainFrame",
+
+    root: {
+        id: "frame-root",
+        type: "MainFrame",
+        name: "MainFrame",
+
+        properties: {},
+        events: {},
+
+        children: [
+            {
+                id: "panel-1",
+                type: "TLitPanel",
+                name: "Panel1",
+
+                properties: {
+                    width: 320,
+                    height: 180
+                },
+
+                events: {},
+
+                children: [
+                    {
+                        id: "button-1",
+                        type: "TLitButton",
+                        name: "Button1",
+
+                        properties: {
+                            caption: "Click me",
+                            left: 16,
+                            top: 16
+                        },
+
+                        events: {
+                            onclick: "Button1Click"
+                        },
+
+                        children: []
+                    }
+                ]
+            }
+        ]
+    }
+};
