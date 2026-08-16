@@ -8,29 +8,53 @@ export const designMetadata = {
         properties: [
                 {
                         name: 'left',
-                        type: 'number'
+                        type: 'number',
+                        design: {
+                                category: 'style',
+                                label: 'Left'
+                        }
                 },
                 {
                         name: 'top',
-                        type: 'number'
+                        type: 'number',
+                        design: {
+                                category: 'style',
+                                label: 'Top'
+                        }
                 },
                 {
                         name: 'width',
-                        type: 'string'
+                        type: 'string',
+                        design: {
+                                category: 'style',
+                                label: 'Width'
+                        }
                 },
                 {
                         name: 'height',
-                        type: 'string'
+                        type: 'string',
+                        design: {
+                                category: 'style',
+                                label: 'Height'
+                        }
                 },
                 {
                         name: 'color',
                         type: 'string',
-                        defaultValue: ''
+                        defaultValue: '',
+                        design: {
+                                category: 'style',
+                                label: 'Color'
+                        }
                 },
                 {
                         name: 'backgroundColor',
                         type: 'string',
-                        defaultValue: ''
+                        defaultValue: '',
+                        design: {
+                                category: 'style',
+                                label: 'Background Color'
+                        }
                 }
         ],
 

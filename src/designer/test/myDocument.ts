@@ -8,6 +8,7 @@ export const mainFrameDocument: DelphineDocument = {
                 type: 'MainFrame',
                 name: 'MainFrame',
 
+                attributes: {},
                 properties: {},
                 events: {},
 
@@ -16,6 +17,7 @@ export const mainFrameDocument: DelphineDocument = {
                                 type: 'TPanel',
                                 name: 'Panel1',
 
+                                attributes: {},
                                 properties: {
                                         left: 10,
                                         top: 10,
@@ -30,6 +32,7 @@ export const mainFrameDocument: DelphineDocument = {
                                         {
                                                 type: 'TButton',
                                                 name: 'Button1',
+                                                attributes: {},
 
                                                 properties: {
                                                         left: 16,

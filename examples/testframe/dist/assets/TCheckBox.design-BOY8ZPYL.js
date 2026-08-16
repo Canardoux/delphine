@@ -1,1 +1,0 @@
-const e={type:"TCheckBox",tagName:"lit-checkbox",extends:"TLitControlElement",properties:[{name:"caption",type:"string",defaultValue:"The Caption"},{name:"enabled",type:"boolean",defaultValue:!0},{name:"checked",type:"boolean",defaultValue:!1}],events:[{name:"onclick",default:!0}]};export{e as designMetadata};

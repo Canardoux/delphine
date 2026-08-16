@@ -14,17 +14,20 @@ export class DelphineSubFrame extends TFrame {
                 // </delphine:properties>
         };
 
+        // <delphine:property-values>
         msg = 'Caption';
         numberClicked = 50;
+        color = 'magenta';
+        // </delphine:property-values>
 
         static override styles: CSSResultGroup = [
-                TFrame.styles,
+                TFrame.styles
                 // <delphine:styles>
-                css`
-                        delphine-frame {
-                                color: green;
-                        }
-                `
+                // css`
+                //         delphine-frame {
+                //                 color: green;
+                //         }
+                // `
                 // </delphine:styles>
         ];
         render() {
@@ -34,7 +37,7 @@ export class DelphineSubFrame extends TFrame {
         // <delphine:layout>
         get layout() {
                 return html`
-                        <delphine-frame id="sub-frameCCC" data-delphine-name="subFrameCCC" data-delphine-oncreate="onMyCreate">
+                        <delphine-frame id="sub-frameCCC" data-delphine-name="subFrameCCC" color="purple">
                                 MY-SUB-FRAME
                                 <lit-panel data-delphine-name="panel1CCC" data-delphine-component="lit-panel">
                                         <h2 id="ipo9">SUB Frame</h2>
@@ -42,15 +45,21 @@ export class DelphineSubFrame extends TFrame {
                                         <lit-button
                                                 data-delphine-component="lit-button"
                                                 id="button-changeMessageCCC"
-                                                caption="Change messageCCC"
+                                                caption="${this.numberClicked}"
                                                 data-delphine-name="buttonChangeMessageCCC"
                                                 data-delphine-onclick="changeMessage_onclick"
-                                                color="cyan"
+                                                color="red"
                                                 backgroundColor="pink"
                                                 class="delphine-control delphine-button"
                                         >
                                         </lit-button>
-                                        <lit-button data-delphine-component="lit-button" id="button-incrementCCC" caption="Increment counterCCC" data-delphine-name="buttonIncrementCCC" data-delphine-onclick="increment_onclick" class="delphine-control delphine-litbutton"
+                                        <lit-button
+                                                data-delphine-component="lit-button"
+                                                id="button-incrementCCC"
+                                                caption="Increment counterCCC: ${this.numberClicked}"
+                                                data-delphine-name="buttonIncrementCCC"
+                                                data-delphine-onclick="increment_onclick"
+                                                class="delphine-control delphine-litbutton"
                                                 >Increment counter!!!</lit-button
                                         >
                                         <lit-checkbox

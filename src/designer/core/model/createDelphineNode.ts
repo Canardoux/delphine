@@ -7,6 +7,7 @@ export interface CreateDelphineNodeOptions {
         type: string;
         name: string;
 
+        attributes?: Record<string, string>;
         properties?: Record<string, DelphinePropertyValue>;
         events?: Record<string, string>;
         children?: DelphineNode[];
@@ -30,6 +31,7 @@ export function createDelphineNode(options: CreateDelphineNodeOptions): Delphine
         return {
                 type,
                 name,
+                attributes: options.attributes ?? {},
                 properties: { ...(options.properties ?? {}) },
                 events: { ...(options.events ?? {}) },
                 children: [...(options.children ?? [])]

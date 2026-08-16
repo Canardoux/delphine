@@ -1,29 +1,15 @@
 // designer/core/parser/parseHtmlFragment.ts
 
 import type { ComponentMetadata, ComponentPropertyMetadata, TDesignRegistry } from '../metadata';
-
 import type { DelphineDocument, DelphineNode, DelphinePropertyValue } from '../model';
-
 import { createDelphineDocument, createDelphineNode } from '../model';
-
 import { loadHtmlFragment, requiredAttribute } from '../html/htmlUtil';
+import type { DelphineExpression } from '../model/delphinePropertyValue';
 
 export interface ParseHtmlFragmentOptions {
         frameName: string;
         frameType?: string;
         designRegistry: TDesignRegistry;
-}
-
-function parseFrameEvents(element: Element): Record<string, string> {
-        const events: Record<string, string> = {};
-
-        const onCreate = element.getAttribute('data-delphine-oncreate')?.trim();
-
-        if (onCreate) {
-                events.oncreate = onCreate;
-        }
-
-        return events;
 }
 
 export function parseHtmlFragment(source: string, options: ParseHtmlFragmentOptions): DelphineDocument {
@@ -46,15 +32,47 @@ export function parseHtmlFragment(source: string, options: ParseHtmlFragmentOpti
                 frameType: options.frameType
         });
 
+        /*
+         * The <delphine-frame> element is represented by document.root.
+         */
         document.root.name = requiredAttribute(frameElement, 'data-delphine-name');
+        document.root.attributes = parseAttributes(frameElement);
 
         document.root.events = parseFrameEvents(frameElement);
+
+        /*
+         * Preserve root attributes which are not represented elsewhere.
+         *
+         * If DelphineNode does not yet contain `attributes`, leave this
+         * section commented for now and add it in a second step.
+         */
+        // document.root.attributes = parseOrdinaryAttributes(frameElement);
 
         for (const child of Array.from(frameElement.children)) {
                 document.root.children.push(...parseElement(child, options.designRegistry));
         }
 
         return document;
+}
+
+function parseFrameEvents(element: Element): Record<string, string> {
+        const events: Record<string, string> = {};
+
+        for (const attribute of Array.from(element.attributes)) {
+                if (!attribute.name.startsWith('data-delphine-on')) {
+                        continue;
+                }
+
+                const eventName = attribute.name.substring('data-delphine-'.length);
+
+                const handlerName = attribute.value.trim();
+
+                if (handlerName !== '') {
+                        events[eventName] = handlerName;
+                }
+        }
+
+        return events;
 }
 
 /**
@@ -72,17 +90,15 @@ function parseElement(element: Element, designRegistry: TDesignRegistry): Delphi
 
         /*
          * An explicitly marked component must be known by the registry.
-         * This catches missing metadata and spelling errors.
          */
         if (element.hasAttribute('data-delphine-component')) {
                 const declaredType = element.getAttribute('data-delphine-component');
 
-                throw new Error(`Unknown Delphine component <${element.localName}>` + ` declared as "${declaredType}".`);
+                throw new Error(`Unknown Delphine component <${element.localName}> ` + `declared as "${declaredType}".`);
         }
 
         /*
-         * Ordinary HTML is ignored, but known Delphine components nested
-         * inside it are preserved.
+         * Ordinary HTML is transparent.
          */
         const nodes: DelphineNode[] = [];
 
@@ -101,15 +117,19 @@ function parseDelphineNode(element: Element, metadata: ComponentMetadata, design
         const node = createDelphineNode({
                 type: metadata.type,
                 name,
+                attributes: parseAttributes(
+                        element,
 
+                        resolvedMetadata
+                ),
                 properties: parseProperties(element, resolvedMetadata),
 
                 events: parseEvents(element, resolvedMetadata)
         });
 
         /*
-         * Ordinary HTML wrappers below a Delphine component are transparent.
-         * Delphine descendants found inside them become children of this node.
+         * Ordinary HTML wrappers below a Delphine component remain
+         * transparent.
          */
         for (const child of Array.from(element.children)) {
                 node.children.push(...parseElement(child, designRegistry));
@@ -122,6 +142,12 @@ function parseEvents(element: Element, metadata: ComponentMetadata): Record<stri
         const events: Record<string, string> = {};
 
         for (const event of metadata.events) {
+                /*
+                 * Current Delphine source accepts data-delphine-onclick.
+                 *
+                 * We can later also accept delphine-onclick if we decide
+                 * that this becomes the canonical syntax.
+                 */
                 const attributeName = `data-delphine-${event.name}`;
 
                 const handlerName = element.getAttribute(attributeName);
@@ -158,7 +184,26 @@ function parseProperties(element: Element, metadata: ComponentMetadata): Record<
         return result;
 }
 
+function parseLitExpression(value: string): DelphineExpression | undefined {
+        const trimmed = value.trim();
+
+        if (!trimmed.startsWith('${') || !trimmed.endsWith('}')) {
+                return undefined;
+        }
+
+        return {
+                kind: 'expression',
+                source: trimmed.slice(2, -1).trim()
+        };
+}
+
 function parsePropertyValue(value: string, metadata: ComponentPropertyMetadata): DelphinePropertyValue {
+        const expression = parseLitExpression(value);
+
+        if (expression) {
+                return expression.source;
+        }
+
         switch (metadata.type) {
                 case 'string':
                         return value;
@@ -167,7 +212,7 @@ function parsePropertyValue(value: string, metadata: ComponentPropertyMetadata):
                         const number = Number(value);
 
                         if (!Number.isFinite(number)) {
-                                throw new Error(`Invalid number "${value}" ` + `for property "${metadata.name}".`);
+                                throw new Error(`Invalid number "${value}" for property "${metadata.name}".`);
                         }
 
                         return number;
@@ -182,6 +227,34 @@ function parsePropertyValue(value: string, metadata: ComponentPropertyMetadata):
                                 return false;
                         }
 
-                        throw new Error(`Invalid boolean "${value}" ` + `for property "${metadata.name}".`);
+                        throw new Error(`Invalid boolean "${value}" for property "${metadata.name}".`);
         }
+}
+
+function parseAttributes(element: Element, metadata?: ComponentMetadata): Record<string, string> {
+        const attributes: Record<string, string> = {};
+
+        for (const attribute of Array.from(element.attributes)) {
+                const name = attribute.name;
+
+                if (name === 'data-delphine-name') {
+                        continue;
+                }
+
+                if (name.startsWith('data-delphine-on')) {
+                        continue;
+                }
+
+                /*
+                 * Properties known by Delphine are stored in `properties`,
+                 * not duplicated in `attributes`.
+                 */
+                if (metadata?.properties.some((property) => property.name.toLowerCase() === name.toLowerCase())) {
+                        continue;
+                }
+
+                attributes[name] = attribute.value;
+        }
+
+        return attributes;
 }

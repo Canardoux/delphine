@@ -11,24 +11,36 @@ export const designMetadata = {
                 {
                         name: 'caption',
                         type: 'string',
-                        defaultValue: 'The Caption'
+                        defaultValue: 'The Caption',
+                        design: {
+                                category: 'property',
+                                label: 'Caption'
+                        }
                 },
                 {
                         name: 'enabled',
                         type: 'boolean',
-                        defaultValue: true
+                        defaultValue: true,
+                        design: {
+                                category: 'property',
+                                label: 'Enabled'
+                        }
                 },
                 {
                         name: 'checked',
                         type: 'boolean',
-                        defaultValue: false
+                        defaultValue: false,
+                        design: {
+                                category: 'property',
+                                label: 'Checked'
+                        }
                 }
         ],
 
         events: [
-                {
-                        name: 'onclick',
-                        default: true
-                }
+                // {
+                //         name: 'onclick',
+                //         default: true
+                // }
         ]
 } as const satisfies ComponentMetadata;

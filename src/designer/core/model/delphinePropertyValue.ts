@@ -1,3 +1,8 @@
 // designer/core/model/delphinePropertyValue.ts
 
-export type DelphinePropertyValue = string | number | boolean | null;
+export interface DelphineExpression {
+        kind: 'expression';
+        source: string;
+}
+
+export type DelphinePropertyValue = string | number | boolean | DelphineExpression;

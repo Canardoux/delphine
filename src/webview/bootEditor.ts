@@ -24,6 +24,7 @@ type DelphineInboundMessage =
                   frameName: string;
                   html: string;
                   css: string;
+                  frameProperties: Record<string, string | number | boolean>;
           }
         | {
                   type: 'log';
@@ -473,6 +474,16 @@ function registerDelphinePanels(editor: any): void {
         }
 
         editor.Panels.addButton(viewsPanelId, {
+                id: 'delphine-open-style',
+                label: 'Style',
+                attributes: {
+                        title: 'Style'
+                },
+                command: 'open-sm',
+                togglable: true
+        });
+
+        editor.Panels.addButton(viewsPanelId, {
                 id: 'delphine-open-blocks',
                 label: 'Blocks',
                 attributes: {
@@ -675,11 +686,20 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                 }
         }
 
-        function loadHtmlIntoGrapes(editor: any, frameName: string, html: string, css: string, designRegistry: TDesignRegistry): void {
+        function loadHtmlIntoGrapes(editor: any, frameName: string, html: string, css: string, frameProperties: Record<string, string | number | boolean>, designRegistry: TDesignRegistry): void {
                 const document = parseHtmlFragment(html, {
                         frameName,
                         designRegistry
                 });
+
+                /*
+                 * Frame property initial values come from the
+                 * TypeScript property-values section, not from
+                 * <delphine-frame>.
+                 */
+                Object.assign(document.root.properties, frameProperties);
+
+                console.log('[Delphine] ROOT PROPERTIES BEFORE LOAD =', document.root.properties);
 
                 loadDelphineDocument(document, css);
         }
@@ -1197,10 +1217,11 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                         }
 
                         case 'html:update': {
+                                //debugger;
                                 console.log('[HTML UPDATE] RAW length =', payload.html.length);
                                 console.log('[HTML UPDATE] RAW =', payload.html);
 
-                                loadHtmlIntoGrapes(editor, payload.frameName, payload.html, payload.css, designRegistry);
+                                loadHtmlIntoGrapes(editor, payload.frameName, payload.html, payload.css, payload.frameProperties, designRegistry);
 
                                 console.log('[HTML UPDATE] editor.getHtml() =', editor.getHtml());
 
@@ -1276,8 +1297,12 @@ async function grapesJSEditor(grapes: any): Promise<void> {
         });
 
         let lastSelection: string | undefined;
+        console.log('### THIS IS THE CURRENT bootEditor.ts ###');
 
         editor.on('component:selected', (model: any) => {
+                console.log('### COMPONENT SELECTED HANDLER ###', model);
+                debugger;
+
                 if (isLoadingRemoteDocument()) {
                         return;
                 }
@@ -1316,21 +1341,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                         console.error('[Delphine] Failed to initialize the Canvas.', error);
                 });
         });
-        // editor.on('canvas:frame:load', () => {
-        //         console.log('[Delphine] frame loaded');
-
-        //         if (currentThemeCss) {
-        //                 applyThemeToDesigner(editor, currentThemeName, currentThemeCss);
-        //         }
-
-        //         //const config = payload.config;
-        //         //const paletteNames: readonly string[] = config.palettes ?? [];
-
-        //         // TODO: Cannot AWAIT !!!!!
-        //         //await installDesignerRuntime(editor, designerRuntimeUri);
-        //         //const canvasWindow = editor.Canvas.getWindow() as DelphineCanvasWindow;
-        //         //await canvasWindow.__delphineRegisterRuntimePalettes?.(paletteNames);
-        // });
 
         editor.on('load', () => {
                 //addThemeSelector(editor);
@@ -1420,6 +1430,16 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                 if (!el) return;
 
                 const style = component.getStyle();
+                console.log('STYLE UPDATE', component.getStyle());
+                debugger;
+
+                // if (style.color !== undefined) {
+                //         const attrs = component.getAttributes?.() ?? {};
+                //         component.setAttributes({
+                //                 ...attrs,
+                //                 color: style.color
+                //         });
+                // }
 
                 if (style.height) {
                         el.style.height = String(style.height);

@@ -52,6 +52,80 @@ function inferTraitType(property: ComponentPropertyMetadata): string {
         }
 }
 
+// export function loadDocumentIntoGrapes(editor: any, document: DelphineDocument, registry: TDesignRegistry): void {
+//         const html = serializeHtmlFragment(document, {
+//                 designRegistry: registry
+//         });
+
+//         console.log('[Delphine] before clear', editor.getHtml());
+
+//         editor.DomComponents.clear();
+//         editor.setComponents(html);
+
+//         console.log('[Delphine] after setComponents', editor.getHtml());
+
+//         const wrapper = editor.getWrapper?.();
+
+//         if (!wrapper) {
+//                 throw new Error('GrapesJS wrapper is not available.');
+//         }
+
+//         for (const component of getComponentModels(wrapper.components?.())) {
+//                 configureTree(component, registry);
+//         }
+
+//         console.log('[Delphine] after configureTree', editor.getHtml());
+// }
+
+function applyRootToGrapesWrapper(wrapper: any, document: DelphineDocument): void {
+        const root = document.root;
+
+        wrapper.set({
+                name: root.name ?? document.frameName
+        });
+
+        /*
+         * Keep Delphine frame properties on the GrapesJS wrapper.
+         *
+         * The wrapper represents the TFrame instance at design time.
+         */
+        for (const [name, value] of Object.entries(root.properties)) {
+                wrapper.set(name, value);
+        }
+
+        /*
+         * Keep root events as model properties too.
+         */
+        for (const [name, handlerName] of Object.entries(root.events)) {
+                wrapper.set(name, handlerName);
+        }
+}
+
+function applyRootPreview(editor: any, document: DelphineDocument): void {
+        const canvasDocument = editor.Canvas.getDocument?.();
+
+        if (!canvasDocument?.body) {
+                return;
+        }
+
+        const body = canvasDocument.body;
+        const properties = document.root.properties;
+        console.log('[Delphine] APPLY ROOT PREVIEW', properties);
+
+        if (properties.color !== undefined) {
+                body.style.color = String(properties.color);
+                console.log(
+                        '[Delphine] BODY COLOR =',
+
+                        body.style.color
+                );
+        }
+
+        if (properties.backgroundColor !== undefined) {
+                body.style.backgroundColor = String(properties.backgroundColor);
+        }
+}
+
 export function loadDocumentIntoGrapes(editor: any, document: DelphineDocument, registry: TDesignRegistry): void {
         const html = serializeHtmlFragment(document, {
                 designRegistry: registry
@@ -60,6 +134,7 @@ export function loadDocumentIntoGrapes(editor: any, document: DelphineDocument, 
         console.log('[Delphine] before clear', editor.getHtml());
 
         editor.DomComponents.clear();
+
         editor.setComponents(html);
 
         console.log('[Delphine] after setComponents', editor.getHtml());
@@ -70,9 +145,39 @@ export function loadDocumentIntoGrapes(editor: any, document: DelphineDocument, 
                 throw new Error('GrapesJS wrapper is not available.');
         }
 
-        for (const component of getComponentModels(wrapper.components?.())) {
+        //debugger;
+
+        const components = wrapper.components?.();
+
+        console.log('[TREE] wrapper =', wrapper);
+        console.log('[TREE] components =', components);
+        console.log('[TREE] models =', components?.models);
+        console.log('[TREE] length =', components?.length);
+
+        // for (const component of getComponentModels(components)) {
+        //         configureTree(component, registry);
+        // }
+
+        const children = wrapper.components?.();
+
+        for (const component of children?.models ?? []) {
                 configureTree(component, registry);
         }
+
+        //wrapper.components().reset();
+        /*
+         * The GrapesJS wrapper represents the Delphine TFrame itself.
+         */
+        console.log('[Delphine] ROOT PROPERTIES =', document.root.properties);
+        applyRootToGrapesWrapper(wrapper, document);
+
+        // for (const child of document.root.children) {
+        //         wrapper.append(createGrapesComponent(child, registry));
+        // }
+
+        requestAnimationFrame(() => {
+                applyRootPreview(editor, document);
+        });
 
         console.log('[Delphine] after configureTree', editor.getHtml());
 }
@@ -152,69 +257,16 @@ function configureGrapesComponent(component: any, registry: TDesignRegistry): vo
         applyControlGeometry(component);
 }
 
-// function applyControlGeometry(element: HTMLElement, attrs: Record<string, unknown>): void {
-//         element.style.position = 'absolute';
-
-//         applyPixelStyle(element, 'left', attrs.left);
-//         applyPixelStyle(element, 'top', attrs.top);
-//         applyPixelStyle(element, 'width', attrs.width);
-//         applyPixelStyle(element, 'height', attrs.height);
-// }
-
-// function applyPixelStyle(element: HTMLElement, property: 'left' | 'top' | 'width' | 'height', value: unknown): void {
-//         if (value === undefined || value === null || value === '') {
-//                 return;
-//         }
-
-//         const number = Number(value);
-
-//         if (!Number.isFinite(number)) {
-//                 return;
-//         }
-
-//         element.style[property] = `${number}px`;
-// }
-
 export function applyDesignPreview(component: any): void {
+        //debugger;
+
         const attrs = component.getAttributes?.() ?? {};
+        console.log('[PREVIEW BEFORE]', attrs['data-delphine-name'], component.getStyle());
         const type = attrs['data-delphine-component'];
 
         if (!type) {
                 return;
         }
-
-        const style: Record<string, string> = {
-                ...component.getStyle?.()
-        };
-
-        switch (type) {
-                case 'TPanel':
-                        style.display = 'block';
-                        style.boxSizing = 'border-box';
-                        style.border = '1px solid #888';
-                        style.background = '#eee';
-
-                        if (attrs.width === undefined) {
-                                style.width = '320px';
-                        }
-
-                        if (attrs.height === undefined) {
-                                style.height = '180px';
-                        }
-                        break;
-
-                case 'TButton':
-                        style.display = 'inline-block';
-                        style.boxSizing = 'border-box';
-                        style.minWidth = '80px';
-                        style.minHeight = '28px';
-                        style.padding = '6px 10px';
-                        style.border = '1px solid #666';
-                        style.background = '#ddd';
-                        break;
-        }
-
-        component.setStyle(style);
 
         /*
          * Fallback caption when the real custom element runtime
@@ -246,11 +298,12 @@ function applyDesignPreviewWhenReady(component: any, remainingAttempts = 60): vo
 }
 
 function configureTree(component: any, registry: TDesignRegistry): void {
+        //debugger;
         configureGrapesComponent(component, registry);
 
         const children = component.components?.();
 
-        for (const child of getComponentModels(children)) {
+        for (const child of children?.models ?? []) {
                 configureTree(child, registry);
         }
 

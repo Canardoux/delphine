@@ -10,6 +10,7 @@ export interface ComponentPropertyMetadata {
         design?: {
                 label?: string;
                 traitType?: 'text' | 'checkbox' | 'select' | 'color' | 'number';
+                category?: 'style' | 'property' | 'event';
                 options?: string[];
         };
 }

@@ -31,6 +31,8 @@ export interface DelphineNode {
          */
         name: string;
 
+        attributes: Record<string, string>;
+
         /**
          * Explicitly assigned property values.
          *

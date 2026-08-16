@@ -396,17 +396,12 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
                                         try {
                                                 const frame = await loadDelphineFrame(sourceUri);
 
-                                                console.log('[Delphine] Designer source', {
-                                                        sourceUri: sourceUri.toString(),
-                                                        sourceLength: frame.source.length,
-                                                        templateLength: frame.layoutHtml.length
-                                                });
-
                                                 await panel.webview.postMessage({
                                                         type: 'html:update',
                                                         frameName: frame.frameName,
                                                         html: frame.layoutHtml,
-                                                        css: ''
+                                                        css: '',
+                                                        frameProperties: frame.frameProperties
                                                 });
                                         } catch (error: unknown) {
                                                 const message = error instanceof Error ? error.message : String(error);
