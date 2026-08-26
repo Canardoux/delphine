@@ -1,6 +1,9 @@
+// extension/projectModel.ts
+
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import type { DelphineAppConfig } from './config/DelphineAppConfig';
 
 export type ResolvedProject = {
         name: string;
@@ -31,18 +34,6 @@ export type ResolvedUnit = {
         sourceUri: vscode.Uri;
         codeUri: vscode.Uri;
 };
-
-export interface DelphineAppConfig {
-        name?: string;
-
-        ui?: {
-                theme?: string;
-                density?: string;
-                fontScale?: number;
-        };
-
-        palettes?: string[];
-}
 
 export async function loadAppConfig(appRoot: vscode.Uri): Promise<DelphineAppConfig> {
         const configUri = vscode.Uri.joinPath(appRoot, 'app.json');

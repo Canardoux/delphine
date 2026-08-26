@@ -1,4 +1,4 @@
-import{T as o,i,b as n}from"./LitControlElement-GywwQSYU.js";const e=class e extends o{constructor(){super(...arguments),this.caption="Caption",this.checked=!1,this.enabled=!0}handleChange(t){t.stopPropagation();const a=t.currentTarget;this.checked=a.checked,this.dispatchEvent(new CustomEvent("change",{bubbles:!0,composed:!0}))}render(){return n`
+import{T as o,i,b as n}from"./LitControlElement-BHTBfLva.js";const e=class e extends o{constructor(){super(...arguments),this.caption="Caption",this.checked=!1,this.enabled=!0}handleChange(t){t.stopPropagation();const a=t.currentTarget;this.checked=a.checked,this.dispatchEvent(new CustomEvent("change",{bubbles:!0,composed:!0}))}render(){return n`
                         <label>
                                 <input class="native-checkbox" type="checkbox" .checked=${this.checked} ?disabled=${!this.enabled} @change=${this.handleChange} />
 

@@ -1,36 +1,38 @@
-import { TForm, TApplication } from '@vcl';
+// frames/RiriFrame.ts
+
+import { TApplication } from '@vcl';
 import { TButton } from '@vcl/palettes/standard/TButton';
-import { TPanel } from '@vcl/palettes/standard/TPanel';
 import { getApplication } from '@vcl/IApplication';
-import { TCheckBox } from '@vcl/palettes/standard/TCheckBox';
 import { TFrame } from '@vcl/palettes/standard/TFrame';
-import { LitElement, html, css } from 'lit';
-
-//import std from '@vcl/palettes/standard/index';
-
-//import './MainForm.css';
-//import { THostFrame } from '@vcl/palettes/standard/TFrame';
-import { registerMyLitFrame } from './TMyLitFrame';
+import { html } from 'lit';
 
 export default class RiriFrame extends TFrame {
         static properties = {
                 ...TFrame.properties
-
-                // msg: { type: String },
-                // subCounter: { type: Number, state: true },
-                // myCounter: { type: Number, state: true }
+                // <delphine:properties>
+                //msg: { type: String },
+                //numberClicked: { type: Number }
+                // </delphine:properties>
         };
 
-        render() {
-                return html`
-                        <div data-delphine-component="TForm" id="ir9k" data-delphine-name="Riri" data-delphine-oncreate="onMyCreate" data-delphine-onshown="onMyShown" data-delphine-onclick="">
-                                Hello from AutoRunDelphiMode : Riri
+        // <delphine:property-values>
+        // </delphine:property-values>
 
-                                <lit-button data-delphine-component="TButton" caption="MainForm" data-delphine-name="button1" @click="${this.button1_onclick}" class="delphine-control delphine-button"> MainForm </lit-button>
-                                <lit-button data-delphine-component="TButton" caption="POP to MainForm" data-delphine-name="button2" @click="${this.button2_onclick}" class="delphine-control delphine-button"> POP to MainForm </lit-button>
-                        </div>
+        render() {
+                return this.layout;
+        }
+        // <delphine:layout>
+        get layout() {
+                return html`
+                        <lit-panel data-delphine-component="TPanel" data-delphine-name="Riri" id="ious"
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="button1" caption="MainForm" data-delphine-onclick="button1_onclick" id="iw11"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="button2" caption="POP to MainForm" data-delphine-onclick="button2_onclick" id="i1dc"> </lit-button></lit-panel
+                        ><sub-frame data-delphine-component="TSubFrame" data-delphine-name="SubFrame1" id="iz0q"> </sub-frame>
                 `;
         }
+        // </delphine:layout>
+
+        // <delphine:handlers>
 
         button1_onclick(_ev: Event | null, _sender: any) {
                 debugger;
@@ -42,9 +44,7 @@ export default class RiriFrame extends TFrame {
                 btn!.color = 'rgb(0, 128, 128)';
                 console.log('Button1 clicked!!!!');
                 const app = getApplication() as TApplication;
-                //const mainForm = app.getFormByName('MainForm');
                 app?.showFormByName('MainForm');
-                //app.replaceForm('MainForm');
         }
 
         button2_onclick(_ev: Event | null, _sender: any) {
@@ -57,15 +57,23 @@ export default class RiriFrame extends TFrame {
                 btn!.color = 'rgb(255, 0, 0)';
                 console.log('Button2 clicked!!!!');
                 const app = getApplication() as TApplication;
-                //const mainForm = app.getFormByName('MainForm');
-                //app?.showFormByName('MainForm');
                 app.popFormDestroy();
         }
+
+        // </delphine:handlers>
 }
 
+export const frameMetadata = {
+        tagName: 'riri-frame',
+        design: {
+                category: 'Frames',
+                resizable: true,
+                droppable: false
+        }
+};
 export function registerRiriFrame() {
-        if (!customElements.get('riri-frame')) {
-                customElements.define('riri-frame', RiriFrame);
+        if (!customElements.get(frameMetadata.tagName)) {
+                customElements.define(frameMetadata.tagName, RiriFrame);
         }
 }
 

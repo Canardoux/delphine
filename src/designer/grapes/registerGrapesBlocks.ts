@@ -131,7 +131,8 @@ function createComponentDefinition(metadata: ComponentMetadata): Record<string, 
         }
 
         return {
-                type: metadata.tagName,
+                // PAS de type: metadata.tagName
+
                 tagName: metadata.tagName,
 
                 attributes,

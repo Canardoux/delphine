@@ -2,11 +2,12 @@
 
 import { showDelphineTraitTab, showCurrentDelphineTraitTab } from './delphineGrapesBridge.js';
 import { TDesignRegistry, initializeDesignRegistry } from '../designer/core/metadata.js';
-import type { ComponentEventMetadata } from '../designer/core/metadata.js';
 import type { DelphineDocument } from '../designer/core/model/delphineDocument.js';
 import { registerGrapesBlocks } from '../designer/grapes/registerGrapesBlocks.js';
 import { applyDesignPreview, loadDocumentIntoGrapes } from '../designer/grapes/documentToGrapes.js';
 import { parseHtmlFragment } from '../designer/core/parser/parseHtmlFragment.js';
+import { registerDesignFrames } from '../designer/core/registerDesignFrames.js';
+import type { DelphineFrameConfig } from '../extension/config/DelphineAppConfig.js';
 
 type DelphineInboundMessage =
         | {
@@ -14,11 +15,6 @@ type DelphineInboundMessage =
                   html: string;
                   css: string;
           }
-        // | {
-        //           type: 'delphine-document:update';
-        //           document: DelphineDocument;
-        //           css?: string;
-        //   }
         | {
                   type: 'html:update';
                   frameName: string;
@@ -56,11 +52,7 @@ interface VsCodeApi {
 }
 
 declare function acquireVsCodeApi(): VsCodeApi;
-// declare global {
-//         interface Window {
-//                 __delphineDesignerRuntimeUri?: string;
-//         }
-// }
+
 declare global {
         interface Window {
                 __delphineDesignerRuntimeSource?: string;
@@ -88,9 +80,12 @@ type DocUpdateMessage = {
 
 type DelphineCanvasWindow = Window & {
         __delphineRegisterRuntimePalettes?: (paletteNames: readonly string[]) => Promise<void>;
+
+        __delphineRegisterRuntimeFrames?: (frames: readonly DelphineFrameConfig[]) => Promise<void>;
 };
 
 let currentPaletteNames: readonly string[] = [];
+let currentFrames: readonly DelphineFrameConfig[] = [];
 let lastSentHtml = '';
 let lastSentCss = '';
 let isApplyingRemoteDocument = false;
@@ -420,6 +415,8 @@ function postContentChanged(editor: any) {
 
         console.log(`[boot ${bootInstanceId}] contentChanged -> VSCode`);
 
+        console.log('[DIRTY TEST] sending contentChanged', html.length, css.length);
+
         postToVsCode({
                 type: 'contentChanged',
                 html,
@@ -543,7 +540,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
         addThemeSelector(editor);
 
         let dirtyTimer: number | undefined;
-        //let app: TApplication = new TApplication('MainApp');
 
         function markDirty(_editor: any, _reason: string) {
                 if (!canSendOutbound()) {
@@ -761,6 +757,23 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                 throw new Error('The GrapesJS Canvas document did not become available.');
         }
 
+        async function registerCanvasRuntimeFrames(editor: any, frames: readonly DelphineFrameConfig[]): Promise<void> {
+                const canvasWindow = editor.Canvas.getWindow?.() as DelphineCanvasWindow | undefined;
+
+                const register = canvasWindow?.__delphineRegisterRuntimeFrames;
+
+                if (typeof register !== 'function') {
+                        throw new Error('Delphine Canvas frame registration is not available.');
+                }
+
+                await register.call(canvasWindow, frames);
+                console.log('[Delphine] Canvas custom elements:', {
+                        button: editor.Canvas.getWindow()?.customElements.get('lit-button'),
+                        panel: editor.Canvas.getWindow()?.customElements.get('lit-panel'),
+                        subFrame: editor.Canvas.getWindow()?.customElements.get('sub-frame')
+                });
+        }
+
         async function initializeCanvas(editor: any): Promise<void> {
                 console.trace('[Delphine] initializeCanvas CALLED');
 
@@ -773,6 +786,14 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
                 if (currentPaletteNames.length > 0) {
                         await registerCanvasRuntimePalettes(editor, currentPaletteNames);
+                }
+
+                if (currentFrames.length > 0) {
+                        await registerCanvasRuntimeFrames(
+                                editor,
+
+                                currentFrames
+                        );
                 }
 
                 if (currentThemeCss) {
@@ -993,68 +1014,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                 }
         }
 
-        //const app = new TApplication('AppForGrapesJS');
-        //await app.readConfig(); !!! ne marche pas, car on ne peut pas faire d'import dynamique dans un module ESM
-        // const typeRegistry = new TTypeRegistry();
-        // await registerPalettes(typeRegistry!, allPalettes);
-        //await app.registerFrames(typeRegistry!);
-
-        // const app = getApplication() as TApplication;
-        // await registerFrames(typeRegistry);
-        // registerDelphineComponentsFromRegistry(editor, typeRegistry!);
-        // keepTypeRegistry(typeRegistry!);
-
-        //await registerDesignPalettes(designRegistry, appConfig.palettes); // TODO:
-
-        // function createTestDocument(): DelphineDocument {
-        //         return {
-        //                 version: 1,
-        //                 frameName: 'MainFrame',
-
-        //                 root: {
-        //                         type: 'MainFrame',
-        //                         name: 'MainFrame',
-        //                         properties: {},
-        //                         events: {},
-
-        //                         children: [
-        //                                 {
-        //                                         type: 'TPanel',
-        //                                         name: 'Panel1',
-
-        //                                         properties: {
-        //                                                 left: 10,
-        //                                                 top: 10,
-        //                                                 width: '320',
-        //                                                 height: '180'
-        //                                         },
-
-        //                                         events: {},
-
-        //                                         children: [
-        //                                                 {
-        //                                                         type: 'TButton',
-        //                                                         name: 'Button1',
-
-        //                                                         properties: {
-        //                                                                 left: 10,
-        //                                                                 top: 10,
-        //                                                                 caption: 'Hello from Delphine',
-        //                                                                 enabled: true
-        //                                                         },
-
-        //                                                         events: {
-        //                                                                 onclick: 'Button1Click'
-        //                                                         },
-
-        //                                                         children: []
-        //                                                 }
-        //                                         ]
-        //                                 }
-        //                         ]
-        //                 }
-        //         };
-        // }
         let currentThemeCss = '';
         let currentThemeName = 'win98';
         messageHandler = async (payload: DelphineInboundMessage) => {
@@ -1072,20 +1031,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
                                 break;
                         }
-
-                        // case 'delphine-document:update': {
-                        //         loadDelphineDocument(payload.document, payload.css ?? '');
-
-                        //         requestAnimationFrame(() => {
-                        //                 if (currentThemeCss) {
-                        //                         applyThemeToDesigner(editor, currentThemeName, currentThemeCss);
-                        //                 }
-
-                        //                 editor.refresh();
-                        //         });
-
-                        //         break;
-                        // }
 
                         case 'log':
                                 break;
@@ -1127,84 +1072,25 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                                 applyThemeToDesigner(editor, currentThemeName, currentThemeCss);
                                 break;
                         }
-                        // case 'app:config': {
-                        //         const config = payload.config;
-                        //         const paletteNames: readonly string[] = config.palettes ?? [];
-
-                        //         console.log('[Delphine] app:config received', config);
-
-                        //         await initializeDesignRegistry(designRegistry, paletteNames);
-
-                        //         console.log('[Delphine] design types registered', designRegistry.getAll());
-
-                        //         registerGrapesBlocks(editor, designRegistry);
-
-                        //         editor.BlockManager.render?.();
-
-                        //         const testDocument = createTestDocument();
-
-                        //         beginRemoteApply();
-
-                        //         try {
-                        //                 editor.UndoManager.stop();
-
-                        //                 loadDocumentIntoGrapes(editor, testDocument, designRegistry);
-
-                        //                 applyDelphineBodyTraits();
-
-                        //                 editor.UndoManager.start();
-                        //                 editor.UndoManager.clear();
-
-                        //                 editor.refresh();
-                        //         } finally {
-                        //                 requestAnimationFrame(() => {
-                        //                         endRemoteApply();
-                        //                 });
-                        //         }
-
-                        //         /*
-                        //          * Runtime registration is optional and must not delay
-                        //          * the design-time preview.
-                        //          */
-                        //         void registerCanvasRuntimePalettes(editor, paletteNames).catch((error: unknown) => {
-                        //                 console.warn('[Delphine] Canvas runtime is unavailable; ' + 'using design previews.', error);
-                        //         });
-
-                        //         editor.BlockManager.render?.();
-
-                        //         break;
-                        // }
 
                         case 'app:config': {
-                                currentPaletteNames = payload.config.palettes ?? [];
+                                const config = payload.config;
+
+                                currentPaletteNames = config.palettes ?? [];
+                                currentFrames = config.frames ?? [];
 
                                 await initializeDesignRegistry(designRegistry, currentPaletteNames);
+
+                                registerDesignFrames(designRegistry, currentFrames);
 
                                 registerGrapesBlocks(editor, designRegistry);
                                 editor.BlockManager.render?.();
 
-                                //await initializeCanvas(editor);
-                                // {
-                                //         // TODO:
-                                //         editor.setComponents(`
-                                //                 <div id="delphine-probe">
-                                //                         HELLO DELPHINE
-                                //                 </div>
-                                //         `);
+                                // IMPORTANT :
+                                // maintenant que palettes + frames sont connues,
+                                // initialise réellement le runtime du Canvas.
+                                await initializeCanvas(editor);
 
-                                //         console.log('[PROBE] editor.getHtml() =', editor.getHtml());
-
-                                //         console.log('[PROBE] canvas body =', editor.Canvas.getDocument?.()?.body?.innerHTML);
-                                //         postToVsCode({
-                                //                 type: 'log',
-                                //                 text: '[PROBE] getHtml=' + editor.getHtml() + ' BODY=' + editor.Canvas.getDocument?.()?.body?.innerHTML
-                                //         });
-                                // }
-
-                                /*
-                                 * Ask the host for the application theme once
-                                 * the Canvas is operational.
-                                 */
                                 postToVsCode({
                                         type: 'delphine:get-theme'
                                 });
@@ -1215,7 +1101,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
                                 break;
                         }
-
                         case 'html:update': {
                                 //debugger;
                                 console.log('[HTML UPDATE] RAW length =', payload.html.length);
@@ -1235,20 +1120,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
                                 break;
                         }
-
-                        // case 'delphine-document:update': {
-                        //         loadDelphineDocument(payload.document, payload.css ?? '');
-
-                        //         requestAnimationFrame(() => {
-                        //                 if (currentThemeCss) {
-                        //                         applyThemeToDesigner(editor, currentThemeName, currentThemeCss);
-                        //                 }
-
-                        //                 editor.refresh();
-                        //         });
-
-                        //         break;
-                        // }
                 }
         };
 
@@ -1259,7 +1130,15 @@ async function grapesJSEditor(grapes: any): Promise<void> {
         });
 
         editor.on('component:add', (model: any) => {
+                console.log(
+                        '[DIRTY TEST] component:add',
+
+                        model.getAttributes?.(),
+
+                        model.get?.('tagName')
+                );
                 if (isLoadingRemoteDocument()) {
+                        console.log('[DIRTY TEST] ignored: remote loading');
                         return;
                 }
 
@@ -1336,10 +1215,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
         editor.on('canvas:frame:load', () => {
                 console.log('[Delphine] frame loaded');
-
-                void initializeCanvas(editor).catch((error: unknown) => {
-                        console.error('[Delphine] Failed to initialize the Canvas.', error);
-                });
         });
 
         editor.on('load', () => {
@@ -1418,7 +1293,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                                 true
                         );
                 }
-                //postToVsCode({ type: 'delphine:get-theme' });
         });
 
         editor.on('component:styleUpdate', (component: any) => {
@@ -1432,14 +1306,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                 const style = component.getStyle();
                 console.log('STYLE UPDATE', component.getStyle());
                 debugger;
-
-                // if (style.color !== undefined) {
-                //         const attrs = component.getAttributes?.() ?? {};
-                //         component.setAttributes({
-                //                 ...attrs,
-                //                 color: style.color
-                //         });
-                // }
 
                 if (style.height) {
                         el.style.height = String(style.height);

@@ -44,12 +44,13 @@ export class TButton extends TLitControlElement {
                                 border: none;
                                 transform: translateY(0);
 
+                                width: 100%;
+                                height: 100%;
                                 min-width: 75px;
                                 min-height: 30px;
                                 padding: 0 12px;
 
                                 color: inherit;
-                                width: inherit;
 
                                 font-family: var(--control-font-family, Arial, sans-serif);
 

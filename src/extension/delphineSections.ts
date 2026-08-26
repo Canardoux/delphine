@@ -65,3 +65,31 @@ function findTemplateLiteralEnd(source: string, start: number): number {
 
         throw new Error('Unterminated Lit template in the Delphine layout section.');
 }
+
+export interface LitTemplateSection {
+        content: string;
+        contentStart: number;
+        contentEnd: number;
+}
+
+export function extractLitTemplateSection(sectionContent: string): LitTemplateSection {
+        const returnHtmlIndex = sectionContent.indexOf('return html`');
+
+        if (returnHtmlIndex < 0) {
+                throw new Error('Unable to find "return html`" in Delphine layout section.');
+        }
+
+        const contentStart = returnHtmlIndex + 'return html`'.length;
+
+        const contentEnd = sectionContent.lastIndexOf('`');
+
+        if (contentEnd < contentStart) {
+                throw new Error('Unable to find closing backtick of Delphine layout template.');
+        }
+
+        return {
+                content: sectionContent.slice(contentStart, contentEnd),
+                contentStart,
+                contentEnd
+        };
+}

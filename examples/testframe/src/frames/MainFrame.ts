@@ -1,36 +1,42 @@
-//import { TForm, TControl, TColor, TApplication, TPluginHost } from '@vcl';
-import { TButton } from '@vcl/palettes/standard/TButton';
-import { TPanel } from '@vcl/palettes/standard/TPanel';
-import { getApplication } from '@vcl/IApplication';
-import { TCheckBox } from '@vcl/palettes/standard/TCheckBox';
+// frames/MainFrame.ts
+
 import { TFrame } from '@vcl/palettes/standard/TFrame';
-import { LitElement, html, css } from 'lit';
-import { DelphineMyLitFrame } from './TMyLitFrame';
-
-//import std from '@vcl/palettes/standard/index';
-
-//import './MainForm.css';
-//import { THostFrame } from '@vcl/palettes/standard/TFrame';
-import { registerMyLitFrame } from './TMyLitFrame';
+import { html, css, type CSSResultGroup } from 'lit';
 
 console.log('[MainFrame] module loaded from:', import.meta.url);
 
 export default class MainFrame extends TFrame {
         static properties = {
                 ...TFrame.properties
-
+                // <delphine:properties>
                 // msg: { type: String },
                 // subCounter: { type: Number, state: true },
                 // myCounter: { type: Number, state: true }
+                // </delphine:properties>
         };
 
+        // <delphine:property-values>
+        // </delphine:property-values>
+
+        static override styles: CSSResultGroup = [
+                TFrame.styles
+                // <delphine:styles>
+                // css`
+                //         delphine-frame {
+                //                 color: green;
+                //         }
+                // `
+                // </delphine:styles>
+        ];
+
         render() {
-                return html`
-                        <div>
-                                <my-lit-frame data-delphine-component="main-frame" id="main-frameAAA" data-delphine-name="main-frameAAA" data-delphine-onclick="helloframeAAA_onclick"></my-lit-frame>
-                        </div>
-                `;
+                return this.layout;
         }
+        // <delphine:layout>
+        get layout() {
+                return html` <my-lit-frame data-delphine-component="main-frame" id="main-frameAAA" data-delphine-name="main-frameAAA" data-delphine-onclick="helloframeAAA_onclick"></my-lit-frame> `;
+        }
+        // </delphine:layout>
 
         private helloframeAAA_onclick(ev: Event): void {
                 console.log('helloframeAAA_onclick');

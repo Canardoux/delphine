@@ -1,4 +1,4 @@
-import{T as o,i as e,b as a}from"./LitControlElement-GywwQSYU.js";const t=class t extends o{constructor(){super(...arguments),this.caption="The Caption",this.enabled=!0}render(){return a`
+import{T as o,i as e,b as a}from"./LitControlElement-BHTBfLva.js";const t=class t extends o{constructor(){super(...arguments),this.caption="The Caption",this.enabled=!0}render(){return a`
                         <button style=${this.getControlStyle()} ?disabled=${!this.enabled}>
                                 <span class="caption">${this.caption}</span>
                         </button>
@@ -13,12 +13,13 @@ import{T as o,i as e,b as a}from"./LitControlElement-GywwQSYU.js";const t=class 
                                 border: none;
                                 transform: translateY(0);
 
+                                width: 100%;
+                                height: 100%;
                                 min-width: 75px;
                                 min-height: 30px;
                                 padding: 0 12px;
 
                                 color: inherit;
-                                width: inherit;
 
                                 font-family: var(--control-font-family, Arial, sans-serif);
 

@@ -28,7 +28,8 @@ export default defineConfig({
         server: {
                 fs: {
                         allow: [path.resolve(__dirname, '../../')]
-                }
+                },
+                cors: true
         },
         build: {
                 rollupOptions: {

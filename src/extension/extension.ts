@@ -4,7 +4,6 @@ import { getPreviewUrlForUnit, disposeAllViteServers, runApp } from './ViteServe
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-//import { ProjectsProvider } from './delphine/ProjectsProvider';
 import { DelphineTreeProvider } from './delphine/DelphineTreeProvider';
 import { newForm } from './delphine/NewForm';
 import { DelphineCustomEditorProvider } from './editor/DelphineCustomEditorProvider';
@@ -16,6 +15,7 @@ import { loadDoc } from './loadForm';
 import { parseDformSource } from './dformSource'; // ou le bon chemin chez vous
 import { loadDelphineFrame } from './loadDelphineFrame';
 import { loadAppConfig } from './projectModel';
+import { extractDelphineSection, extractLitTemplateSection } from './delphineSections';
 
 let activeRuntimePreviewUri: vscode.Uri | undefined;
 
@@ -226,16 +226,30 @@ function createDesignerHtml(webview: vscode.Webview, extensionUri: vscode.Uri): 
 <head>
         <meta charset="UTF-8">
 
-        <meta
-                http-equiv="Content-Security-Policy"
-                content="
-                        default-src 'none';
-                        style-src ${webview.cspSource} 'unsafe-inline';
-                        script-src ${webview.cspSource} 'nonce-${nonce}' blob:;
-                        img-src ${webview.cspSource} data:;
-                "
-        >
+<meta
+        http-equiv="Content-Security-Policy"
+        content="
+                default-src 'none';
 
+                style-src
+                        ${webview.cspSource}
+                        'unsafe-inline';
+
+                script-src
+                        ${webview.cspSource}
+                        'nonce-${nonce}'
+                        blob:
+                        http://127.0.0.1:*;
+
+                connect-src
+                        http://127.0.0.1:*
+                        ws://127.0.0.1:*;
+
+                img-src
+                        ${webview.cspSource}
+                        data:;
+        "
+>
         <meta
                 name="viewport"
                 content="width=device-width, initial-scale=1.0"
@@ -275,53 +289,27 @@ function createDesignerHtml(webview: vscode.Webview, extensionUri: vscode.Uri): 
 </html>`;
 }
 
-// async function loadDelphineDocumentFromFrame(sourceUri: vscode.Uri): Promise<DelphineDocument> {
-//         const textDocument = await vscode.workspace.openTextDocument(sourceUri);
-
-//         const source = textDocument.getText();
-
-//         const loaded = await loadDoc(sourceUri);
-//         const document = parseHtmlFragment(loaded.template, {
-//                 frameName: path.basename(sourceUri.fsPath, '.ts'),
-//                 designRegistry: null as any // TODO: Provide the actual design registry here
-//         });
-//         return document;
-
-//         // return parseDelphineFrameSource(source, {
-//         //         sourceUri
-//         // });
-// }
-
 async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.Uri): Promise<void> {
-        // const panel = vscode.window.createWebviewPanel('delphineDesigner', 'Delphine Designer', vscode.ViewColumn.One, {
-        //         enableScripts: true,
-        //         retainContextWhenHidden: true,
+        const sourceDocument = await vscode.workspace.openTextDocument(sourceUri);
+        const app = resolveApp(sourceUri);
 
-        //         localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')]
-        // });
-        //const document = await loadDelphineDocumentFromFrame(sourceUri);
+        if (!app) {
+                throw new Error(`Unable to resolve the Delphine app for "${sourceUri.fsPath}".`);
+        }
 
-        const panel = vscode.window.createWebviewPanel(
-                'delphineDesigner',
+        const appConfig = await loadAppConfig(app.rootDir);
 
-                `Delphine Designer — ${path.basename(sourceUri.fsPath)}`,
+        const baseTitle = `Delphine Designer — ${path.basename(sourceUri.fsPath)}`;
 
-                vscode.ViewColumn.One,
+        const panel = vscode.window.createWebviewPanel('delphineDesigner', baseTitle, vscode.ViewColumn.One, {
+                enableScripts: true,
+                retainContextWhenHidden: true,
+                localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')]
+        });
 
-                {
-                        enableScripts: true,
-
-                        retainContextWhenHidden: true,
-
-                        localResourceRoots: [
-                                vscode.Uri.joinPath(
-                                        context.extensionUri,
-
-                                        'media'
-                                )
-                        ]
-                }
-        );
+        function updateDesignerTitle(): void {
+                panel.title = sourceDocument.isDirty ? `${baseTitle} *` : baseTitle;
+        }
 
         panel.webview.onDidReceiveMessage(
                 async (message: unknown) => {
@@ -344,15 +332,31 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
                                         console.log('[Delphine] Designer WebView ready');
                                         break;
 
-                                case 'app:get-config':
+                                case 'app:get-config': {
+                                        const previewUrl = await getPreviewUrlForUnit(sourceUri);
+
+                                        const viteOrigin = new URL(previewUrl).origin;
+                                        // extension.ts
+
+                                        const designerConfig = {
+                                                ...appConfig,
+
+                                                frames: (appConfig.frames ?? []).map((frame) => ({
+                                                        ...frame,
+
+                                                        url: new URL(frame.url.replace(/^\.\//, ''), viteOrigin + '/').href
+                                                }))
+                                        };
+
+                                        console.log('[Delphine Designer] config frames =', designerConfig.frames);
+
                                         await panel.webview.postMessage({
                                                 type: 'app:config',
-
-                                                config: {
-                                                        palettes: ['standard'] // TODO:
-                                                }
+                                                config: designerConfig
                                         });
+
                                         break;
+                                }
 
                                 case 'log':
                                         console.log('[Delphine WebView]', message);
@@ -361,13 +365,7 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
                                 case 'delphine:get-theme': {
                                         console.log('[Delphine host] delphine:get-theme received');
 
-                                        const app = resolveApp(sourceUri);
-
-                                        if (!app) {
-                                                throw new Error(`Unable to resolve the Delphine app for "${sourceUri.fsPath}".`);
-                                        }
-                                        const config = await loadAppConfig(app.rootDir);
-                                        const themeName = config.ui?.theme ?? 'flat'; // const themeName = 'motif';
+                                        const themeName = appConfig.ui?.theme ?? 'flat'; // const themeName = 'motif';
 
                                         const themePath = vscode.Uri.joinPath(app.rootDir, 'public', 'themes', `${themeName}.css`);
                                         console.log('[Delphine host] loading theme:', themePath.fsPath);
@@ -394,7 +392,13 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
                                 }
                                 case 'delphine:design-ready': {
                                         try {
+                                                console.log('[DESIGN READY] source =', sourceUri.fsPath);
                                                 const frame = await loadDelphineFrame(sourceUri);
+                                                console.log('[DESIGN READY] frameName =', frame.frameName);
+
+                                                console.log('[DESIGN READY] layoutHtml =', frame.layoutHtml);
+
+                                                console.log('[DESIGN READY] frameProperties =', frame.frameProperties);
 
                                                 await panel.webview.postMessage({
                                                         type: 'html:update',
@@ -403,7 +407,9 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
                                                         css: '',
                                                         frameProperties: frame.frameProperties
                                                 });
+                                                console.log('[DESIGN READY] html:update SENT');
                                         } catch (error: unknown) {
+                                                console.error('[DESIGN READY] FAILED', error);
                                                 const message = error instanceof Error ? error.message : String(error);
 
                                                 console.error('[Delphine] Failed to load frame layout.', error);
@@ -411,6 +417,37 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
                                                 void vscode.window.showErrorMessage(`Unable to load Delphine layout: ${message}`);
                                         }
 
+                                        break;
+                                }
+                                case 'contentChanged': {
+                                        const change = message as {
+                                                type: 'contentChanged';
+                                                html: string;
+                                                css: string;
+                                                rev: number;
+                                        };
+
+                                        try {
+                                                await applyDesignerChanges(sourceDocument, change.html, change.css);
+
+                                                updateDesignerTitle();
+                                        } catch (error) {
+                                                console.error('[Delphine] Unable to apply designer changes.', error);
+
+                                                void vscode.window.showErrorMessage(`Unable to apply Designer changes: ${error instanceof Error ? error.message : String(error)}`);
+                                        }
+
+                                        break;
+                                }
+
+                                case 'delphine:save': {
+                                        const saved = await sourceDocument.save();
+
+                                        if (!saved) {
+                                                void vscode.window.showErrorMessage('Unable to save Delphine frame.');
+                                        }
+
+                                        updateDesignerTitle();
                                         break;
                                 }
                         }
@@ -422,8 +459,98 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
         panel.webview.html = createDesignerHtml(panel.webview, context.extensionUri);
 }
 
+async function applyDesignerChanges(document: vscode.TextDocument, html: string, _css: string): Promise<void> {
+        const source = document.getText();
+
+        const layoutSection = extractDelphineSection(source, 'layout');
+
+        if (!layoutSection) {
+                throw new Error('Delphine layout section not found.');
+        }
+
+        const template = extractLitTemplateSection(layoutSection.content);
+
+        /*
+         * template.contentStart / contentEnd are relative
+         * to layoutSection.content.
+         */
+        const absoluteStart = layoutSection.contentStart + template.contentStart;
+
+        const absoluteEnd = layoutSection.contentStart + template.contentEnd;
+
+        const start = document.positionAt(absoluteStart);
+        const end = document.positionAt(absoluteEnd);
+
+        const replacement = `
+${html}
+        `;
+
+        const edit = new vscode.WorkspaceEdit();
+
+        edit.replace(document.uri, new vscode.Range(start, end), replacement);
+
+        const applied = await vscode.workspace.applyEdit(edit);
+
+        if (!applied) {
+                throw new Error('Unable to apply Delphine Designer changes.');
+        }
+
+        console.log('[DIRTY TEST] applyEdit =', applied, 'isDirty =', document.isDirty);
+}
+
 function resolveCommandUri(input?: unknown): vscode.Uri | undefined {
         return (input as any)?.unit?.sourceUri ?? (input as any)?.fileUri ?? resolveUnit(normalizeToFileUri(input))?.sourceUri ?? normalizeToFileUri(input) ?? vscode.window.activeTextEditor?.document.uri;
+}
+
+function isDelphineFrameSource(uri: vscode.Uri): boolean {
+        const document = vscode.workspace.textDocuments.find((doc) => doc.uri.toString() === uri.toString());
+
+        if (!document) {
+                return false;
+        }
+
+        const source = document.getText();
+
+        return source.includes('// <delphine:layout>') && source.includes('// </delphine:layout>');
+}
+
+function resolveDesignerUri(input?: unknown): vscode.Uri | undefined {
+        console.log('[RESOLVE DESIGNER] input =', input);
+
+        /*
+         * Command invoked from the Delphine tree.
+         */
+        const itemUri = (input as any)?.unit?.sourceUri ?? (input as any)?.fileUri;
+
+        if (itemUri instanceof vscode.Uri) {
+                console.log('[RESOLVE DESIGNER] tree uri =', itemUri.fsPath);
+                return itemUri;
+        }
+
+        /*
+         * Command invoked from the editor.
+         *
+         * A Delphine Frame is now a TypeScript source file, therefore
+         * the active TypeScript document itself is the natural target.
+         */
+        const activeUri = vscode.window.activeTextEditor?.document.uri;
+
+        console.log('[RESOLVE DESIGNER] activeUri =', activeUri?.fsPath);
+
+        if (activeUri?.scheme === 'file' && activeUri.fsPath.endsWith('.ts')) {
+                return activeUri;
+        }
+
+        /*
+         * Last chance for older callers which pass a URI-like object.
+         */
+        const normalized = normalizeToFileUri(input);
+
+        if (normalized?.fsPath.endsWith('.ts')) {
+                return normalized;
+        }
+
+        return undefined;
 }
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -492,21 +619,20 @@ export function activate(context: vscode.ExtensionContext): void {
         );
 
         context.subscriptions.push(
-                vscode.commands.registerCommand(
-                        'delphine.openDesigner',
+                vscode.commands.registerCommand('delphine.openDesigner', async (input?: unknown) => {
+                        console.log('[OPEN DESIGNER] input =', input);
 
-                        async (input?: unknown) => {
-                                const targetUri = resolveCommandUri(input);
+                        const targetUri = resolveDesignerUri(input);
 
-                                if (!targetUri) {
-                                        void vscode.window.showErrorMessage('No Delphine frame selected');
+                        console.log('[OPEN DESIGNER] target =', targetUri?.fsPath);
 
-                                        return;
-                                }
-
-                                await openDesigner(context, targetUri);
+                        if (!targetUri) {
+                                void vscode.window.showErrorMessage('No Delphine Frame selected');
+                                return;
                         }
-                )
+
+                        await openDesigner(context, targetUri);
+                })
         );
 
         // ------------------------------------------------

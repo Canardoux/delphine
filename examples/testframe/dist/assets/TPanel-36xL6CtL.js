@@ -1,4 +1,4 @@
-import{T as o,i as e,b as s}from"./LitControlElement-GywwQSYU.js";const t=class t extends o{updated(){super.updated(),this.style.setProperty("--delphine-control-color",this.color||""),this.style.setProperty("--delphine-control-background-color",this.backgroundColor||""),this.style.width=this.width||"",this.style.backgroundColor=this.backgroundColor,this.style.color=this.color,this.style.width=this.width}render(){return s`<slot></slot>`}};t.properties={...o.properties},t.styles=[o.styles,e`
+import{T as o,i as e,b as s}from"./LitControlElement-BHTBfLva.js";const t=class t extends o{updated(){super.updated(),this.style.setProperty("--delphine-control-color",this.color||""),this.style.setProperty("--delphine-control-background-color",this.backgroundColor||""),this.style.width=this.width||"",this.style.backgroundColor=this.backgroundColor,this.style.color=this.color,this.style.width=this.width}render(){return s`<slot></slot>`}};t.properties={...o.properties},t.styles=[o.styles,e`
                         :host {
                                 display: block;
                                 box-sizing: border-box;

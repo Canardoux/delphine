@@ -1,5 +1,3 @@
-// frames/TSubFrame.ts
-
 import { html, css, type CSSResultGroup } from 'lit';
 import { TButton } from '@vcl/palettes/standard/TButton';
 import { TCheckBox } from '@vcl/palettes/standard/TCheckBox';
@@ -19,7 +17,7 @@ export class DelphineSubFrame extends TFrame {
         // <delphine:property-values>
         msg = 'Caption';
         numberClicked = 50;
-        color = 'green';
+        color = 'magenta';
         // </delphine:property-values>
 
         static override styles: CSSResultGroup = [
@@ -39,11 +37,47 @@ export class DelphineSubFrame extends TFrame {
         // <delphine:layout>
         get layout() {
                 return html`
-                        <lit-panel data-delphine-component="TPanel" data-delphine-name="panel1CCC" id="iryw"
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="buttonChangeMessageCCC" color="red" backgroundcolor="pink" caption="this.numberClicked" data-delphine-onclick="changeMessage_onclick" id="iyiz"> </lit-button
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="buttonIncrementCCC" caption="Increment counterCCC: ${this.numberClicked}" data-delphine-onclick="increment_onclick" id="izif"> </lit-button
-                                ><lit-checkbox data-delphine-component="TCheckBox" data-delphine-name="litCheckboxCCC" caption="THE CAPTION FROM GRAPESJS" data-delphine-onclick="LitCheckbox_onclick" id="imsp"> </lit-checkbox></lit-panel
-                        ><lit-button data-delphine-component="TButton" data-delphine-name="Button1" color="" backgroundcolor="" caption="The Caption" enabled="true" id="igqba"> </lit-button>
+                        <delphine-frame id="sub-frameCCC" data-delphine-name="subFrameCCC" color="purple">
+                                MY-SUB-FRAME
+                                <lit-panel data-delphine-name="panel1CCC" data-delphine-component="lit-panel">
+                                        <h2 id="ipo9">SUB Frame</h2>
+                                        👋 Message: ${this.msg}
+                                        <lit-button
+                                                data-delphine-component="lit-button"
+                                                id="button-changeMessageCCC"
+                                                caption="${this.numberClicked}"
+                                                data-delphine-name="buttonChangeMessageCCC"
+                                                data-delphine-onclick="changeMessage_onclick"
+                                                color="red"
+                                                backgroundColor="pink"
+                                                class="delphine-control delphine-button"
+                                        >
+                                        </lit-button>
+                                        <lit-button
+                                                data-delphine-component="lit-button"
+                                                id="button-incrementCCC"
+                                                caption="Increment counterCCC: ${this.numberClicked}"
+                                                data-delphine-name="buttonIncrementCCC"
+                                                data-delphine-onclick="increment_onclick"
+                                                class="delphine-control delphine-litbutton"
+                                                >Increment counter!!!</lit-button
+                                        >
+                                        <lit-checkbox
+                                                data-delphine-component="lit-checkbox"
+                                                data-delphine-name="litCheckboxCCC"
+                                                data-delphine-popupmenu=""
+                                                data-delphine-onclick="LitCheckbox_onclick"
+                                                data-delphine-ondblclick=""
+                                                data-delphine-oncontextpopup=""
+                                                caption="THE CAPTION FROM GRAPESJS"
+                                                id="ibu0nCCC"
+                                                class="delphine-control delphine-litcheckbox"
+                                                @change="${this.checkbox_onchange}"
+                                        >
+                                        </lit-checkbox>
+                                        <p>Number of clicks: ${this.numberClicked}</p>
+                                </lit-panel>
+                        </delphine-frame>
                 `;
         }
         // </delphine:layout>

@@ -56,30 +56,24 @@ export abstract class TLitControlElement extends LitElement {
         width = '';
         height = '';
         left = 77; // TODO:
-        right = 77; // TODO:
+        top = 77; // TODO:
 
         protected getControlStyle() {
                 return styleMap({
                         color: this.color || undefined,
-                        'background-color': this.backgroundColor || undefined,
-                        width: this.width || undefined
+                        'background-color': this.backgroundColor || undefined
+                        //width: this.width || undefined,
+                        //height: this.height || undefined
                 });
         }
 
         protected override updated(): void {
-                this.style.setProperty(
-                        '--delphine-control-color',
+                this.style.setProperty('--delphine-control-color', this.color || '');
 
-                        this.color || ''
-                );
-
-                this.style.setProperty(
-                        '--delphine-control-background-color',
-
-                        this.backgroundColor || ''
-                );
+                this.style.setProperty('--delphine-control-background-color', this.backgroundColor || '');
 
                 this.style.width = this.width || '';
+                this.style.height = this.height || '';
         }
 }
 

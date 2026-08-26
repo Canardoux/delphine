@@ -28,7 +28,7 @@
                         "name": "SubFrame",
                         "className": "TSubFrame",
                         "type": "lit",
-                        "url": "./src/frames/subframe.ts",
+                        "url": "./src/frames/TSubFrame.ts",
                         "tagName": "sub-frame",
                         "module": "./dist/frames/subframe.js",
                         "props": [],
@@ -60,17 +60,5 @@
                 "density": "normal",
                 "fontScale": 1
         },
-        "palettes": ["standard", "additional"],
-        "plugins": [
-                {
-                        "id": "hello-vue",
-                        "type": "vue",
-                        "factory": "./plugins/hello-vue/index.ts"
-                },
-                {
-                        "id": "hello-svelte",
-                        "type": "svelte",
-                        "factory": "./plugins/hello-svelte/index.ts"
-                }
-        ]
+        "palettes": ["standard", "additional"]
 }

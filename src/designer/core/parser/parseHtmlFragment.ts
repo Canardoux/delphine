@@ -17,44 +17,50 @@ export function parseHtmlFragment(source: string, options: ParseHtmlFragmentOpti
 
         const rootElements = Array.from(fragment.children);
 
-        if (rootElements.length !== 1) {
-                throw new Error('A Delphine layout must contain exactly one root <delphine-frame> element.');
-        }
-
-        const frameElement = rootElements[0];
-
-        if (frameElement.localName !== 'delphine-frame') {
-                throw new Error(`Expected root <delphine-frame>, found <${frameElement.localName}>.`);
-        }
-
         const document = createDelphineDocument({
                 frameName: options.frameName,
                 frameType: options.frameType
         });
 
         /*
-         * The <delphine-frame> element is represented by document.root.
+         * Backward compatibility with the old representation:
+         *
+         * <delphine-frame>
+         *     ...
+         * </delphine-frame>
          */
-        document.root.name = requiredAttribute(frameElement, 'data-delphine-name');
-        document.root.attributes = parseAttributes(frameElement);
+        if (rootElements.length === 1 && rootElements[0].localName === 'delphine-frame') {
+                const frameElement = rootElements[0];
 
-        document.root.events = parseFrameEvents(frameElement);
+                const frameName = frameElement.getAttribute('data-delphine-name');
+
+                if (frameName) {
+                        document.root.name = frameName;
+                }
+
+                document.root.attributes = parseAttributes(frameElement);
+                document.root.events = parseFrameEvents(frameElement);
+
+                for (const child of Array.from(frameElement.children)) {
+                        document.root.children.push(...parseElement(child, options.designRegistry));
+                }
+
+                return document;
+        }
 
         /*
-         * Preserve root attributes which are not represented elsewhere.
+         * Current representation:
          *
-         * If DelphineNode does not yet contain `attributes`, leave this
-         * section commented for now and add it in a second step.
+         * The TFrame itself is document.root.
+         * The Lit template contains only its children and may therefore
+         * contain several top-level elements.
          */
-        // document.root.attributes = parseOrdinaryAttributes(frameElement);
-
-        for (const child of Array.from(frameElement.children)) {
-                document.root.children.push(...parseElement(child, options.designRegistry));
+        for (const element of rootElements) {
+                document.root.children.push(...parseElement(element, options.designRegistry));
         }
 
         return document;
 }
-
 function parseFrameEvents(element: Element): Record<string, string> {
         const events: Record<string, string> = {};
 
