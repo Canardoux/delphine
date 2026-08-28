@@ -24,10 +24,10 @@ export default class RiriFrame extends TFrame {
         // <delphine:layout>
         get layout() {
                 return html`
-                        <lit-panel data-delphine-component="TPanel" data-delphine-name="Riri" id="ious"
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="button1" caption="MainForm" data-delphine-onclick="button1_onclick" id="iw11"> </lit-button
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="button2" caption="POP to MainForm" data-delphine-onclick="button2_onclick" id="i1dc"> </lit-button></lit-panel
-                        ><sub-frame data-delphine-component="TSubFrame" data-delphine-name="SubFrame1" id="iz0q"> </sub-frame>
+                        <lit-panel data-delphine-component="TPanel" data-delphine-name="Riri" id="iomi"
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="button1" caption="MainForm" data-delphine-onclick="button1_onclick" id="is7v"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="button2" caption="POP to MainForm" data-delphine-onclick="button2_onclick" id="irgh2"> </lit-button
+                        ></lit-panel>
                 `;
         }
         // </delphine:layout>

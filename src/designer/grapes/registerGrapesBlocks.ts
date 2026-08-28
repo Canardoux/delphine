@@ -2,8 +2,18 @@
 
 import type { ComponentMetadata, TDesignRegistry } from '../core/metadata';
 
-export function registerGrapesBlocks(editor: any, registry: TDesignRegistry): void {
+export function registerGrapesBlocks(
+        editor: any,
+
+        registry: TDesignRegistry,
+
+        excludedTypes: ReadonlySet<string> = new Set()
+): void {
         for (const metadata of registry.getAll()) {
+                if (excludedTypes.has(metadata.type)) {
+                        continue;
+                }
+
                 registerGrapesBlock(editor, registry, metadata);
         }
 }

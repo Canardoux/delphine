@@ -16,6 +16,7 @@ import { parseDformSource } from './dformSource'; // ou le bon chemin chez vous
 import { loadDelphineFrame } from './loadDelphineFrame';
 import { loadAppConfig } from './projectModel';
 import { extractDelphineSection, extractLitTemplateSection } from './delphineSections';
+import { buildForbiddenFrameTypes } from './designerFrameDependencies';
 
 let activeRuntimePreviewUri: vscode.Uri | undefined;
 
@@ -336,7 +337,20 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
                                         const previewUrl = await getPreviewUrlForUnit(sourceUri);
 
                                         const viteOrigin = new URL(previewUrl).origin;
-                                        // extension.ts
+
+                                        const forbiddenFrameTypes = await buildForbiddenFrameTypes(app.rootDir, sourceUri, appConfig.frames ?? []);
+                                        console.log(
+                                                '[Delphine Designer] CURRENT =',
+
+                                                sourceUri.fsPath
+                                        );
+
+                                        console.log(
+                                                '[Delphine Designer] FORBIDDEN =',
+
+                                                forbiddenFrameTypes
+                                        );
+                                        console.log('[Delphine Designer] forbidden frames =', forbiddenFrameTypes);
 
                                         const designerConfig = {
                                                 ...appConfig,
@@ -345,7 +359,9 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
                                                         ...frame,
 
                                                         url: new URL(frame.url.replace(/^\.\//, ''), viteOrigin + '/').href
-                                                }))
+                                                })),
+
+                                                forbiddenFrameTypes
                                         };
 
                                         console.log('[Delphine Designer] config frames =', designerConfig.frames);
@@ -450,6 +466,28 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
                                         updateDesignerTitle();
                                         break;
                                 }
+
+                                case 'delphine:open-handler': {
+                                        const request = message as {
+                                                type: 'delphine:open-handler';
+                                                componentName: string;
+                                                componentClass: string;
+                                                eventName: string;
+                                                handlerName: string;
+                                        };
+
+                                        console.log('[Delphine] OPEN HANDLER REQUEST', request);
+
+                                        try {
+                                                await openDelphineHandler(sourceDocument, request.handlerName);
+                                        } catch (error) {
+                                                console.error('[Delphine] Unable to open handler.', error);
+
+                                                void vscode.window.showErrorMessage(`Unable to open event handler: ${error instanceof Error ? error.message : String(error)}`);
+                                        }
+
+                                        break;
+                                }
                         }
                 },
                 undefined,
@@ -457,6 +495,104 @@ async function openDesigner(context: vscode.ExtensionContext, sourceUri: vscode.
         );
 
         panel.webview.html = createDesignerHtml(panel.webview, context.extensionUri);
+}
+
+function hasDelphineSection(source: string, sectionName: string): boolean {
+        return source.includes(`// <delphine:${sectionName}>`) && source.includes(`// </delphine:${sectionName}>`);
+}
+
+function findHandlerPosition(document: vscode.TextDocument, handlerName: string): vscode.Position | undefined {
+        const source = document.getText();
+
+        if (!hasDelphineSection(source, 'handlers')) {
+                return undefined;
+        }
+
+        const handlersSection = extractDelphineSection(source, 'handlers');
+
+        const regex = new RegExp(`(^|\\n)\\s*${escapeRegExp(handlerName)}\\s*\\(`, 'm');
+
+        const match = regex.exec(handlersSection.content);
+
+        if (!match) {
+                return undefined;
+        }
+
+        const nameOffsetInMatch = match[0].lastIndexOf(handlerName);
+
+        const relativeOffset = match.index + nameOffsetInMatch;
+
+        const absoluteOffset = handlersSection.contentStart + relativeOffset;
+
+        return document.positionAt(absoluteOffset);
+}
+
+function selectHandler(editor: vscode.TextEditor, position: vscode.Position): void {
+        editor.selection = new vscode.Selection(position, position);
+
+        editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+}
+
+async function openDelphineHandler(document: vscode.TextDocument, handlerName: string): Promise<void> {
+        const source = document.getText();
+
+        if (!hasDelphineSection(source, 'handlers')) {
+                throw new Error('Invalid Delphine Frame: missing ' + '"// <delphine:handlers>" section.');
+        }
+
+        const editor = await vscode.window.showTextDocument(document, {
+                viewColumn: vscode.ViewColumn.Beside,
+                preserveFocus: false,
+                preview: false
+        });
+
+        let position = findHandlerPosition(document, handlerName);
+
+        if (!position) {
+                console.log('[Delphine] handler does not exist, creating:', handlerName);
+
+                position = await createDelphineHandler(document, handlerName);
+        } else {
+                console.log('[Delphine] existing handler:', handlerName);
+        }
+
+        selectHandler(editor, position);
+}
+function escapeRegExp(value: string): string {
+        return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+async function createDelphineHandler(document: vscode.TextDocument, handlerName: string): Promise<vscode.Position> {
+        const source = document.getText();
+
+        const handlersSection = extractDelphineSection(source, 'handlers');
+
+        const insertionOffset = handlersSection.contentEnd;
+
+        const newHandler = `
+
+        ${handlerName}(_ev: Event | null, _sender: any): void {
+
+        }
+`;
+
+        const edit = new vscode.WorkspaceEdit();
+
+        edit.insert(document.uri, document.positionAt(insertionOffset), newHandler);
+
+        const applied = await vscode.workspace.applyEdit(edit);
+
+        if (!applied) {
+                throw new Error(`Unable to create event handler "${handlerName}".`);
+        }
+
+        const position = findHandlerPosition(document, handlerName);
+
+        if (!position) {
+                throw new Error(`Handler "${handlerName}" was created but cannot be located.`);
+        }
+
+        return position;
 }
 
 async function applyDesignerChanges(document: vscode.TextDocument, html: string, _css: string): Promise<void> {

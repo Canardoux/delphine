@@ -20,128 +20,55 @@ import { DelphineSubFrame } from './TSubFrame';
 export class DelphineMyLitFrame extends TFrame {
         static properties = {
                 ...TFrame.properties,
-
+                // <delphine:properties>
                 msg: { type: String },
                 subCounter: { type: Number, state: true },
                 myCounter: { type: Number, state: true }
+                // </delphine:properties>
         };
-        // static styles = css`
-        //         div {
-        //                 color: red;
+        // <delphine:styles>
+        // css`
+        //         delphine-frame {
+        //                 color: green;
         //         }
-        // `;
+        // `
+        // </delphine:styles>
 
+        // <delphine:property-values>
         msg = 'Caption';
         //subFrame = this.getComponent<DelphineSubFrame>('sub-frameBBB')!;
         //subCounter = this.subFrame ? this.subFrame.numberClicked : 20;
         subCounter: number = 20;
         myCounter: number = 30;
+        // </delphine:property-values>
+
         constructor() {
                 super();
         }
 
         render() {
-                return html`
-                        <div id="hello-frameBBB" data-delphine-name="hello-frameBBB" data-delphine-oncreate="onMyCreateBBB">
-                                <lit-panel data-delphine-name="Panel1BBB" id="Panel1BBB" data-delphine-component="lit-panel">
-                                        <h2 id="ipo99">Frame</h2>
-                                        👋 Message: ${this.msg}
-
-                                        <lit-button
-                                                data-delphine-component="TButton"
-                                                id="button-a"
-                                                caption="Show Riri"
-                                                data-delphine-name="showriri"
-                                                data-delphine-onclick="showriri_onclick"
-                                                data-delphine-ondblclick=""
-                                                data-delphine-popupmenu=""
-                                                data-delphine-oncontextpopup=""
-                                                class="delphine-control delphine-button"
-                                        >
-                                        </lit-button>
-                                        <lit-button
-                                                data-delphine-component="TButton"
-                                                id="button-b"
-                                                caption="push Riri"
-                                                data-delphine-name="pushriri"
-                                                data-delphine-onclick="pushriri_onclick"
-                                                data-delphine-ondblclick=""
-                                                data-delphine-popupmenu=""
-                                                data-delphine-oncontextpopup=""
-                                                class="delphine-control delphine-button"
-                                        >
-                                        </lit-button>
-
-                                        <lit-button
-                                                data-delphine-component="TButton"
-                                                data-delphine-name="Modern"
-                                                data-delphine-onclick="modern_onclick"
-                                                caption="Modern"
-                                                id="itiqa"
-                                                data-delphine-ondblclick=""
-                                                data-delphine-popupmenu=""
-                                                data-delphine-oncontextpopup=""
-                                                class="delphine-control delphine-button"
-                                        >
-                                        </lit-button>
-                                        <lit-button
-                                                data-delphine-component="TButton"
-                                                data-delphine-name="Win95"
-                                                data-delphine-onclick="Win95_onclick"
-                                                caption="Win95"
-                                                id="ipm9k"
-                                                data-delphine-ondblclick=""
-                                                data-delphine-popupmenu=""
-                                                data-delphine-oncontextpopup=""
-                                                class="delphine-control delphine-button"
-                                        >
-                                        </lit-button>
-                                        <lit-button
-                                                data-delphine-component="TButton"
-                                                data-delphine-name="Win98"
-                                                data-delphine-onclick="Win98_onclick"
-                                                caption="Win98"
-                                                data-delphine-ondblclick=""
-                                                id="i90r7"
-                                                data-delphine-popupmenu=""
-                                                data-delphine-oncontextpopup=""
-                                                class="delphine-control delphine-button"
-                                        >
-                                        </lit-button>
-                                        <lit-button
-                                                data-delphine-component="TButton"
-                                                data-delphine-name="Cde"
-                                                data-delphine-onclick="cde_onclick"
-                                                caption="Cde"
-                                                data-delphine-ondblclick=""
-                                                id="iimad"
-                                                data-delphine-popupmenu=""
-                                                data-delphine-oncontextpopup=""
-                                                class="delphine-control delphine-button"
-                                        >
-                                        </lit-button>
-                                        <lit-button
-                                                data-delphine-component="TButton"
-                                                data-delphine-name="Motif"
-                                                data-delphine-onclick="Motif_onclick"
-                                                caption="Motif"
-                                                data-delphine-ondblclick=""
-                                                data-delphine-oncontextpopup=""
-                                                data-delphine-caption="Motif"
-                                                id="iyccw"
-                                                class="delphine-control delphine-button"
-                                        >
-                                        </lit-button>
-                                        <p>Number of clicks: ${this.subCounter}</p>
-                                        <lit-button data-delphine-component="TButton" data-delphine-name="incrementSubCounter" data-delphine-onclick="incrementSubCounter" caption="Incr. Counter" id="fgju" class="delphine-control delphine-button"> </lit-button>
-                                        <p>myCounter: ${this.myCounter}</p>
-                                        <lit-button data-delphine-component="TButton" data-delphine-name="incrementMyCounter" data-delphine-onclick="incrementMyCounter" caption="Incr. MyCounter" id="fgjuqd" class="delphine-control delphine-button"> </lit-button>
-                                </lit-panel>
-
-                                <sub-frame data-delphine-component="sub-frame" id="sub-frameBBB" data-delphine-name="sub-frameBBB" @counter-change="${this.counterChanged}" .numberClicked=${this.myCounter} data-delphine-oncreate="onMyCreate"></sub-frame>
-                        </div>
-                `;
+                return this.layout;
         }
+        // <delphine:layout>
+        get layout() {
+                return html`
+                        <lit-panel data-delphine-component="TPanel" data-delphine-name="Panel1BBB" id="i1r1"
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="showriri" caption="Show Riri" data-delphine-onclick="showriri_onclick" id="ismp"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="pushriri" caption="push Riri" data-delphine-onclick="pushriri_onclick" id="iuxg"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="Modern" caption="Modern" data-delphine-onclick="modern_onclick" id="i68l"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="Win95" caption="Win95" data-delphine-onclick="Win95_onclick" id="iccty"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="Win98" caption="Win98" data-delphine-onclick="Win98_onclick" id="i6l54"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="Cde" caption="Cde" data-delphine-onclick="cde_onclick" id="ipphk"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="Motif" caption="Motif" data-delphine-onclick="Motif_onclick" id="i55su"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="incrementSubCounter" caption="Incr. Counter" data-delphine-onclick="incrementSubCounter" id="i0siq"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="incrementMyCounter" caption="Incr. MyCounter" data-delphine-onclick="incrementMyCounter" id="iwe6h"> </lit-button></lit-panel
+                        ><sub-frame data-delphine-component="TSubFrame" data-delphine-name="sub-frameBBB" id="i7x16"> </sub-frame
+                        ><lit-button data-delphine-component="TButton" data-delphine-name="Button1" color="" backgroundcolor="" caption="The Caption" enabled="true" data-delphine-onclick="Button1_onclick" id="i0mfk"> </lit-button>
+                `;
+                // </delphine:layout>
+        }
+
+        // <delphine:handlers>
 
         private counterChanged(ev: CustomEvent<number>): void {
                 this.subCounter = ev.detail;
@@ -237,11 +164,6 @@ export class DelphineMyLitFrame extends TFrame {
                 app!.setTheme('modern');
         }
 
-        Win95_onclick(_ev: Event | null, _sender: any) {
-                const app = getApplication();
-                app!.setTheme('win95');
-        }
-
         Win98_onclick(_ev: Event | null, _sender: any) {
                 const app = getApplication();
                 app!.setTheme('win98');
@@ -257,7 +179,7 @@ export class DelphineMyLitFrame extends TFrame {
         }
 
         Button1_oncontextpopup(_ev: Event | null, _sender: any) {
-                console.log('Button1 context popup!!!!'); // TODO: handle Button1_oncontextpopup
+                console.log('Button1 context popup!!!!');
         }
 
         Motif_onclick(_ev: Event | null, _sender: any) {
@@ -292,6 +214,9 @@ export class DelphineMyLitFrame extends TFrame {
                 const btn = this.getComponent<TCheckBox>('LitCheckbox');
                 btn!.color = 'rgb(255, 0, 255)';
         }
+
+        Win95_onclick(_ev: Event | null, _sender: any): void {}
+        // </delphine:handlers>
 }
 //customElements.define('my-lit-frame', DelphineMyLitFrame);
 

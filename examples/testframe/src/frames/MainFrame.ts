@@ -34,7 +34,7 @@ export default class MainFrame extends TFrame {
         }
         // <delphine:layout>
         get layout() {
-                return html` <my-lit-frame data-delphine-component="main-frame" id="main-frameAAA" data-delphine-name="main-frameAAA" data-delphine-onclick="helloframeAAA_onclick"></my-lit-frame> `;
+                return html` <my-lit-frame data-delphine-component="TMyLitFrame" id="main-frameAAA" data-delphine-name="main-frameAAA" data-delphine-onclick="helloframeAAA_onclick"></my-lit-frame> `;
         }
         // </delphine:layout>
 

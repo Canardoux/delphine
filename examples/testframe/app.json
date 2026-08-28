@@ -19,7 +19,7 @@
                         "className": "TMyLitFrame",
                         "type": "lit",
                         "url": "./src/frames/TMyLitFrame.ts",
-                        "tagName": "mylit-frame",
+                        "tagName": "my-lit-frame",
                         "module": "./dist/frames/TMyLitFrame.js",
                         "props": [],
                         "events": []

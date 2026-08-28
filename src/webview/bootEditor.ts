@@ -9,6 +9,12 @@ import { parseHtmlFragment } from '../designer/core/parser/parseHtmlFragment.js'
 import { registerDesignFrames } from '../designer/core/registerDesignFrames.js';
 import type { DelphineFrameConfig } from '../extension/config/DelphineAppConfig.js';
 
+type DelphineDesignerConfig = {
+        palettes?: string[];
+        frames?: DelphineFrameConfig[];
+        forbiddenFrameTypes?: string[];
+};
+
 type DelphineInboundMessage =
         | {
                   type: 'doc:update';
@@ -37,7 +43,7 @@ type DelphineInboundMessage =
           }
         | {
                   type: 'app:config';
-                  config: any;
+                  config: DelphineDesignerConfig;
           };
 
 type DelphineWindow = Window &
@@ -267,24 +273,24 @@ function installKeyboardShortcuts(): void {
         });
 }
 
-function installDirectHostReceiver(): void {
-        const w = window as DelphineWindow;
+// function installDirectHostReceiver(): void {
+//         const w = window as DelphineWindow;
 
-        w.__delphineReceiveFromHost = (payload: DelphineInboundMessage) => {
-                console.log(`[boot ${bootInstanceId}] direct message from host: ${payload.type}`);
+//         w.__delphineReceiveFromHost = (payload: DelphineInboundMessage) => {
+//                 console.log(`[boot ${bootInstanceId}] direct message from host: ${payload.type}`);
 
-                if (!messageHandler) {
-                        if (!w.__delphinePendingFromHost) {
-                                w.__delphinePendingFromHost = [];
-                        }
-                        w.__delphinePendingFromHost.push(payload);
-                        console.log(`[boot ${bootInstanceId}] queued before editor ready: ${payload.type}`);
-                        return;
-                }
+//                 if (!messageHandler) {
+//                         if (!w.__delphinePendingFromHost) {
+//                                 w.__delphinePendingFromHost = [];
+//                         }
+//                         w.__delphinePendingFromHost.push(payload);
+//                         console.log(`[boot ${bootInstanceId}] queued before editor ready: ${payload.type}`);
+//                         return;
+//                 }
 
-                messageHandler(payload);
-        };
-}
+//                 messageHandler(payload);
+//         };
+// }
 
 function installHostReceiver(): void {
         window.addEventListener('message', (event: MessageEvent<DelphineInboundMessage>) => {
@@ -512,6 +518,28 @@ function registerDelphinePanels(editor: any): void {
                 command: 'open-layers',
                 togglable: true
         });
+}
+
+function setEventHandlerName(component: any, eventName: string, handlerName: string): void {
+        const attrName = `data-delphine-${eventName}`;
+        const value = handlerName.trim();
+
+        const attrs = {
+                ...(component.getAttributes?.() ?? {})
+        };
+
+        if (value) {
+                attrs[attrName] = value;
+        } else {
+                delete attrs[attrName];
+        }
+
+        component.setAttributes(attrs);
+
+        /*
+         * Keep the GrapesJS property coherent with the HTML attribute.
+         */
+        component.set(eventName, value);
 }
 
 async function grapesJSEditor(grapes: any): Promise<void> {
@@ -863,28 +891,30 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
                                 const eventName = trait.get('name');
                                 const attrName = `data-delphine-${eventName}`;
+
                                 const attrs = component.getAttributes?.() ?? {};
 
                                 input.value = attrs[attrName] ?? '';
 
+                                /*
+                                 * Manual modification:
+                                 *
+                                 * only modify the association.
+                                 * Do not inspect or modify TypeScript handlers.
+                                 */
                                 input.addEventListener('change', () => {
-                                        const currentAttrs = component.getAttributes?.() ?? {};
-
-                                        component.setAttributes({
-                                                ...currentAttrs,
-                                                [attrName]: input.value
-                                        });
-
-                                        component.set(eventName, input.value);
+                                        setEventHandlerName(component, eventName, input.value);
                                 });
 
+                                /*
+                                 * Explicit request to open/create the handler.
+                                 */
                                 button.addEventListener('click', () => {
-                                        openEventHandler(editor, component, eventName);
+                                        openEventHandler(editor, component, eventName, input);
                                 });
 
-                                // bonus : double click aussi
                                 input.addEventListener('dblclick', () => {
-                                        openEventHandler(editor, component, eventName);
+                                        openEventHandler(editor, component, eventName, input);
                                 });
 
                                 container.appendChild(input);
@@ -894,7 +924,6 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                         }
                 });
         }
-
         function findModelFromElement(editor: any, el: HTMLElement): any | null {
                 const name = el.getAttribute('data-delphine-name');
                 if (!name) return null;
@@ -919,6 +948,57 @@ async function grapesJSEditor(grapes: any): Promise<void> {
                 }
 
                 return name;
+        }
+
+        function openEventHandler(editor: any, model: any, eventName: string, input?: HTMLInputElement): void {
+                if (!model) {
+                        return;
+                }
+
+                const attrs = model.getAttributes?.() ?? {};
+
+                const componentName = attrs['data-delphine-name'];
+                const componentClass = attrs['data-delphine-component'];
+
+                if (!componentName || !componentClass) {
+                        return;
+                }
+
+                const attrName = `data-delphine-${eventName}`;
+
+                let handlerName = String(attrs[attrName] ?? '').trim();
+
+                /*
+                 * Empty event:
+                 * generate the conventional handler name and associate it
+                 * with the event.
+                 */
+                if (!handlerName) {
+                        handlerName = `${componentName}_${eventName}`;
+
+                        setEventHandlerName(model, eventName, handlerName);
+
+                        /*
+                         * Reflect immediately in the visible trait editor.
+                         */
+                        if (input) {
+                                input.value = handlerName;
+                        }
+                }
+
+                /*
+                 * From here on, handlerName is always non-empty.
+                 *
+                 * The extension decides whether the TypeScript method
+                 * already exists or must be created.
+                 */
+                postToVsCode({
+                        type: 'delphine:open-handler',
+                        componentName,
+                        componentClass,
+                        eventName,
+                        handlerName
+                });
         }
 
         function openDefaultEventHandler(editor: any, model: any): void {
@@ -1083,12 +1163,14 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
                                 registerDesignFrames(designRegistry, currentFrames);
 
-                                registerGrapesBlocks(editor, designRegistry);
+                                console.log('[Delphine WebView] forbiddenFrameTypes =', config.forbiddenFrameTypes);
+
+                                const forbiddenFrameTypes = new Set<string>(config.forbiddenFrameTypes ?? []);
+
+                                registerGrapesBlocks(editor, designRegistry, forbiddenFrameTypes);
+
                                 editor.BlockManager.render?.();
 
-                                // IMPORTANT :
-                                // maintenant que palettes + frames sont connues,
-                                // initialise réellement le runtime du Canvas.
                                 await initializeCanvas(editor);
 
                                 postToVsCode({
@@ -1101,6 +1183,7 @@ async function grapesJSEditor(grapes: any): Promise<void> {
 
                                 break;
                         }
+
                         case 'html:update': {
                                 //debugger;
                                 console.log('[HTML UPDATE] RAW length =', payload.html.length);
