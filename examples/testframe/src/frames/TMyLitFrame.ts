@@ -52,21 +52,24 @@ export class DelphineMyLitFrame extends TFrame {
         // <delphine:layout>
         get layout() {
                 return html`
-                        <lit-panel data-delphine-component="TPanel" data-delphine-name="Panel1BBB" id="i1r1"
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="showriri" caption="Show Riri" data-delphine-onclick="showriri_onclick" id="ismp"> </lit-button
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="pushriri" caption="push Riri" data-delphine-onclick="pushriri_onclick" id="iuxg"> </lit-button
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="Modern" caption="Modern" data-delphine-onclick="modern_onclick" id="i68l"> </lit-button
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="Win95" caption="Win95" data-delphine-onclick="Win95_onclick" id="iccty"> </lit-button
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="Win98" caption="Win98" data-delphine-onclick="Win98_onclick" id="i6l54"> </lit-button
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="Cde" caption="Cde" data-delphine-onclick="cde_onclick" id="ipphk"> </lit-button
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="Motif" caption="Motif" data-delphine-onclick="Motif_onclick" id="i55su"> </lit-button
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="incrementSubCounter" caption="Incr. Counter" data-delphine-onclick="incrementSubCounter" id="i0siq"> </lit-button
-                                ><lit-button data-delphine-component="TButton" data-delphine-name="incrementMyCounter" caption="Incr. MyCounter" data-delphine-onclick="incrementMyCounter" id="iwe6h"> </lit-button></lit-panel
-                        ><sub-frame data-delphine-component="TSubFrame" data-delphine-name="sub-frameBBB" id="i7x16"> </sub-frame
-                        ><lit-button data-delphine-component="TButton" data-delphine-name="Button1" color="" backgroundcolor="" caption="The Caption" enabled="true" data-delphine-onclick="Button1_onclick" id="i0mfk"> </lit-button>
+                        <lit-panel data-delphine-component="TPanel" data-delphine-name="Panel1BBB" id="iezh"
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="showriri" caption="Show Riri" data-delphine-onclick="showriri_onclick" id="ii4f"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="pushriri" caption="push Riri" data-delphine-onclick="pushriri_onclick" id="ishi"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="Modern" caption="Modern" data-delphine-onclick="modern_onclick" id="izma"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="Win95" caption="Win95" data-delphine-onclick="Win95_onclick" id="izvtj"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="Win98" caption="Win98" data-delphine-onclick="Win98_onclick" id="ip2lh"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="Cde" caption="Cde" data-delphine-onclick="cde_onclick" id="ivnif"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="Motif" caption="Motif" data-delphine-onclick="Motif_onclick" id="iovp9"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="incrementSubCounter" caption="Incr. Counter" data-delphine-onclick="incrementSubCounter" id="ifyni"> </lit-button
+                                ><lit-button data-delphine-component="TButton" data-delphine-name="incrementMyCounter" caption="Incr. MyCounter" data-delphine-onclick="incrementMyCounter" id="il86u"> </lit-button></lit-panel
+                        ><sub-frame data-delphine-component="TSubFrame" data-delphine-name="sub-frameBBB" id="i4ocj"> </sub-frame
+                        ><lit-button data-delphine-component="TButton" data-delphine-name="Button1" color="" backgroundcolor="" caption="The Caption" enabled="true" data-delphine-onclick="Button1_onclick" id="iuh2l"> </lit-button>
                 `;
                 // </delphine:layout>
         }
+
+        // <delphine:components>
+        // </delphine:components>
 
         // <delphine:handlers>
 
@@ -216,6 +219,8 @@ export class DelphineMyLitFrame extends TFrame {
         }
 
         Win95_onclick(_ev: Event | null, _sender: any): void {}
+
+        toto(_ev: Event | null, _sender: any): void {}
         // </delphine:handlers>
 }
 //customElements.define('my-lit-frame', DelphineMyLitFrame);

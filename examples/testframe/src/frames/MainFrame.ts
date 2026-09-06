@@ -38,9 +38,14 @@ export default class MainFrame extends TFrame {
         }
         // </delphine:layout>
 
+        // <delphine:components>
+        // </delphine:components>
+
+        // <delphine:handlers>
         private helloframeAAA_onclick(ev: Event): void {
                 console.log('helloframeAAA_onclick');
         }
+        // </delphine:handlers>
 }
 
 export function registerMainFrame(): void {

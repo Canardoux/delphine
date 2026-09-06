@@ -1,4 +1,4 @@
-// TLitFrame.ts
+// TFrame.ts
 
 /*
  * Copyright 2026 Canardoux.
@@ -93,50 +93,26 @@ export class TFrame extends TLitControlElement {
 
                 console.log(`--- ${this.nodeName} : TFrame end(updated) ---`);
         }
-        private findDelphineComponentFromEvent(event: Event): HTMLElement | undefined {
-                for (const item of event.composedPath()) {
-                        if (!(item instanceof HTMLElement)) {
-                                continue;
-                        }
 
-                        if (item.hasAttribute('data-delphine-name')) {
-                                return item;
-                        }
-
-                        if (item === this) {
-                                break;
-                        }
-                }
-
-                return undefined;
-        }
-
-        private clickTimer?: number;
+        private static readonly delphineEventTypes = ['click', 'input', 'change', 'keydown', 'frameevent', 'dblclick'] as const;
 
         override connectedCallback(): void {
                 super.connectedCallback();
 
-                console.log('[Delphine] install click dispatcher on', this, this.tagName, this.getAttribute('data-delphine-name'));
-                for (const type of ['click', 'input', 'change', 'keydown', 'frameevent', 'dblclick']) {
-                        // same handler for everybody
-                        const handler = (ev: Event) => {
-                                this.handleDelphineEvent(ev, ev.type);
-                                //this.handleDelphineClick(ev, ev.type);
-                        };
-                        this.addEventListener(type, handler);
+                console.log('[Delphine] install event dispatcher on', this, this.tagName, this.getAttribute('data-delphine-name'));
+
+                for (const type of TFrame.delphineEventTypes) {
+                        this.addEventListener(type, this.handleDelphineEvent);
                 }
-                //this.addEventListener('click', this.handleDelphineClick);
         }
 
         override disconnectedCallback(): void {
-                //this.removeEventListener('click', this.handleDelphineClick);
-                for (const type of ['click', 'input', 'change', 'keydown', 'frameevent', 'dbl-click', 'dblclick']) {
-                        // same handler for everybody
-                        const handler = (ev: Event) => {
-                                this.removeEventListener(ev.type, handler);
-                        };
-                        //this.addEventListener(type, handler, { capture: true });
+                console.log('[Delphine] remove event dispatcher from', this, this.tagName, this.getAttribute('data-delphine-name'));
+
+                for (const type of TFrame.delphineEventTypes) {
+                        this.removeEventListener(type, this.handleDelphineEvent);
                 }
+
                 super.disconnectedCallback();
         }
 
@@ -197,52 +173,30 @@ export class TFrame extends TLitControlElement {
 
                 return undefined;
         }
-        private readonly handleDelphineEvent = (ev: Event, eventType: string): void => {
+        private readonly handleDelphineEvent = (ev: Event): void => {
                 console.log('[CLICK DISPATCHER]', this.tagName, this.getAttribute('data-delphine-name'));
 
-                const binding = this.findDelphineEventHandler(ev, `on${eventType}`);
+                const binding = this.findDelphineEventHandler(ev, `on${ev.type}`);
 
                 console.log('[EVENT BINDING]', this.tagName, binding);
 
                 if (!binding) {
                         return;
                 }
-                console.log('[HANDLER LOOKUP]', binding?.handlerName, 'this =', this, 'constructor =', this.constructor.name, 'handler =', (this as any)[binding!.handlerName]);
 
                 const handler = (this as any)[binding.handlerName];
 
+                console.log('[HANDLER LOOKUP]', binding.handlerName, 'this =', this, 'constructor =', this.constructor.name, 'handler =', handler);
+
                 if (typeof handler !== 'function') {
-                        console.warn(`[Delphine] OnClick handler "${binding.handlerName}" not found.`);
+                        console.warn(`[Delphine] handler "${binding.handlerName}" not found.`);
                         return;
                 }
 
                 console.log('[HANDLER CALL]', handler, ev.currentTarget, ev.target, ev.type, ev);
-                //handler.call(this, binding.component, ev);
+
                 handler.call(this, ev, binding.component);
 
                 ev.stopPropagation();
         };
-        // private readonly handleDelphineClick = (event: Event, eventType: string): void => {
-        //         console.log('[CLICK DISPATCHER]', this.tagName, this.getAttribute('data-delphine-name'));
-
-        //         const binding = this.findDelphineEventHandler(event, 'onclick');
-
-        //         console.log('[CLICK BINDING]', this.tagName, binding);
-
-        //         if (!binding) {
-        //                 return;
-        //         }
-        //         console.log('[HANDLER LOOKUP]', binding?.handlerName, 'this =', this, 'constructor =', this.constructor.name, 'handler =', (this as any)[binding!.handlerName]);
-
-        //         const handler = (this as any)[binding.handlerName];
-
-        //         if (typeof handler !== 'function') {
-        //                 console.warn(`[Delphine] OnClick handler "${binding.handlerName}" not found.`);
-        //                 return;
-        //         }
-
-        //         handler.call(this, binding.component, event);
-
-        //         event.stopPropagation();
-        // };
 }

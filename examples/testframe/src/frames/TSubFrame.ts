@@ -118,7 +118,7 @@ export class DelphineSubFrame extends TFrame {
                 //this.subFrameCCC.style.setProperty('background-color', 'yellow');
                 //this.style.color = 'magenta';
                 console.log('Color...', this.color);
-                this.color = 'orange';
+                this.color = 'magenta';
 
                 //const btn3 = this.getComponent<TCheckBox>('LitCheckboxCCC');
                 this.litCheckboxCCC.checked = !this.litCheckboxCCC.checked;
@@ -129,6 +129,10 @@ export class DelphineSubFrame extends TFrame {
                 //_ev.stopPropagation();
                 //const btn = this.getComponent<TCheckBox>('LitCheckboxCCC');
                 this.litCheckboxCCC.caption = this.litCheckboxCCC.checked ? 'Checked' : 'Unchecked';
+        }
+
+        LitCheckbox_onclick(_ev: Event) {
+                console.log('LitCheckbox_onclick()');
         }
 
         // </delphine:handlers>

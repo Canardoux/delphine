@@ -32,6 +32,9 @@ export default class RiriFrame extends TFrame {
         }
         // </delphine:layout>
 
+        // <delphine:components>
+        // </delphine:components>
+
         // <delphine:handlers>
 
         button1_onclick(_ev: Event | null, _sender: any) {
